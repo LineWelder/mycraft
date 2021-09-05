@@ -54,8 +54,6 @@ void main()
 
         private const float MOVEMENT_SPEED = .05f, ROTATION_SPEED = .05f;
         private readonly Camera camera;
-        private readonly Input1d verticalInput;
-        private readonly Input2d movementInput, rotationInput;
 
         public GameWindow()
         {
@@ -90,9 +88,6 @@ void main()
             ResumeLayout(false);
 
             camera = new Camera(new Vertex3f(0f, 0f, 5f), new Vertex2f(0f, 0f));
-            verticalInput = new Input1d(this, Keys.Q, Keys.Z);
-            movementInput = new Input2d(this, Keys.W, Keys.A, Keys.S, Keys.D);
-            rotationInput = new Input2d(this, Keys.U, Keys.H, Keys.J, Keys.K);
         }
 
         private void OnResized(object sender, EventArgs e)
@@ -113,9 +108,15 @@ void main()
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)
         {
-            camera.Rotate(ROTATION_SPEED * rotationInput.X, ROTATION_SPEED * rotationInput.Y);
-            camera.MoveRelativeToYaw(MOVEMENT_SPEED * movementInput.Y, MOVEMENT_SPEED * movementInput.X);
-            camera.Translate(0f, MOVEMENT_SPEED * verticalInput.Value, 0f);
+            int cameraYawInput        = FuncUtils.GetInput1d(Keys.K, Keys.H);
+            int cameraPitchInput      = FuncUtils.GetInput1d(Keys.U, Keys.J);
+            int cameraForwardInput    = FuncUtils.GetInput1d(Keys.W, Keys.S);
+            int cameraHorizontalInput = FuncUtils.GetInput1d(Keys.D, Keys.A);
+            int cameraVerticalInput   = FuncUtils.GetInput1d(Keys.E, Keys.Q);
+
+            camera.Rotate(ROTATION_SPEED * cameraYawInput, ROTATION_SPEED * cameraPitchInput);
+            camera.MoveRelativeToYaw(MOVEMENT_SPEED * cameraForwardInput, MOVEMENT_SPEED * cameraHorizontalInput);
+            camera.Translate(0f, MOVEMENT_SPEED * cameraVerticalInput, 0f);
             camera.Update();
         }
 
