@@ -8,6 +8,17 @@ namespace Mycraft.Graphics
     {
         public readonly uint glId;
 
+        public Matrix4x4f MVP
+        {
+            set
+            {
+                Gl.UseProgram(glId);
+                Gl.UniformMatrix4f(mvpLocation, 1, false, value);
+            }
+        }
+
+        private readonly int mvpLocation;
+
         public ShaderProgram(string vertexSource, string fragmentSource)
         {
             glId = Gl.CreateProgram();
@@ -32,6 +43,10 @@ namespace Mycraft.Graphics
 
             Gl.DeleteShader(vertex);
             Gl.DeleteShader(fragment);
+
+            mvpLocation = Gl.GetUniformLocation(glId, "mvp");
+            if (mvpLocation < 0)
+                throw new InvalidOperationException("Could not find the mvp variable");
         }
 
         public void Dispose()

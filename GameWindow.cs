@@ -15,18 +15,20 @@ namespace Mycraft
 
         private readonly float[] vertices =
         {
-             0.5f, -0.5f, 0.0f,
-            -0.5f, -0.5f, 0.0f,
-             0.0f,  0.5f, 0.0f
+             1f, -1f, 0f,
+            -1f, -1f, 0f,
+             0f,  1f, 0f
         };
 
         private readonly string vertexSource =
 @"#version 330 core
-layout(location = 0) in vec3 aPos;
+
+layout(location = 0) in vec3 position;
+uniform mat4 mvp;
 
 void main()
 {
-    gl_Position = vec4(aPos, 1.0);
+    gl_Position = mvp * vec4(position, 1.0);
 }";
 
         private readonly string fragmentSource =
@@ -37,18 +39,26 @@ void main()
     gl_FragColor = vec4(1.0);
 }";
 
+        private Matrix4x4f view, projection;
+        private Vertex2f cameraRotation;
+        private Vertex2i rotationInput;
+
         public GameWindow()
         {
             SuspendLayout();
 
             Name = "GameWindow";
             Text = "Mycraft";
+            KeyPreview = true;
             ClientSize = new Size(1920, 1080);
 
             glControl = new GlControl
             {
                 Name = "GLControl",
                 Dock = DockStyle.Fill,
+
+                Animation = true,
+                AnimationTimer = false,
 
                 ColorBits = 24u,
                 DepthBits = 0u,
@@ -57,25 +67,88 @@ void main()
             };
 
             Resize += OnResized;
+            KeyDown += OnKeyDown;
+            KeyUp += OnKeyUp;
             glControl.ContextCreated += OnContextCreated;
             glControl.ContextDestroying += OnContextDestroyed;
+            glControl.ContextUpdate += OnContextUpdate;
             glControl.Render += Render;
 
             Controls.Add(glControl);
             ResumeLayout(false);
         }
 
+        private void OnKeyUp(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.K:
+                    if (rotationInput.x == 1)
+                        rotationInput.x = 0;
+                    break;
+
+                case Keys.H:
+                    if (rotationInput.x == -1)
+                        rotationInput.x = 0;
+                    break;
+
+                case Keys.U:
+                    if (rotationInput.y == 1)
+                        rotationInput.y = 0;
+                    break;
+
+                case Keys.J:
+                    if (rotationInput.y == -1)
+                        rotationInput.y = 0;
+                    break;
+            }
+        }
+
+        private void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.K:
+                    rotationInput.x = 1;
+                    break;
+
+                case Keys.H:
+                    rotationInput.x = -1;
+                    break;
+
+                case Keys.U:
+                    rotationInput.y = 1;
+                    break;
+
+                case Keys.J :
+                    rotationInput.y = -1;
+                    break;
+            }
+        }
+
         private void OnResized(object sender, EventArgs e)
         {
             Gl.Viewport(0, 0, ClientSize.Width, ClientSize.Height);
+
+            projection = Matrix4x4f.Perspective(70, (float)ClientSize.Width / ClientSize.Height, .01f, 100f);
         }
 
         private void OnContextCreated(object sender, GlControlEventArgs e)
         {
-            Gl.Viewport(0, 0, ClientSize.Width, ClientSize.Height);
+            OnResized(null, null);
 
             program = new ShaderProgram(vertexSource, fragmentSource);
             trangle = new VertexArray(vertices);
+        }
+
+        private void OnContextUpdate(object sender, GlControlEventArgs e)
+        {
+            cameraRotation.x += .4f * rotationInput.x;
+            cameraRotation.y -= .4f * rotationInput.y;
+
+            view = Matrix4x4f.RotatedX(cameraRotation.y)
+                 * Matrix4x4f.RotatedY(cameraRotation.x)
+                 * Matrix4x4f.Translated(0f, 0f, -5f);
         }
 
         private void Render(object sender, GlControlEventArgs e)
@@ -83,6 +156,7 @@ void main()
             Gl.Clear(ClearBufferMask.ColorBufferBit);
 
             Gl.UseProgram(program.glId);
+            program.MVP = projection * view;
             trangle.Draw(PrimitiveType.Triangles);
         }
 
