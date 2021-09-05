@@ -12,7 +12,7 @@ namespace Mycraft
         private readonly GlControl glControl;
 
         private ShaderProgram program;
-        private VertexArray trangle, origin;
+        private VertexArray triangle, origin;
 
         private readonly float[] triangleVertices =
         {
@@ -102,8 +102,8 @@ void main()
             OnResized(null, null);
 
             program = new ShaderProgram(vertexSource, fragmentSource);
-            trangle = new VertexArray(triangleVertices);
-            origin = new VertexArray(originVertices);
+            triangle = new VertexArray(PrimitiveType.Triangles, triangleVertices);
+            origin = new VertexArray(PrimitiveType.Lines, originVertices);
         }
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)
@@ -126,13 +126,14 @@ void main()
 
             Gl.UseProgram(program.glId);
             program.MVP = projection * camera.TransformMatrix;
-            origin.Draw(PrimitiveType.Lines);
+            origin.Draw();
+            triangle.Draw();
         }
 
         private void OnContextDestroyed(object sender, GlControlEventArgs e)
         {
             program.Dispose();
-            trangle.Dispose();
+            triangle.Dispose();
         }
     }
 }

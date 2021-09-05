@@ -7,14 +7,16 @@ namespace Mycraft.Graphics
     {
         public readonly uint glId;
 
+        private readonly PrimitiveType primitiveType;
         private readonly int verticesCount;
         private readonly uint vbo;
 
-        public VertexArray(float[] vertices)
+        public VertexArray(PrimitiveType primitiveType, float[] vertices)
         {
             if (vertices.Length % 3 != 0)
                 throw new ArgumentException("Invalid vertices data");
 
+            this.primitiveType = primitiveType;
             verticesCount = vertices.Length / 3;
     
             glId = Gl.GenVertexArray();
@@ -31,7 +33,7 @@ namespace Mycraft.Graphics
             Gl.BindVertexArray(0);
         }
 
-        public void Draw(PrimitiveType primitiveType)
+        public void Draw()
         {
             Gl.BindVertexArray(glId);
             Gl.DrawArrays(primitiveType, 0, verticesCount);
