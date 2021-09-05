@@ -9,7 +9,6 @@ namespace Mycraft
 {
     public class GameWindow : Form
     {
-        private const float RADIANS_TO_DEGREES = (float)(180d / Math.PI);
         private readonly GlControl glControl;
 
         private ShaderProgram program;
@@ -41,9 +40,10 @@ void main()
     gl_FragColor = vec4(1.0);
 }";
 
-        private Matrix4x4f view, projection;
-        private Vertex3f cameraPosition = new Vertex3f(0f, 0f, -5f);
-        private Vertex2f cameraRotation;
+        private Matrix4x4f projection;
+
+        private const float MOVEMENT_SPEED = .05f, ROTATION_SPEED = .3f;
+        private readonly Camera camera;
         private readonly Input2d movementInput, rotationInput;
 
         public GameWindow()
@@ -78,6 +78,7 @@ void main()
             Controls.Add(glControl);
             ResumeLayout(false);
 
+            camera = new Camera(new Vertex3f(0f, 0f, -5f), new Vertex2f(0f, 0f));
             movementInput = new Input2d(this, Keys.W, Keys.A, Keys.S, Keys.D);
             rotationInput = new Input2d(this, Keys.U, Keys.H, Keys.J, Keys.K);
         }
@@ -99,19 +100,9 @@ void main()
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)
         {
-            cameraRotation.x += .05f * rotationInput.X;
-            cameraRotation.y -= .05f * rotationInput.Y;
-
-            cameraPosition.z += .2f * (float)Math.Cos(cameraRotation.x) * movementInput.Y
-                              - .2f * (float)Math.Sin(cameraRotation.x) * movementInput.X;
-            cameraPosition.x -= .2f * (float)Math.Sin(cameraRotation.x) * movementInput.Y
-                              + .2f * (float)Math.Cos(cameraRotation.x) * movementInput.X;
-
-            view = Matrix4x4f.RotatedX(cameraRotation.y * RADIANS_TO_DEGREES)
-                 * Matrix4x4f.RotatedY(cameraRotation.x * RADIANS_TO_DEGREES)
-                 * Matrix4x4f.Translated(cameraPosition.x, cameraPosition.y, cameraPosition.z);
-
-            Text = $"Mycraft | yaw = {cameraRotation.x}";
+            camera.Rotate(ROTATION_SPEED * rotationInput.X, ROTATION_SPEED * rotationInput.Y);
+            camera.MoveRelativeToYaw(MOVEMENT_SPEED * movementInput.Y, MOVEMENT_SPEED * movementInput.X);
+            camera.Update();
         }
 
         private void Render(object sender, GlControlEventArgs e)
@@ -119,7 +110,7 @@ void main()
             Gl.Clear(ClearBufferMask.ColorBufferBit);
 
             Gl.UseProgram(program.glId);
-            program.MVP = projection * view;
+            program.MVP = projection * camera.TransformMatrix;
             trangle.Draw(PrimitiveType.Triangles);
         }
 
