@@ -68,8 +68,10 @@
     <Compile Include="GameWindow.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Graphics\VertexArray.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Graphics\ShaderProgram.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
