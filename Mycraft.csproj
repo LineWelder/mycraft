@@ -72,6 +72,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Graphics\ShaderProgram.cs" />
+    <Compile Include="Utils\Input2d.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

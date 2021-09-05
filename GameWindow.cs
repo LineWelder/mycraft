@@ -1,4 +1,5 @@
 ﻿using Mycraft.Graphics;
+using Mycraft.Utils;
 using OpenGL;
 using System;
 using System.Drawing;
@@ -41,7 +42,7 @@ void main()
 
         private Matrix4x4f view, projection;
         private Vertex2f cameraRotation;
-        private Vertex2i rotationInput;
+        private readonly Input2d rotationInput;
 
         public GameWindow()
         {
@@ -67,8 +68,6 @@ void main()
             };
 
             Resize += OnResized;
-            KeyDown += OnKeyDown;
-            KeyUp += OnKeyUp;
             glControl.ContextCreated += OnContextCreated;
             glControl.ContextDestroying += OnContextDestroyed;
             glControl.ContextUpdate += OnContextUpdate;
@@ -76,54 +75,8 @@ void main()
 
             Controls.Add(glControl);
             ResumeLayout(false);
-        }
 
-        private void OnKeyUp(object sender, KeyEventArgs e)
-        {
-            switch (e.KeyCode)
-            {
-                case Keys.K:
-                    if (rotationInput.x == 1)
-                        rotationInput.x = 0;
-                    break;
-
-                case Keys.H:
-                    if (rotationInput.x == -1)
-                        rotationInput.x = 0;
-                    break;
-
-                case Keys.U:
-                    if (rotationInput.y == 1)
-                        rotationInput.y = 0;
-                    break;
-
-                case Keys.J:
-                    if (rotationInput.y == -1)
-                        rotationInput.y = 0;
-                    break;
-            }
-        }
-
-        private void OnKeyDown(object sender, KeyEventArgs e)
-        {
-            switch (e.KeyCode)
-            {
-                case Keys.K:
-                    rotationInput.x = 1;
-                    break;
-
-                case Keys.H:
-                    rotationInput.x = -1;
-                    break;
-
-                case Keys.U:
-                    rotationInput.y = 1;
-                    break;
-
-                case Keys.J :
-                    rotationInput.y = -1;
-                    break;
-            }
+            rotationInput = new Input2d(this, Keys.U, Keys.H, Keys.J, Keys.K);
         }
 
         private void OnResized(object sender, EventArgs e)
@@ -143,8 +96,8 @@ void main()
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)
         {
-            cameraRotation.x += .4f * rotationInput.x;
-            cameraRotation.y -= .4f * rotationInput.y;
+            cameraRotation.x += .4f * rotationInput.X;
+            cameraRotation.y -= .4f * rotationInput.Y;
 
             view = Matrix4x4f.RotatedX(cameraRotation.y)
                  * Matrix4x4f.RotatedY(cameraRotation.x)
