@@ -33,17 +33,17 @@ namespace Mycraft.Utils
 
         public void MoveRelativeToYaw(float forward, float right)
         {
-            Position.z += (float)Math.Cos(Rotation.x) * forward
+            Position.z -= (float)Math.Cos(Rotation.x) * forward
                         - (float)Math.Sin(Rotation.x) * right;
-            Position.x -= (float)Math.Sin(Rotation.x) * forward
-                        + (float)Math.Cos(Rotation.x) * right;
+            Position.x += (float)Math.Cos(Rotation.x) * right
+                        + (float)Math.Sin(Rotation.x) * forward;
         }
 
         public void Update()
         {
             TransformMatrix = Matrix4x4f.RotatedX(-Rotation.y * RADIANS_TO_DEGREES)
                             * Matrix4x4f.RotatedY(Rotation.x * RADIANS_TO_DEGREES)
-                            * Matrix4x4f.Translated(Position.x, Position.y, Position.z);
+                            * Matrix4x4f.Translated(-Position.x, -Position.y, -Position.z);
         }
     }
 }

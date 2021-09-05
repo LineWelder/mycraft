@@ -73,6 +73,7 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Graphics\ShaderProgram.cs" />
     <Compile Include="Utils\Camera.cs" />
+    <Compile Include="Utils\Input1d.cs" />
     <Compile Include="Utils\Input2d.cs" />
     <None Include="packages.config" />
   </ItemGroup>
