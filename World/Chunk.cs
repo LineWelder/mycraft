@@ -22,52 +22,61 @@ namespace Mycraft.World
             base.Draw();
         }
 
+        public new void Dispose()
+        {
+            testTexture.Dispose();
+            base.Dispose();
+        }
+
         public void RegenerateMesh()
         {
             List<float> mesh = new List<float>();
 
-            AddBlock(mesh);
+            for (float x = 0; x < CHUNK_SIZE; x++)
+                for (float z = 0; z < CHUNK_SIZE; z++)
+                    for (float y = 0; y < 3; y++)
+                        AddBlock(mesh, x, y, z);
 
             Data = mesh.ToArray();
         }
 
-        private void AddBlock(List<float> mesh)
+        private void AddBlock(List<float> mesh, float x, float y, float z)
             => mesh.AddRange(new float[] {
                 // Back
-                0f, 0f, 0f,  1f, 1f,
-                0f, 1f, 0f,  1f, 0f,
-                1f, 1f, 0f,  0f, 0f,
-                1f, 0f, 0f,  0f, 1f,
+                x,      y,      z,         1f, 1f,
+                x,      y + 1f, z,         1f, 0f,
+                x + 1f, y + 1f, z,         0f, 0f,
+                x + 1f, y,      z,         0f, 1f,
 
                 // Front     
-                1f, 0f, 1f,  1f, 1f,
-                1f, 1f, 1f,  1f, 0f,
-                0f, 1f, 1f,  0f, 0f,
-                0f, 0f, 1f,  0f, 1f,
+                x + 1f, y,      z + 1f,    1f, 1f,
+                x + 1f, y + 1f, z + 1f,    1f, 0f,
+                x,      y + 1f, z + 1f,    0f, 0f,
+                x,      y,      z + 1f,    0f, 1f,
 
                 // Right     
-                1f, 0f, 0f,  1f, 1f,
-                1f, 1f, 0f,  1f, 0f,
-                1f, 1f, 1f,  0f, 0f,
-                1f, 0f, 1f,  0f, 1f,
+                x + 1f, y,      z,         1f, 1f,
+                x + 1f, y + 1f, z,         1f, 0f,
+                x + 1f, y + 1f, z + 1f,    0f, 0f,
+                x + 1f, y,      z + 1f,    0f, 1f,
 
                 // Left      
-                0f, 0f, 1f,  1f, 1f,
-                0f, 1f, 1f,  1f, 0f,
-                0f, 1f, 0f,  0f, 0f,
-                0f, 0f, 0f,  0f, 1f,
+                x,      y,      z + 1f,    1f, 1f,
+                x,      y + 1f, z + 1f,    1f, 0f,
+                x,      y + 1f, z,         0f, 0f,
+                x,      y,      z,         0f, 1f,
 
                 // Top       
-                1f, 1f, 1f,  1f, 1f,
-                1f, 1f, 0f,  1f, 0f,
-                0f, 1f, 0f,  0f, 0f,
-                0f, 1f, 1f,  0f, 1f,
+                x + 1f, y + 1f, z + 1f,    1f, 1f,
+                x + 1f, y + 1f, z,         1f, 0f,
+                x,      y + 1f, z,         0f, 0f,
+                x,      y + 1f, z + 1f,    0f, 1f,
 
                 // Bottom    
-                0f, 0f, 1f,  1f, 1f,
-                0f, 0f, 0f,  1f, 0f,
-                1f, 0f, 0f,  0f, 0f,
-                1f, 0f, 1f,  0f, 1f
+                x,      y,      z + 1f,    1f, 1f,
+                x,      y,      z,         1f, 0f,
+                x + 1f, y,      z,         0f, 0f,
+                x + 1f, y,      z + 1f,    0f, 1f
             });
     }
 }
