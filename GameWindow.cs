@@ -9,61 +9,66 @@ namespace Mycraft
 {
     public class GameWindow : Form
     {
+        private readonly float[] cubeVertices =
+        {
+            // Back
+            0f, 0f, 0f,  1f, 1f,
+            0f, 1f, 0f,  1f, 0f,
+            1f, 1f, 0f,  0f, 0f,
+            1f, 0f, 0f,  0f, 1f,
+
+            // Front     
+            1f, 0f, 1f,  1f, 1f,
+            1f, 1f, 1f,  1f, 0f,
+            0f, 1f, 1f,  0f, 0f,
+            0f, 0f, 1f,  0f, 1f,
+
+            // Right     
+            1f, 0f, 0f,  1f, 1f,
+            1f, 1f, 0f,  1f, 0f,
+            1f, 1f, 1f,  0f, 0f,
+            1f, 0f, 1f,  0f, 1f,
+
+            // Left      
+            0f, 0f, 1f,  1f, 1f,
+            0f, 1f, 1f,  1f, 0f,
+            0f, 1f, 0f,  0f, 0f,
+            0f, 0f, 0f,  0f, 1f,
+
+            // Top       
+            1f, 1f, 1f,  1f, 1f,
+            1f, 1f, 0f,  1f, 0f,
+            0f, 1f, 0f,  0f, 0f,
+            0f, 1f, 1f,  0f, 1f,
+
+            // Bottom    
+            0f, 0f, 1f,  1f, 1f,
+            0f, 0f, 0f,  1f, 0f,
+            1f, 0f, 0f,  0f, 0f,
+            1f, 0f, 1f,  0f, 1f
+        };
+
+        private readonly float[] originVertices =
+        {
+            // X axis
+            0f, 0f, 0f,  1f, 0f, 0f,
+            1f, 0f, 0f,  1f, 0f, 0f,
+
+            // Y axis
+            0f, 0f, 0f,  0f, 1f, 0f,
+            0f, 1f, 0f,  0f, 1f, 0f,
+
+            // Z axis
+            0f, 0f, 0f,  0f, 0f, 1f,
+            0f, 0f, 1f,  0f, 0f, 1f
+        };
+
         private readonly GlControl glControl;
 
         private ColoredShader coloredShader;
         private TexturedShader texturedShader;
         private VertexArray cube, origin;
         private Texture testTexture;
-
-        private readonly float[] cubeVertices =
-        {
-            // Back
-            0f, 0f, 0f, 1f, 1f,
-            0f, 1f, 0f, 1f, 0f,
-            1f, 1f, 0f, 0f, 0f,
-            1f, 0f, 0f, 0f, 1f,
-
-            // Front
-            1f, 0f, 1f, 1f, 1f,
-            1f, 1f, 1f, 1f, 0f,
-            0f, 1f, 1f, 0f, 0f,
-            0f, 0f, 1f, 0f, 1f,
-
-            // Right
-            1f, 0f, 0f, 1f, 1f,
-            1f, 1f, 0f, 1f, 0f,
-            1f, 1f, 1f, 0f, 0f,
-            1f, 0f, 1f, 0f, 1f,
-
-            // Left
-            0f, 0f, 1f, 1f, 1f,
-            0f, 1f, 1f, 1f, 0f,
-            0f, 1f, 0f, 0f, 0f,
-            0f, 0f, 0f, 0f, 1f,
-
-            // Top
-            1f, 1f, 1f, 1f, 1f,
-            1f, 1f, 0f, 1f, 0f,
-            0f, 1f, 0f, 0f, 0f,
-            0f, 1f, 1f, 0f, 1f,
-
-            // Bottom
-            0f, 0f, 1f, 1f, 1f,
-            0f, 0f, 0f, 1f, 0f,
-            1f, 0f, 0f, 0f, 0f,
-            1f, 0f, 1f, 0f, 1f
-        };
-
-        private readonly float[] originVertices =
-        {
-            0f, 0f, 0f, 1f, 0f, 0f,
-            1f, 0f, 0f, 1f, 0f, 0f,
-            0f, 0f, 0f, 0f, 1f, 0f,
-            0f, 1f, 0f, 0f, 1f, 0f,
-            0f, 0f, 0f, 0f, 0f, 1f,
-            0f, 0f, 1f, 0f, 0f, 1f
-        };
 
         private const float MOVEMENT_SPEED = .05f, ROTATION_SPEED = .03f;
         private readonly Camera camera;
@@ -150,13 +155,13 @@ namespace Mycraft
             Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             Matrix4x4f mvp = projection * camera.TransformMatrix;
 
-            Gl.UseProgram(texturedShader.glId);
-            texturedShader.MVP = mvp;
-            cube.Draw();
-
             Gl.UseProgram(coloredShader.glId);
             coloredShader.MVP = mvp;
             origin.Draw();
+
+            Gl.UseProgram(texturedShader.glId);
+            texturedShader.MVP = mvp;
+            cube.Draw();
         }
 
         private void OnContextDestroyed(object sender, GlControlEventArgs e)

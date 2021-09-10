@@ -34,10 +34,7 @@ namespace Mycraft.Graphics
             Gl.DeleteShader(fragment);
         }
 
-        public void Dispose()
-        {
-            Gl.DeleteProgram(glId);
-        }
+        public void Dispose() => Gl.DeleteProgram(glId);
 
         private uint CreateShader(ShaderType shaderType, string source)
         {

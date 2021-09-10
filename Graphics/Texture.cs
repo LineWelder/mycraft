@@ -35,14 +35,7 @@ namespace Mycraft.Graphics
             );
         }
 
-        public void Bind()
-        {
-            Gl.BindTexture(TextureTarget.Texture2d, glId);
-        }
-
-        public void Dispose()
-        {
-            Gl.DeleteTextures(glId);
-        }
+        public void Bind() => Gl.BindTexture(TextureTarget.Texture2d, glId);
+        public void Dispose() => Gl.DeleteTextures(glId);
     }
 }
