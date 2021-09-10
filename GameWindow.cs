@@ -105,7 +105,7 @@ namespace Mycraft
             camera.Rotate(ROTATION_SPEED * cameraYawInput, ROTATION_SPEED * cameraPitchInput);
             camera.MoveRelativeToYaw(MOVEMENT_SPEED * cameraForwardInput, MOVEMENT_SPEED * cameraHorizontalInput);
             camera.Translate(0f, MOVEMENT_SPEED * cameraVerticalInput, 0f);
-            camera.Update();
+            camera.UpdateTransformMatrix();
         }
 
         private void Render(object sender, GlControlEventArgs e)

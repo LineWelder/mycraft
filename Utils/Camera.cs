@@ -39,7 +39,7 @@ namespace Mycraft.Utils
                         + (float)Math.Sin(Rotation.x) * forward;
         }
 
-        public void Update()
+        public void UpdateTransformMatrix()
         {
             TransformMatrix = Matrix4x4f.RotatedX(-Rotation.y * RADIANS_TO_DEGREES)
                             * Matrix4x4f.RotatedY(Rotation.x * RADIANS_TO_DEGREES)
