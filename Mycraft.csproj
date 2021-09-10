@@ -68,6 +68,8 @@
     <Compile Include="GameWindow.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Graphics\AttributeColoredShader.cs" />
+    <Compile Include="Graphics\OneColoredShader.cs" />
     <Compile Include="Graphics\VertexArray.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="AssemblyInfo.cs" />
