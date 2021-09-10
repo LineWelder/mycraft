@@ -1,5 +1,7 @@
 ﻿using OpenGL;
 using System;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Mycraft.Graphics
 {
@@ -11,23 +13,36 @@ namespace Mycraft.Graphics
         private readonly int verticesCount;
         private readonly uint vbo;
 
-        public VertexArray(PrimitiveType primitiveType, float[] vertices)
+        /// <param name="vertexFormat">The index is the variable location and the value is the variable size</param>
+        public VertexArray(PrimitiveType primitiveType, float[] data, int[] vertexFormat)
         {
-            if (vertices.Length % 3 != 0)
-                throw new ArgumentException("Invalid vertices data");
+            int vertexSize = vertexFormat.Sum();
+            Debug.Assert(data.Length % vertexSize == 0, "Invalid vertices data");
 
             this.primitiveType = primitiveType;
-            verticesCount = vertices.Length / 3;
+            verticesCount = data.Length / vertexSize;
     
             glId = Gl.GenVertexArray();
             Gl.BindVertexArray(glId);
 
             vbo = Gl.GenBuffer();
             Gl.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-            Gl.BufferData(BufferTarget.ArrayBuffer, (uint)(sizeof(float) * vertices.Length), vertices, BufferUsage.StaticDraw);
+            Gl.BufferData(BufferTarget.ArrayBuffer, (uint)(sizeof(float) * data.Length), data, BufferUsage.StaticDraw);
 
-            Gl.VertexAttribPointer(0, 3, VertexAttribType.Float, false, 0, IntPtr.Zero);
-            Gl.EnableVertexAttribArray(0);
+            int offset = 0;
+            for (uint i = 0; i < vertexFormat.Length; i++)
+            {
+                Debug.Assert(vertexFormat[i] > 0, "Variable size must be greater than zero");
+
+                Gl.VertexAttribPointer(
+                    i, vertexFormat[i],
+                    VertexAttribType.Float, false,
+                    sizeof(float) * vertexSize,
+                    IntPtr.Zero + sizeof(float) * offset
+                );
+                Gl.EnableVertexAttribArray(i);
+                offset += vertexFormat[i];
+            }
 
             Gl.BindBuffer(BufferTarget.ArrayBuffer, 0);
             Gl.BindVertexArray(0);
