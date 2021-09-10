@@ -1,5 +1,6 @@
 ﻿using Mycraft.Graphics;
 using Mycraft.Utils;
+using Mycraft.World;
 using OpenGL;
 using System;
 using System.Drawing;
@@ -69,8 +70,7 @@ namespace Mycraft
         private VertexArray origin;
 
         private TexturedShader texturedShader;
-        private Texture testTexture;
-        private VertexArray cube;
+        private Chunk world;
 
         private const float MOVEMENT_SPEED = .05f, ROTATION_SPEED = .03f;
         private readonly Camera camera;
@@ -124,7 +124,6 @@ namespace Mycraft
             coloredShader = new ColoredShader();
             texturedShader = new TexturedShader();
 
-            cube = new VertexArray(PrimitiveType.Quads, new int[] { 3, 2 }, cubeVertices);
             origin = new VertexArray(PrimitiveType.Lines, new int[] { 3, 3 }, originVertices);
 
             Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
@@ -134,8 +133,8 @@ namespace Mycraft
             Gl.UseProgram(texturedShader.glId);
             texturedShader.Texture = 0;
 
-            testTexture = new Texture(@"resources\textures\test_texture.png");
-            testTexture.Bind();
+            world = new Chunk();
+            world.RegenerateMesh();
         }
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)
@@ -163,16 +162,15 @@ namespace Mycraft
 
             Gl.UseProgram(texturedShader.glId);
             texturedShader.MVP = mvp;
-            cube.Draw();
+            world.Draw();
         }
 
         private void OnContextDestroyed(object sender, GlControlEventArgs e)
         {
             texturedShader.Dispose();
             coloredShader.Dispose();
-            cube.Dispose();
+            world.Dispose();
             origin.Dispose();
-            testTexture.Dispose();
         }
     }
 }
