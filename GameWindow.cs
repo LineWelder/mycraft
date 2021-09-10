@@ -3,8 +3,6 @@ using Mycraft.Utils;
 using OpenGL;
 using System;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
 using System.Windows.Forms;
 
 namespace Mycraft
@@ -16,13 +14,14 @@ namespace Mycraft
         private ColoredShader coloredShader;
         private TexturedShader texturedShader;
         private VertexArray quad, origin;
+        private Texture testTexture;
 
         private readonly float[] quadVertices =
         {
-            0f, 0f, 0f, 0f, 0f,
-            0f, 1f, 0f, 0f, 1f,
-            1f, 1f, 0f, 1f, 1f,
-            1f, 0f, 0f, 1f, 0f
+            0f, 0f, 0f, 1f, 1f,
+            0f, 1f, 0f, 1f, 0f,
+            1f, 1f, 0f, 0f, 0f,
+            1f, 0f, 0f, 0f, 1f
         };
 
         private readonly float[] originVertices =
@@ -80,33 +79,6 @@ namespace Mycraft
             projection = Matrix4x4f.Perspective(70, (float)ClientSize.Width / ClientSize.Height, .01f, 100f);
         }
 
-        private void LoadTexture()
-        {
-            uint testTexture = Gl.GenTexture();
-
-            Bitmap image = new Bitmap(@"resources\textures\test_texture.png");
-            BitmapData data = image.LockBits(
-                new Rectangle(0, 0, image.Width, image.Height),
-                ImageLockMode.ReadOnly,
-                System.Drawing.Imaging.PixelFormat.Format32bppArgb
-            );
-
-            Gl.TexImage2D(
-                TextureTarget.Texture2d, 0,
-                InternalFormat.Rgba,
-                image.Width, image.Height, 0,
-                OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte,
-                data.Scan0
-            );
-
-            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapS, TextureWrapMode.Repeat);
-            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapT, TextureWrapMode.Repeat);
-            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, TextureMinFilter.Linear);
-            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, TextureMagFilter.Nearest);
-
-            Gl.BindTexture(TextureTarget.Texture2d, testTexture);
-        }
-
         private void OnContextCreated(object sender, GlControlEventArgs e)
         {
             OnResized(null, null);
@@ -121,9 +93,10 @@ namespace Mycraft
             Gl.Enable(EnableCap.DepthTest);
 
             Gl.UseProgram(texturedShader.glId);
-            Gl.Uniform1i(texturedShader.textureLocation, 1, 1);
+            Gl.Uniform1i(texturedShader.textureLocation, 1, 0);
 
-            LoadTexture();
+            testTexture = new Texture(@"resources\textures\test_texture.png");
+            testTexture.Bind();
         }
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)
@@ -159,6 +132,8 @@ namespace Mycraft
             texturedShader.Dispose();
             coloredShader.Dispose();
             quad.Dispose();
+            origin.Dispose();
+            testTexture.Dispose();
         }
     }
 }
