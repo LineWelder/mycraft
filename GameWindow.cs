@@ -93,7 +93,7 @@ namespace Mycraft
             Gl.Enable(EnableCap.DepthTest);
 
             Gl.UseProgram(texturedShader.glId);
-            Gl.Uniform1i(texturedShader.textureLocation, 1, 0);
+            texturedShader.Texture = 0;
 
             testTexture = new Texture(@"resources\textures\test_texture.png");
             testTexture.Bind();
@@ -119,11 +119,11 @@ namespace Mycraft
             Matrix4x4f mvp = projection * camera.TransformMatrix;
 
             Gl.UseProgram(texturedShader.glId);
-            Gl.UniformMatrix4f(texturedShader.mvpLocation, 1, false, mvp);
+            texturedShader.MVP = mvp;
             quad.Draw();
 
             Gl.UseProgram(coloredShader.glId);
-            Gl.UniformMatrix4f(coloredShader.mvpLocation, 1, false, mvp);
+            coloredShader.MVP = mvp;
             origin.Draw();
         }
 

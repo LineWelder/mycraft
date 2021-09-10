@@ -30,8 +30,18 @@ void main()
     gl_FragColor = texture(tex, texCoords);
 }";
 
-        public readonly int mvpLocation;
-        public readonly int textureLocation;
+        public Matrix4x4f MVP
+        {
+            set => Gl.UniformMatrix4f(mvpLocation, 1, false, value);
+        }
+
+        public int Texture
+        {
+            set => Gl.Uniform1i(mvpLocation, 1, value);
+        }
+
+        private readonly int mvpLocation;
+        private readonly int textureLocation;
 
         public TexturedShader()
             : base(VERTEX_SOURCE, FRAGMENT_SOURCE)

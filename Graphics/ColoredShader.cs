@@ -28,7 +28,12 @@ void main()
     gl_FragColor = vec4(vtxColor, 1.0);
 }";
 
-        public readonly int mvpLocation; 
+        public Matrix4x4f MVP
+        {
+            set => Gl.UniformMatrix4f(mvpLocation, 1, false, value);
+        }
+
+        private readonly int mvpLocation;
 
         public ColoredShader()
             : base(VERTEX_SOURCE, FRAGMENT_SOURCE)
