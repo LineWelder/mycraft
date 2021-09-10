@@ -13,15 +13,46 @@ namespace Mycraft
 
         private ColoredShader coloredShader;
         private TexturedShader texturedShader;
-        private VertexArray quad, origin;
+        private VertexArray cube, origin;
         private Texture testTexture;
 
-        private readonly float[] quadVertices =
+        private readonly float[] cubeVertices =
         {
+            // Back
             0f, 0f, 0f, 1f, 1f,
             0f, 1f, 0f, 1f, 0f,
             1f, 1f, 0f, 0f, 0f,
-            1f, 0f, 0f, 0f, 1f
+            1f, 0f, 0f, 0f, 1f,
+
+            // Front
+            1f, 0f, 1f, 1f, 1f,
+            1f, 1f, 1f, 1f, 0f,
+            0f, 1f, 1f, 0f, 0f,
+            0f, 0f, 1f, 0f, 1f,
+
+            // Right
+            1f, 0f, 0f, 1f, 1f,
+            1f, 1f, 0f, 1f, 0f,
+            1f, 1f, 1f, 0f, 0f,
+            1f, 0f, 1f, 0f, 1f,
+
+            // Left
+            0f, 0f, 1f, 1f, 1f,
+            0f, 1f, 1f, 1f, 0f,
+            0f, 1f, 0f, 0f, 0f,
+            0f, 0f, 0f, 0f, 1f,
+
+            // Top
+            1f, 1f, 1f, 1f, 1f,
+            1f, 1f, 0f, 1f, 0f,
+            0f, 1f, 0f, 0f, 0f,
+            0f, 1f, 1f, 0f, 1f,
+
+            // Bottom
+            0f, 0f, 1f, 1f, 1f,
+            0f, 0f, 0f, 1f, 0f,
+            1f, 0f, 0f, 0f, 0f,
+            1f, 0f, 1f, 0f, 1f
         };
 
         private readonly float[] originVertices =
@@ -86,11 +117,12 @@ namespace Mycraft
             coloredShader = new ColoredShader();
             texturedShader = new TexturedShader();
 
-            quad = new VertexArray(PrimitiveType.Quads, quadVertices, new int[] { 3, 2 });
+            cube = new VertexArray(PrimitiveType.Quads, cubeVertices, new int[] { 3, 2 });
             origin = new VertexArray(PrimitiveType.Lines, originVertices, new int[] { 3, 3 });
 
             Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
             Gl.Enable(EnableCap.DepthTest);
+            Gl.Enable(EnableCap.CullFace);
 
             Gl.UseProgram(texturedShader.glId);
             texturedShader.Texture = 0;
@@ -120,7 +152,7 @@ namespace Mycraft
 
             Gl.UseProgram(texturedShader.glId);
             texturedShader.MVP = mvp;
-            quad.Draw();
+            cube.Draw();
 
             Gl.UseProgram(coloredShader.glId);
             coloredShader.MVP = mvp;
@@ -131,7 +163,7 @@ namespace Mycraft
         {
             texturedShader.Dispose();
             coloredShader.Dispose();
-            quad.Dispose();
+            cube.Dispose();
             origin.Dispose();
             testTexture.Dispose();
         }
