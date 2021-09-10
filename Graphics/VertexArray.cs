@@ -9,47 +9,64 @@ namespace Mycraft.Graphics
     {
         public readonly uint glId;
 
+        public float[] Data
+        {
+            set
+            {
+                Debug.Assert(value.Length % vertexSize == 0, "Invalid vertices data");
+                verticesCount = value.Length / vertexSize;
+
+                Gl.BindVertexArray(glId);
+                Gl.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+                Gl.BufferData(BufferTarget.ArrayBuffer, (uint)(sizeof(float) * value.Length), value, BufferUsage.StaticDraw);
+
+                int offset = 0;
+                for (uint i = 0; i < vertexFormat.Length; i++)
+                {
+                    Debug.Assert(vertexFormat[i] > 0, "Variable size must be greater than zero");
+
+                    Gl.VertexAttribPointer(
+                        i, vertexFormat[i],
+                        VertexAttribType.Float, false,
+                        sizeof(float) * vertexSize,
+                        IntPtr.Zero + sizeof(float) * offset
+                    );
+                    Gl.EnableVertexAttribArray(i);
+                    offset += vertexFormat[i];
+                }
+            }
+        }
+
         private readonly PrimitiveType primitiveType;
-        private readonly int verticesCount;
+        private readonly int[] vertexFormat;
+        private readonly int vertexSize;
         private readonly uint vbo;
 
-        /// <param name="vertexFormat">The index is the variable location and the value is the variable size</param>
-        public VertexArray(PrimitiveType primitiveType, float[] data, int[] vertexFormat)
-        {
-            int vertexSize = vertexFormat.Sum();
-            Debug.Assert(data.Length % vertexSize == 0, "Invalid vertices data");
+        private int verticesCount;
 
+        /// <param name="vertexFormat">The index is the variable location and the value is the variable size</param>
+        public VertexArray(PrimitiveType primitiveType, int[] vertexFormat)
+        {
             this.primitiveType = primitiveType;
-            verticesCount = data.Length / vertexSize;
-    
+            this.vertexFormat = vertexFormat;
+            vertexSize = vertexFormat.Sum();
+
             glId = Gl.GenVertexArray();
             Gl.BindVertexArray(glId);
 
             vbo = Gl.GenBuffer();
-            Gl.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-            Gl.BufferData(BufferTarget.ArrayBuffer, (uint)(sizeof(float) * data.Length), data, BufferUsage.StaticDraw);
+        }
 
-            int offset = 0;
-            for (uint i = 0; i < vertexFormat.Length; i++)
-            {
-                Debug.Assert(vertexFormat[i] > 0, "Variable size must be greater than zero");
-
-                Gl.VertexAttribPointer(
-                    i, vertexFormat[i],
-                    VertexAttribType.Float, false,
-                    sizeof(float) * vertexSize,
-                    IntPtr.Zero + sizeof(float) * offset
-                );
-                Gl.EnableVertexAttribArray(i);
-                offset += vertexFormat[i];
-            }
-
-            Gl.BindBuffer(BufferTarget.ArrayBuffer, 0);
-            Gl.BindVertexArray(0);
+        public VertexArray(PrimitiveType primitiveType, int[] vertexFormat, float[] data)
+            : this(primitiveType, vertexFormat)
+        {
+            Data = data;
         }
 
         public void Draw()
         {
+            Debug.Assert(verticesCount > 0, "The vertex array is empty");
+
             Gl.BindVertexArray(glId);
             Gl.DrawArrays(primitiveType, 0, verticesCount);
         }

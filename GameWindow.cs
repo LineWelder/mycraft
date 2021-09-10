@@ -66,9 +66,11 @@ namespace Mycraft
         private readonly GlControl glControl;
 
         private ColoredShader coloredShader;
+        private VertexArray origin;
+
         private TexturedShader texturedShader;
-        private VertexArray cube, origin;
         private Texture testTexture;
+        private VertexArray cube;
 
         private const float MOVEMENT_SPEED = .05f, ROTATION_SPEED = .03f;
         private readonly Camera camera;
@@ -122,8 +124,8 @@ namespace Mycraft
             coloredShader = new ColoredShader();
             texturedShader = new TexturedShader();
 
-            cube = new VertexArray(PrimitiveType.Quads, cubeVertices, new int[] { 3, 2 });
-            origin = new VertexArray(PrimitiveType.Lines, originVertices, new int[] { 3, 3 });
+            cube = new VertexArray(PrimitiveType.Quads, new int[] { 3, 2 }, cubeVertices);
+            origin = new VertexArray(PrimitiveType.Lines, new int[] { 3, 3 }, originVertices);
 
             Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
             Gl.Enable(EnableCap.DepthTest);
