@@ -3,7 +3,7 @@ using System;
 
 namespace Mycraft.Graphics
 {
-    public class AttributeColoredShader : ShaderProgram
+    public class ColoredShader : ShaderProgram
     {
         private static readonly string VERTEX_SOURCE =
 @"#version 330 core
@@ -30,12 +30,12 @@ void main()
 
         public readonly int mvpLocation; 
 
-        public AttributeColoredShader()
+        public ColoredShader()
             : base(VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
             mvpLocation = Gl.GetUniformLocation(glId, "mvp");
             if (mvpLocation < 0)
-                throw new InvalidOperationException("MVP variable not found");
+                throw new InvalidOperationException("mvp variable not found");
         }
     }
 }
