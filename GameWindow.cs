@@ -5,6 +5,7 @@ using OpenGL;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using Mycraft.Graphics;
 
 namespace Mycraft
 {
@@ -15,6 +16,7 @@ namespace Mycraft
         private Origin origin;
         private GameWorld world;
         private Selection selection;
+        private Vertex3i placeBlockCoords;
 
         private const float MOVEMENT_SPEED = .05f, ROTATION_SPEED = .03f;
         private readonly Camera camera;
@@ -53,30 +55,33 @@ namespace Mycraft
             Controls.Add(glControl);
             ResumeLayout(false);
 
-            camera = new Camera(new Vertex3f(0f, 0f, 5f), new Vertex2f(0f, 0f));
+            camera = new Camera(new Vertex3f(.5f, 3.5f, .5f), new Vertex2f(0f, 0f));
         }
 
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.I)
+            if (selection.IsSelected)
             {
-                world.SetBlock(
-                    selection.Selected.x,
-                    selection.Selected.y,
-                    selection.Selected.z,
-                    Block.Test
-                );
-                world.RegenerateMesh();
-            }
-            else if (e.KeyCode == Keys.Y)
-            {
-                world.SetBlock(
-                    selection.Selected.x,
-                    selection.Selected.y,
-                    selection.Selected.z,
-                    Block.Air
-                );
-                world.RegenerateMesh();
+                if (e.KeyCode == Keys.Y)
+                {
+                    world.SetBlock(
+                        selection.Selected.x,
+                        selection.Selected.y,
+                        selection.Selected.z,
+                        Block.Air
+                    );
+                    world.RegenerateMesh();
+                }
+                else if (e.KeyCode == Keys.I)
+                {
+                    world.SetBlock(
+                        placeBlockCoords.x,
+                        placeBlockCoords.y,
+                        placeBlockCoords.z,
+                        Block.Test
+                    );
+                    world.RegenerateMesh();
+                }
             }
         }
 
@@ -120,16 +125,40 @@ namespace Mycraft
             camera.Translate(0f, MOVEMENT_SPEED * cameraVerticalInput, 0f);
             camera.UpdateTransformMatrix();
 
-            if (RayCasting.Raycast(world, camera.Position, new Vertex3f(0f, -1f, 0f), out Hit hit))
+            if (RayCasting.Raycast(world, camera.Position, camera.Forward, out Hit hit))
             {
+                placeBlockCoords = hit.neighbourCoords;
                 selection.Selected = hit.blockCoords;
-                Text = $"Mycraft - {hit.blockCoords}";
             }
             else
             {
                 selection.IsSelected = false;
-                Text = "Mycraft - None";
             }
+        }
+
+        private void DrawCamera(Camera camera)
+        {
+            Vertex3f look = camera.Forward;
+            float[] cameraGraphicsVertices = {
+                  -.1f,     0f,     0f,  0f, 0f, 0f,
+                   .1f,     0f,     0f,  0f, 0f, 0f,
+                    0f,   -.1f,     0f,  0f, 0f, 0f,
+                    0f,    .1f,     0f,  0f, 0f, 0f,
+                    0f,     0f,   -.1f,  0f, 0f, 0f,
+                    0f,     0f,    .1f,  0f, 0f, 0f,
+
+                    0f,     0f,     0f,  1f, 0f, 0f,
+                look.x, look.y, look.z,  1f, 0f, 0f
+            };
+
+            Resources.WorldUIShader.Model = Matrix4x4f.Translated(
+                camera.Position.x,
+                camera.Position.y,
+                camera.Position.z
+            );
+
+            using (VertexArray cameraGraphics = new VertexArray(PrimitiveType.Lines, new int[] { 3, 3 }, cameraGraphicsVertices))
+                cameraGraphics.Draw();
         }
 
         private void Render(object sender, GlControlEventArgs e)
@@ -137,14 +166,33 @@ namespace Mycraft
             Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             Matrix4x4f vp = projection * camera.TransformMatrix;
 
-            Gl.UseProgram(Resources.WorldUIShader.glId);
-            Resources.WorldUIShader.VP = vp;
-            origin.Draw();
-            selection.Draw();
-
+            // Draw the world
             Gl.UseProgram(Resources.TexturedShader.glId);
             Resources.TexturedShader.MVP = vp;
             world.Draw();
+
+            // Draw UI stuff
+            Gl.UseProgram(Resources.WorldUIShader.glId);
+            Resources.WorldUIShader.VP = Matrix4x4f.Identity;
+            Resources.WorldUIShader.Model = Matrix4x4f.Identity;
+            Gl.Disable(EnableCap.DepthTest);
+            using (VertexArray cursor = new VertexArray(
+                PrimitiveType.Lines, new int[] { 3, 3 }, new float[]
+                {
+                    -.1f,  .0f,  .0f,    0f, 0f, 0f,
+                     .1f,  .0f,  .0f,    0f, 0f, 0f,
+                     .0f, -.1f,  .0f,    0f, 0f, 0f,
+                     .0f,  .1f,  .0f,    0f, 0f, 0f,
+                     .0f,  .0f, -.1f,    0f, 0f, 0f,
+                     .0f,  .0f,  .1f,    0f, 0f, 0f,
+                })
+            )
+                cursor.Draw();
+            Gl.Enable(EnableCap.DepthTest);
+
+            Resources.WorldUIShader.VP = vp;
+            origin.Draw();
+            selection.Draw();
         }
 
         private void OnContextDestroyed(object sender, GlControlEventArgs e)
