@@ -1,4 +1,4 @@
-﻿using Mycraft.Graphics;
+﻿using Mycraft.WorldUI;
 using Mycraft.Utils;
 using Mycraft.World;
 using OpenGL;
@@ -10,64 +10,11 @@ namespace Mycraft
 {
     public class GameWindow : Form
     {
-        private readonly float[] cubeVertices =
-        {
-            // Back
-            0f, 0f, 0f,  1f, 1f,
-            0f, 1f, 0f,  1f, 0f,
-            1f, 1f, 0f,  0f, 0f,
-            1f, 0f, 0f,  0f, 1f,
-
-            // Front     
-            1f, 0f, 1f,  1f, 1f,
-            1f, 1f, 1f,  1f, 0f,
-            0f, 1f, 1f,  0f, 0f,
-            0f, 0f, 1f,  0f, 1f,
-
-            // Right     
-            1f, 0f, 0f,  1f, 1f,
-            1f, 1f, 0f,  1f, 0f,
-            1f, 1f, 1f,  0f, 0f,
-            1f, 0f, 1f,  0f, 1f,
-
-            // Left      
-            0f, 0f, 1f,  1f, 1f,
-            0f, 1f, 1f,  1f, 0f,
-            0f, 1f, 0f,  0f, 0f,
-            0f, 0f, 0f,  0f, 1f,
-
-            // Top       
-            1f, 1f, 1f,  1f, 1f,
-            1f, 1f, 0f,  1f, 0f,
-            0f, 1f, 0f,  0f, 0f,
-            0f, 1f, 1f,  0f, 1f,
-
-            // Bottom    
-            0f, 0f, 1f,  1f, 1f,
-            0f, 0f, 0f,  1f, 0f,
-            1f, 0f, 0f,  0f, 0f,
-            1f, 0f, 1f,  0f, 1f
-        };
-
-        private readonly float[] originVertices =
-        {
-            // X axis
-            0f, 0f, 0f,  1f, 0f, 0f,
-            1f, 0f, 0f,  1f, 0f, 0f,
-
-            // Y axis
-            0f, 0f, 0f,  0f, 1f, 0f,
-            0f, 1f, 0f,  0f, 1f, 0f,
-
-            // Z axis
-            0f, 0f, 0f,  0f, 0f, 1f,
-            0f, 0f, 1f,  0f, 0f, 1f
-        };
-
         private readonly GlControl glControl;
 
-        private VertexArray origin;
+        private Origin origin;
         private GameWorld world;
+        private Selection selection;
 
         private const float MOVEMENT_SPEED = .05f, ROTATION_SPEED = .03f;
         private readonly Camera camera;
@@ -97,6 +44,7 @@ namespace Mycraft
             };
 
             Resize += OnResized;
+            KeyDown += OnKeyDown;
             glControl.ContextCreated += OnContextCreated;
             glControl.ContextDestroying += OnContextDestroyed;
             glControl.ContextUpdate += OnContextUpdate;
@@ -106,6 +54,30 @@ namespace Mycraft
             ResumeLayout(false);
 
             camera = new Camera(new Vertex3f(0f, 0f, 5f), new Vertex2f(0f, 0f));
+        }
+
+        private void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.I)
+            {
+                world.SetBlock(
+                    selection.Selected.x,
+                    selection.Selected.y,
+                    selection.Selected.z,
+                    Block.Test
+                );
+                world.RegenerateMesh();
+            }
+            else if (e.KeyCode == Keys.Y)
+            {
+                world.SetBlock(
+                    selection.Selected.x,
+                    selection.Selected.y,
+                    selection.Selected.z,
+                    Block.Air
+                );
+                world.RegenerateMesh();
+            }
         }
 
         private void OnResized(object sender, EventArgs e)
@@ -120,7 +92,8 @@ namespace Mycraft
 
             OnResized(null, null);
 
-            origin = new VertexArray(PrimitiveType.Lines, new int[] { 3, 3 }, originVertices);
+            origin = new Origin();
+            selection = new Selection();
 
             Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
             Gl.Enable(EnableCap.DepthTest);
@@ -146,19 +119,27 @@ namespace Mycraft
             camera.MoveRelativeToYaw(MOVEMENT_SPEED * cameraForwardInput, MOVEMENT_SPEED * cameraHorizontalInput);
             camera.Translate(0f, MOVEMENT_SPEED * cameraVerticalInput, 0f);
             camera.UpdateTransformMatrix();
+
+            Vertex3f sel = camera.Position + new Vertex3f(3f, 0f, 0f);
+            selection.Selected = new Vertex3i(
+                (int)Math.Floor(sel.x),
+                (int)Math.Floor(sel.y),
+                (int)Math.Floor(sel.z)
+            );
         }
 
         private void Render(object sender, GlControlEventArgs e)
         {
             Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            Matrix4x4f mvp = projection * camera.TransformMatrix;
+            Matrix4x4f vp = projection * camera.TransformMatrix;
 
-            Gl.UseProgram(Resources.ColoredShader.glId);
-            Resources.ColoredShader.MVP = mvp;
+            Gl.UseProgram(Resources.WorldUIShader.glId);
+            Resources.WorldUIShader.VP = vp;
             origin.Draw();
+            selection.Draw();
 
             Gl.UseProgram(Resources.TexturedShader.glId);
-            Resources.TexturedShader.MVP = mvp;
+            Resources.TexturedShader.MVP = vp;
             world.Draw();
         }
 
@@ -167,6 +148,7 @@ namespace Mycraft
             Resources.DisposeAll();
             world.Dispose();
             origin.Dispose();
+            selection.Dispose();
         }
     }
 }

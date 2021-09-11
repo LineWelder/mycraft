@@ -41,8 +41,6 @@ namespace Mycraft.World
                 for (int z = 0; z < SIZE; z++)
                     for (int y = 0; y < 3; y++)
                         blocks[x, y, z] = Block.Test;
-
-            blocks[0, 2, 0] = Block.Air;
         }
 
         private Block GetBlockExtended(int x, int y, int z)
