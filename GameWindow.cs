@@ -134,6 +134,7 @@ namespace Mycraft
             texturedShader.Texture = 0;
 
             world = new Chunk();
+            world.Generate();
             world.RegenerateMesh();
         }
 
