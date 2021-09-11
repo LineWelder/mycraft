@@ -14,6 +14,32 @@ namespace Mycraft.World
             chunks = new Dictionary<(int, int), Chunk>();
         }
 
+        private (int chunk, int block) ToChunkCoord(int v)
+            => v >= 0
+            ? (v / Chunk.SIZE, v % Chunk.SIZE)
+            : ((v + 1) / Chunk.SIZE - 1, (v + 1) % Chunk.SIZE + Chunk.SIZE - 1);
+
+        public Block GetBlock(int x, int y, int z)
+        {
+            var (chunkX, blockX) = ToChunkCoord(x);
+            var (chunkZ, blockZ) = ToChunkCoord(z);
+
+            if (y >= Chunk.HEIGHT || y < 0
+             || !chunks.TryGetValue((chunkX, chunkZ), out Chunk chunk))
+                return Block.Void;
+
+            return chunk.blocks[blockX, y, blockZ];
+        }
+
+        public void SetBlock(int x, int y, int z, Block block)
+        {
+            var (chunkX, blockX) = ToChunkCoord(x);
+            var (chunkZ, blockZ) = ToChunkCoord(z);
+
+            if (chunks.TryGetValue((chunkX, chunkZ), out Chunk chunk))
+                chunk.blocks[blockX, y, blockZ] = block;
+        }
+
         public void GenerateSpawnArea()
         {
             for (int x = -SPAWN_AREA_RADIUS; x <= SPAWN_AREA_RADIUS; x++)
