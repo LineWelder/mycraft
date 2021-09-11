@@ -18,7 +18,7 @@ namespace Mycraft
         private Selection selection;
         private Vertex3i placeBlockCoords;
 
-        private const float MOVEMENT_SPEED = .05f, MOUSE_SENSIVITY = .005f;
+        private const float MOVEMENT_SPEED = .05f, MOUSE_SENSIVITY = .002f;
         private readonly Camera camera;
         private Matrix4x4f projection;
 
@@ -74,6 +74,22 @@ namespace Mycraft
 
             Cursor.Position = cursorPos;
             camera.Rotate(MOUSE_SENSIVITY * dx, -MOUSE_SENSIVITY * dy);
+
+            Vertex2f rotation = camera.Rotation;
+            rotation.x += MOUSE_SENSIVITY * dx;
+            rotation.y += -MOUSE_SENSIVITY * dy;
+
+            if (rotation.x >= 2f * (float)Math.PI)
+                rotation.x -= 2f * (float)Math.PI;
+            else if (rotation.x < 0)
+                rotation.x += 2f * (float)Math.PI;
+
+            if (rotation.y > .5f * (float)Math.PI)
+                rotation.y = .5f * (float)Math.PI;
+            else if (rotation.y < -.5f * (float)Math.PI)
+                rotation.y = -.5f * (float)Math.PI;
+
+            camera.Rotation = rotation;
         }
 
         private void OnMouseDown(object sender, MouseEventArgs e)
