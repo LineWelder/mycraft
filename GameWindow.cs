@@ -18,7 +18,7 @@ namespace Mycraft
         private Selection selection;
         private Vertex3i placeBlockCoords;
 
-        private const float MOVEMENT_SPEED = .05f, ROTATION_SPEED = .03f;
+        private const float MOVEMENT_SPEED = .05f, MOUSE_SENSIVITY = .005f;
         private readonly Camera camera;
         private Matrix4x4f projection;
 
@@ -46,23 +46,41 @@ namespace Mycraft
             };
 
             Resize += OnResized;
-            KeyDown += OnKeyDown;
+            glControl.MouseMove += OnMouseMove;
+            glControl.MouseDown += OnMouseDown;
             glControl.ContextCreated += OnContextCreated;
             glControl.ContextDestroying += OnContextDestroyed;
             glControl.ContextUpdate += OnContextUpdate;
             glControl.Render += Render;
 
             Controls.Add(glControl);
+            Cursor.Hide();
             ResumeLayout(false);
 
             camera = new Camera(new Vertex3f(.5f, 3.5f, .5f), new Vertex2f(0f, 0f));
         }
 
-        private void OnKeyDown(object sender, KeyEventArgs e)
+        private void OnMouseMove(object sender, MouseEventArgs e)
+        {
+            Point screenLocation = Location;
+            Point screenCenter = new Point(ClientSize.Width / 2, ClientSize.Height / 2);
+            Point cursorPos = new Point(
+                screenLocation.X + screenCenter.X,
+                screenLocation.Y + screenCenter.Y
+            );
+
+            float dx = Cursor.Position.X - cursorPos.X;
+            float dy = Cursor.Position.Y - cursorPos.Y;
+
+            Cursor.Position = cursorPos;
+            camera.Rotate(MOUSE_SENSIVITY * dx, -MOUSE_SENSIVITY * dy);
+        }
+
+        private void OnMouseDown(object sender, MouseEventArgs e)
         {
             if (selection.IsSelected)
             {
-                if (e.KeyCode == Keys.Y)
+                if (e.Button == MouseButtons.Left)
                 {
                     world.SetBlock(
                         selection.Selected.x,
@@ -72,7 +90,7 @@ namespace Mycraft
                     );
                     world.RegenerateMesh();
                 }
-                else if (e.KeyCode == Keys.I)
+                else if (e.Button == MouseButtons.Right)
                 {
                     world.SetBlock(
                         placeBlockCoords.x,
@@ -120,7 +138,7 @@ namespace Mycraft
             int cameraHorizontalInput = FuncUtils.GetInput1d(Keys.D, Keys.A);
             int cameraVerticalInput   = FuncUtils.GetInput1d(Keys.E, Keys.Q);
 
-            camera.Rotate(ROTATION_SPEED * cameraYawInput, ROTATION_SPEED * cameraPitchInput);
+            camera.Rotate(MOUSE_SENSIVITY * cameraYawInput, MOUSE_SENSIVITY * cameraPitchInput);
             camera.MoveRelativeToYaw(MOVEMENT_SPEED * cameraForwardInput, MOVEMENT_SPEED * cameraHorizontalInput);
             camera.Translate(0f, MOVEMENT_SPEED * cameraVerticalInput, 0f);
             camera.UpdateTransformMatrix();
