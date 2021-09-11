@@ -9,25 +9,27 @@ namespace Mycraft.Graphics
 @"#version 330 core
 
 layout(location = 0) in vec3 position;
-layout(location = 1) in vec3 color;
 uniform mat4 model;
 uniform mat4 vp;
-out vec3 vtxColor;
 
 void main()
 {
-    vtxColor = color;
     gl_Position = vp * model * vec4(position, 1.0);
 }";
 
         private const string FRAGMENT_SOURCE =
 @"#version 330 core
-in vec3 vtxColor;
+uniform vec3 color;
 
 void main()
 {
-    gl_FragColor = vec4(vtxColor, 1.0);
+    gl_FragColor = vec4(color, 1.0);
 }";
+
+        public Vertex3f Color
+        {
+            set => Gl.Uniform3f(colorLocation, 1, value);
+        }
 
         public Matrix4x4f Model
         {
@@ -39,11 +41,15 @@ void main()
             set => Gl.UniformMatrix4f(vpLocation, 1, false, value);
         }
 
-        private readonly int modelLocation, vpLocation;
+        private readonly int colorLocation, modelLocation, vpLocation;
 
         public WorldUIShader()
             : base(VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
+            colorLocation = Gl.GetUniformLocation(glId, "color");
+            if (colorLocation < 0)
+                throw new InvalidOperationException("color variable not found");
+
             modelLocation = Gl.GetUniformLocation(glId, "model");
             if (modelLocation < 0)
                 throw new InvalidOperationException("model variable not found");

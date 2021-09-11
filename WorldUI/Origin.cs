@@ -1,33 +1,55 @@
 ﻿using Mycraft.Graphics;
 using Mycraft.Utils;
 using OpenGL;
+using System;
 
 namespace Mycraft.WorldUI
 {
-    public class Origin : VertexArray
+    public class Origin : IDisposable
     {
-        private static readonly float[] vertices =
+        private static readonly float[] xAxisVertices =
         {
-            // X axis
             0f, 0f, 0f,  1f, 0f, 0f,
-            1f, 0f, 0f,  1f, 0f, 0f,
+            1f, 0f, 0f,  1f, 0f, 0f
+        };
 
-            // Y axis
+        private static readonly float[] yAxisVertices =
+        {
             0f, 0f, 0f,  0f, 1f, 0f,
-            0f, 1f, 0f,  0f, 1f, 0f,
+            0f, 1f, 0f,  0f, 1f, 0f
+        };
 
-            // Z axis
+        private static readonly float[] zAxisVertices =
+        {
             0f, 0f, 0f,  0f, 0f, 1f,
             0f, 0f, 1f,  0f, 0f, 1f
         };
 
-        public Origin()
-            : base(PrimitiveType.Lines, new int[] { 3, 3 }, vertices) { }
+        private VertexArray xAxis, yAxis, zAxis;
 
-        public new void Draw()
+        public Origin()
+        {
+            xAxis = new VertexArray(PrimitiveType.Lines, new int[] { 3 }, xAxisVertices);
+            yAxis = new VertexArray(PrimitiveType.Lines, new int[] { 3 }, yAxisVertices);
+            zAxis = new VertexArray(PrimitiveType.Lines, new int[] { 3 }, zAxisVertices);
+        }
+
+        public void Draw()
         {
             Resources.WorldUIShader.Model = Matrix4x4f.Identity;
-            base.Draw();
+            Resources.WorldUIShader.Color = new Vertex3f(1f, 0f, 0f);
+            xAxis.Draw();
+            Resources.WorldUIShader.Color = new Vertex3f(0f, 1f, 0f);
+            yAxis.Draw();
+            Resources.WorldUIShader.Color = new Vertex3f(0f, 0f, 1f);
+            zAxis.Draw();
+        }
+
+        public void Dispose()
+        {
+            xAxis.Dispose();
+            yAxis.Dispose();
+            zAxis.Dispose();
         }
     }
 }

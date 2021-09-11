@@ -136,7 +136,6 @@ namespace Mycraft
 
             Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
             Gl.LineWidth(2f);
-            Gl.Enable(EnableCap.DepthTest);
             Gl.Enable(EnableCap.CullFace);
             Gl.Enable(EnableCap.Multisample);
 
@@ -166,17 +165,19 @@ namespace Mycraft
 
         private void DrawCamera(Camera camera)
         {
-            Vertex3f look = camera.Forward;
-            float[] cameraGraphicsVertices = {
-                  -.1f,     0f,     0f,  0f, 0f, 0f,
-                   .1f,     0f,     0f,  0f, 0f, 0f,
-                    0f,   -.1f,     0f,  0f, 0f, 0f,
-                    0f,    .1f,     0f,  0f, 0f, 0f,
-                    0f,     0f,   -.1f,  0f, 0f, 0f,
-                    0f,     0f,    .1f,  0f, 0f, 0f,
+            float[] positionVertices = {
+                 -.1f,   0f,   0f,
+                  .1f,   0f,   0f,
+                   0f, -.1f,   0f,
+                   0f,  .1f,   0f,
+                   0f,   0f, -.1f,
+                   0f,   0f,  .1f
+            };
 
-                    0f,     0f,     0f,  1f, 0f, 0f,
-                look.x, look.y, look.z,  1f, 0f, 0f
+            Vertex3f look = camera.Forward;
+            float[] lookVertices = {
+                0f,     0f,     0f,
+                look.x, look.y, look.z
             };
 
             Resources.WorldUIShader.Model = Matrix4x4f.Translated(
@@ -185,8 +186,13 @@ namespace Mycraft
                 camera.Position.z
             );
 
-            using (VertexArray cameraGraphics = new VertexArray(PrimitiveType.Lines, new int[] { 3, 3 }, cameraGraphicsVertices))
-                cameraGraphics.Draw();
+            Resources.WorldUIShader.Color = new Vertex3f(0f, 0f, 0f);
+            using (VertexArray positionGraphics = new VertexArray(PrimitiveType.Lines, new int[] { 3 }, positionVertices))
+                positionGraphics.Draw();
+
+            Resources.WorldUIShader.Color = new Vertex3f(1f, 0f, 0f);
+            using (VertexArray lookGraphics = new VertexArray(PrimitiveType.Lines, new int[] { 3 }, lookVertices))
+                lookGraphics.Draw();
         }
 
         private void Render(object sender, GlControlEventArgs e)
@@ -196,31 +202,32 @@ namespace Mycraft
 
             // Draw the world
             Gl.UseProgram(Resources.TexturedShader.glId);
+            Gl.Enable(EnableCap.DepthTest);
             Resources.TexturedShader.MVP = vp;
             world.Draw();
 
             // Draw UI stuff
             Gl.UseProgram(Resources.WorldUIShader.glId);
+            
+            Resources.WorldUIShader.VP = vp;
+            Resources.WorldUIShader.Model = Matrix4x4f.Identity;
+            origin.Draw();
+            selection.Draw();
+
             Resources.WorldUIShader.VP = Matrix4x4f.Identity;
             Resources.WorldUIShader.Model = Matrix4x4f.Identity;
+            Resources.WorldUIShader.Color = new Vertex3f(.1f, .1f, .1f);
             Gl.Disable(EnableCap.DepthTest);
             using (VertexArray cursor = new VertexArray(
-                PrimitiveType.Lines, new int[] { 3, 3 }, new float[]
+                PrimitiveType.Lines, new int[] { 3 }, new float[]
                 {
-                    -.1f,  .0f,  .0f,    .1f, .1f, .1f,
-                     .1f,  .0f,  .0f,    .1f, .1f, .1f,
-                     .0f, -.1f,  .0f,    .1f, .1f, .1f,
-                     .0f,  .1f,  .0f,    .1f, .1f, .1f,
-                     .0f,  .0f, -.1f,    .1f, .1f, .1f,
-                     .0f,  .0f,  .1f,    .1f, .1f, .1f,
+                    -.05f,  .0f,  .0f,
+                     .05f,  .0f,  .0f,
+                     .0f,  -.07f, .0f,
+                     .0f,   .07f, .0f
                 })
             )
                 cursor.Draw();
-            Gl.Enable(EnableCap.DepthTest);
-
-            Resources.WorldUIShader.VP = vp;
-            origin.Draw();
-            selection.Draw();
         }
 
         private void OnContextDestroyed(object sender, GlControlEventArgs e)
