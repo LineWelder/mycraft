@@ -10,34 +10,34 @@ namespace Mycraft.WorldUI
         private static readonly float[] vertices =
         {
             // X aligned
-            0f, 0f, 0f,  0f, 0f, 0f,
-            1f, 0f, 0f,  0f, 0f, 0f,
-            0f, 0f, 1f,  0f, 0f, 0f,
-            1f, 0f, 1f,  0f, 0f, 0f,
-            0f, 1f, 0f,  0f, 0f, 0f,
-            1f, 1f, 0f,  0f, 0f, 0f,
-            0f, 1f, 1f,  0f, 0f, 0f,
-            1f, 1f, 1f,  0f, 0f, 0f,
+            0f, 0f, 0f,  .1f, .1f, .1f,
+            1f, 0f, 0f,  .1f, .1f, .1f,
+            0f, 0f, 1f,  .1f, .1f, .1f,
+            1f, 0f, 1f,  .1f, .1f, .1f,
+            0f, 1f, 0f,  .1f, .1f, .1f,
+            1f, 1f, 0f,  .1f, .1f, .1f,
+            0f, 1f, 1f,  .1f, .1f, .1f,
+            1f, 1f, 1f,  .1f, .1f, .1f,
 
             // Y aligned
-            0f, 0f, 0f,  0f, 0f, 0f,
-            0f, 1f, 0f,  0f, 0f, 0f,
-            0f, 0f, 1f,  0f, 0f, 0f,
-            0f, 1f, 1f,  0f, 0f, 0f,
-            1f, 0f, 0f,  0f, 0f, 0f,
-            1f, 1f, 0f,  0f, 0f, 0f,
-            1f, 0f, 1f,  0f, 0f, 0f,
-            1f, 1f, 1f,  0f, 0f, 0f,
+            0f, 0f, 0f,  .1f, .1f, .1f,
+            0f, 1f, 0f,  .1f, .1f, .1f,
+            0f, 0f, 1f,  .1f, .1f, .1f,
+            0f, 1f, 1f,  .1f, .1f, .1f,
+            1f, 0f, 0f,  .1f, .1f, .1f,
+            1f, 1f, 0f,  .1f, .1f, .1f,
+            1f, 0f, 1f,  .1f, .1f, .1f,
+            1f, 1f, 1f,  .1f, .1f, .1f,
 
             // Z aligned
-            0f, 0f, 0f,  0f, 0f, 0f,
-            0f, 0f, 1f,  0f, 0f, 0f,
-            0f, 1f, 0f,  0f, 0f, 0f,
-            0f, 1f, 1f,  0f, 0f, 0f,
-            1f, 0f, 0f,  0f, 0f, 0f,
-            1f, 0f, 1f,  0f, 0f, 0f,
-            1f, 1f, 0f,  0f, 0f, 0f,
-            1f, 1f, 1f,  0f, 0f, 0f
+            0f, 0f, 0f,  .1f, .1f, .1f,
+            0f, 0f, 1f,  .1f, .1f, .1f,
+            0f, 1f, 0f,  .1f, .1f, .1f,
+            0f, 1f, 1f,  .1f, .1f, .1f,
+            1f, 0f, 0f,  .1f, .1f, .1f,
+            1f, 0f, 1f,  .1f, .1f, .1f,
+            1f, 1f, 0f,  .1f, .1f, .1f,
+            1f, 1f, 1f,  .1f, .1f, .1f
         };
 
         public bool IsSelected { get; private set; }

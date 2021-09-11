@@ -40,7 +40,7 @@ namespace Mycraft
 
                 ColorBits = 24u,
                 DepthBits = 8u,
-                MultisampleBits = 0u,
+                MultisampleBits = 4u,
                 StencilBits = 0u
             };
 
@@ -135,8 +135,10 @@ namespace Mycraft
             selection = new Selection();
 
             Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
+            Gl.LineWidth(2f);
             Gl.Enable(EnableCap.DepthTest);
             Gl.Enable(EnableCap.CullFace);
+            Gl.Enable(EnableCap.Multisample);
 
             Gl.UseProgram(Resources.TexturedShader.glId);
             Resources.TexturedShader.Texture = 0;
@@ -205,12 +207,12 @@ namespace Mycraft
             using (VertexArray cursor = new VertexArray(
                 PrimitiveType.Lines, new int[] { 3, 3 }, new float[]
                 {
-                    -.1f,  .0f,  .0f,    0f, 0f, 0f,
-                     .1f,  .0f,  .0f,    0f, 0f, 0f,
-                     .0f, -.1f,  .0f,    0f, 0f, 0f,
-                     .0f,  .1f,  .0f,    0f, 0f, 0f,
-                     .0f,  .0f, -.1f,    0f, 0f, 0f,
-                     .0f,  .0f,  .1f,    0f, 0f, 0f,
+                    -.1f,  .0f,  .0f,    .1f, .1f, .1f,
+                     .1f,  .0f,  .0f,    .1f, .1f, .1f,
+                     .0f, -.1f,  .0f,    .1f, .1f, .1f,
+                     .0f,  .1f,  .0f,    .1f, .1f, .1f,
+                     .0f,  .0f, -.1f,    .1f, .1f, .1f,
+                     .0f,  .0f,  .1f,    .1f, .1f, .1f,
                 })
             )
                 cursor.Draw();
