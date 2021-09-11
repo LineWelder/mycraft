@@ -148,13 +148,10 @@ namespace Mycraft
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)
         {
-            int cameraYawInput        = FuncUtils.GetInput1d(Keys.K, Keys.H);
-            int cameraPitchInput      = FuncUtils.GetInput1d(Keys.U, Keys.J);
             int cameraForwardInput    = FuncUtils.GetInput1d(Keys.W, Keys.S);
             int cameraHorizontalInput = FuncUtils.GetInput1d(Keys.D, Keys.A);
-            int cameraVerticalInput   = FuncUtils.GetInput1d(Keys.E, Keys.Q);
+            int cameraVerticalInput   = FuncUtils.GetInput1d(Keys.Space, Keys.LShiftKey);
 
-            camera.Rotate(MOUSE_SENSIVITY * cameraYawInput, MOUSE_SENSIVITY * cameraPitchInput);
             camera.MoveRelativeToYaw(MOVEMENT_SPEED * cameraForwardInput, MOVEMENT_SPEED * cameraHorizontalInput);
             camera.Translate(0f, MOVEMENT_SPEED * cameraVerticalInput, 0f);
             camera.UpdateTransformMatrix();
