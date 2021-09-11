@@ -5,6 +5,13 @@ using System.Collections.Generic;
 
 namespace Mycraft.World
 {
+    public enum BlockSide
+    {
+        Front, Back,
+        Right, Left,
+        Top, Bottom
+    }
+
     public enum Block
     {
         Air, Void, Test

@@ -7,14 +7,14 @@ namespace Mycraft.Utils
     public struct Hit
     {
         public readonly Vertex3f point;
-        public readonly Vertex3i neighbourCoords;
+        public readonly BlockSide side;
         public readonly Vertex3i blockCoords;
         public readonly Block block;
 
-        public Hit(Vertex3f point, Vertex3i neighbourCoords, Vertex3i blockCoords, Block block)
+        public Hit(Vertex3f point, BlockSide side, Vertex3i blockCoords, Block block)
         {
             this.point = point;
-            this.neighbourCoords = neighbourCoords;
+            this.side = side;
             this.blockCoords = blockCoords;
             this.block = block;
         }
@@ -110,7 +110,7 @@ namespace Mycraft.Utils
                 float distanceToYZ = (checkYZCurrent - origin).ModuleSquared();
 
                 Vertex3f currentPoint;
-                Vertex3i neighbourCoords;
+                BlockSide hitSide;
                 Vertex3i hitCoords;
 
                 // The next face is in the XY plane
@@ -127,9 +127,7 @@ namespace Mycraft.Utils
                         (int)Math.Floor(checkXYCurrent.y),
                         (int)checkXYCurrent.z - (checkXYStep.z < 0 ? 1 : 0)
                     );
-                    neighbourCoords = hitCoords + new Vertex3i(
-                        0, 0, checkXZStep.z < 0 ? 1 : -1
-                    );
+                    hitSide = checkXZStep.z < 0 ? BlockSide.Front : BlockSide.Back;
 
                     checkXYCurrent += checkXYStep;
                 }
@@ -148,9 +146,7 @@ namespace Mycraft.Utils
                         (int)checkXZCurrent.y - (checkXZStep.y < 0 ? 1 : 0),
                         (int)Math.Floor(checkXZCurrent.z)
                     );
-                    neighbourCoords = hitCoords + new Vertex3i(
-                        0, checkXZStep.y < 0 ? 1 : -1, 0
-                    );
+                    hitSide = checkXZStep.y < 0 ? BlockSide.Top : BlockSide.Bottom;
 
                     checkXZCurrent += checkXZStep;
                 }
@@ -167,9 +163,7 @@ namespace Mycraft.Utils
                         (int)Math.Floor(checkYZCurrent.y),
                         (int)Math.Floor(checkYZCurrent.z)
                     );
-                    neighbourCoords = hitCoords + new Vertex3i(
-                        checkXZStep.x < 0 ? 1 : -1, 0, 0
-                    );
+                    hitSide = checkYZStep.x < 0 ? BlockSide.Right : BlockSide.Left;
 
                     checkYZCurrent += checkYZStep;
                 }
@@ -177,7 +171,7 @@ namespace Mycraft.Utils
                 Block hitBlock = world.GetBlock(hitCoords.x, hitCoords.y, hitCoords.z);
                 if (hitBlock > Block.Void)
                 {
-                    ray = new Hit(currentPoint, neighbourCoords, hitCoords, hitBlock);
+                    ray = new Hit(currentPoint, hitSide, hitCoords, hitBlock);
                     return true;
                 }
             }
@@ -190,7 +184,7 @@ namespace Mycraft.Utils
             );
             Block endBlock = world.GetBlock(endCoords.x, endCoords.y, endCoords.z);
 
-            ray = new Hit(endPoint, endCoords, endCoords, endBlock);
+            ray = new Hit(endPoint, BlockSide.Front, endCoords, endBlock);
             return false;
         }
     }

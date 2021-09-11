@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenGL;
+using System;
 using System.Collections.Generic;
 
 namespace Mycraft.World
@@ -18,6 +19,27 @@ namespace Mycraft.World
             => v >= 0
             ? (v / Chunk.SIZE, v % Chunk.SIZE)
             : ((v + 1) / Chunk.SIZE - 1, (v + 1) % Chunk.SIZE + Chunk.SIZE - 1);
+
+        public static Vertex3i GetNeighbour(Vertex3i coords, BlockSide side)
+        {
+            switch (side)
+            {
+                case BlockSide.Front:
+                    return coords + new Vertex3i(0, 0, 1);
+                case BlockSide.Back:
+                    return coords + new Vertex3i(0, 0, -1);
+                case BlockSide.Right:
+                    return coords + new Vertex3i(1, 0, 0);
+                case BlockSide.Left:
+                    return coords + new Vertex3i(-1, 0, 0);
+                case BlockSide.Top:
+                    return coords + new Vertex3i(0, 1, 0);
+                case BlockSide.Bottom:
+                    return coords + new Vertex3i(0, -1, 0);
+                default:
+                    return coords;
+            }
+        }
 
         public Block GetBlock(int x, int y, int z)
         {

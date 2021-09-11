@@ -16,7 +16,6 @@ namespace Mycraft
         private Origin origin;
         private GameWorld world;
         private Selection selection;
-        private Vertex3i placeBlockCoords;
 
         private const float MOVEMENT_SPEED = .05f, MOUSE_SENSIVITY = .002f;
         private readonly Camera camera;
@@ -99,15 +98,16 @@ namespace Mycraft
                 if (e.Button == MouseButtons.Left)
                 {
                     world.SetBlock(
-                        selection.Selected.x,
-                        selection.Selected.y,
-                        selection.Selected.z,
+                        selection.Position.x,
+                        selection.Position.y,
+                        selection.Position.z,
                         Block.Air
                     );
                     world.RegenerateMesh();
                 }
                 else if (e.Button == MouseButtons.Right)
                 {
+                    Vertex3i placeBlockCoords = GameWorld.GetNeighbour(selection.Position, selection.Side);
                     world.SetBlock(
                         placeBlockCoords.x,
                         placeBlockCoords.y,
@@ -157,14 +157,9 @@ namespace Mycraft
             camera.UpdateTransformMatrix();
 
             if (RayCasting.Raycast(world, camera.Position, camera.Forward, out Hit hit))
-            {
-                placeBlockCoords = hit.neighbourCoords;
-                selection.Selected = hit.blockCoords;
-            }
+                selection.Select(hit.blockCoords, hit.side);
             else
-            {
-                selection.IsSelected = false;
-            }
+                selection.Deselect();
         }
 
         private void DrawCamera(Camera camera)
