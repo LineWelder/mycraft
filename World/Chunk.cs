@@ -7,25 +7,26 @@ namespace Mycraft.World
 {
     public enum Block
     {
-        Air, Test
+        Air, Void, Test
     }
 
     public class Chunk : VertexArray
     {
-        public const int CHUNK_SIZE = 16;
-        public const int CHUNK_HEIGHT = 256;
+        public const int SIZE = 16;
+        public const int HEIGHT = 256;
+
+        public readonly Block[,,] blocks;
 
         private readonly GameWorld world;
-        private readonly int x, z;
-
-        private readonly Block[,,] blocks;
+        private readonly int chunkX, chunkZ;
 
         public Chunk(GameWorld world, int x, int z)
             : base(PrimitiveType.Quads, new int[] { 3, 2 })
         {
-            blocks = new Block[CHUNK_SIZE, CHUNK_HEIGHT, CHUNK_SIZE];
-            this.x = x;
-            this.z = z;
+            blocks = new Block[SIZE, HEIGHT, SIZE];
+            this.world = world;
+            chunkX = x;
+            chunkZ = z;
         }
 
         public new void Draw()
@@ -36,22 +37,36 @@ namespace Mycraft.World
 
         public void Generate()
         {
-            for (int x = 0; x < CHUNK_SIZE; x++)
-                for (int z = 0; z < CHUNK_SIZE; z++)
+            for (int x = 0; x < SIZE; x++)
+                for (int z = 0; z < SIZE; z++)
                     for (int y = 0; y < 3; y++)
                         blocks[x, y, z] = Block.Test;
+
+            blocks[0, 2, 0] = Block.Air;
+        }
+
+        private Block GetBlockExtended(int x, int y, int z)
+        {
+            if (y < 0 || y >= HEIGHT)
+                return Block.Void;
+
+            if (x >= 0 && x < SIZE
+             && z >= 0 && z < SIZE)
+                return blocks[x, y, z];
+
+            return world.GetBlock(chunkX * SIZE + x, y, chunkZ * SIZE + z);
         }
 
         public void RegenerateMesh()
         {
             List<float> mesh = new List<float>();
 
-            float chunkX = x * CHUNK_SIZE;
-            float chunkZ = z * CHUNK_SIZE;
+            float chunkX = this.chunkX * SIZE;
+            float chunkZ = this.chunkZ * SIZE;
 
-            for (int cx = 0; cx < CHUNK_SIZE; cx++)
-                for (int cz = 0; cz < CHUNK_SIZE; cz++)
-                    for (int cy = 0; cy < CHUNK_HEIGHT; cy++)
+            for (int cx = 0; cx < SIZE; cx++)
+                for (int cz = 0; cz < SIZE; cz++)
+                    for (int cy = 0; cy < HEIGHT; cy++)
                     {
                         if (blocks[cx, cy, cz] == Block.Air)
                             continue;
@@ -61,7 +76,7 @@ namespace Mycraft.World
                         float wy = cy;
 
                         // Bottom
-                        if (cy == 0 || blocks[cx, cy - 1, cz] == Block.Air)
+                        if (GetBlockExtended(cx, cy - 1, cz) <= Block.Void)
                             mesh.AddRange(new float[] {
                                 wx,      wy,      wz + 1f,    1f, 1f,
                                 wx,      wy,      wz,         1f, 0f,
@@ -70,7 +85,7 @@ namespace Mycraft.World
                             });
 
                         // Top
-                        if (cy == CHUNK_HEIGHT - 1 || blocks[cx, cy + 1, cz] == Block.Air)
+                        if (GetBlockExtended(cx, cy + 1, cz) <= Block.Void)
                             mesh.AddRange(new float[] {
                                 wx + 1f, wy + 1f, wz + 1f,    1f, 1f,
                                 wx + 1f, wy + 1f, wz,         1f, 0f,
@@ -79,7 +94,7 @@ namespace Mycraft.World
                             });
 
                         // Left
-                        if (cx == 0 || blocks[cx - 1, cy, cz] == Block.Air)
+                        if (GetBlockExtended(cx - 1, cy, cz) <= Block.Void)
                             mesh.AddRange(new float[] {
                                 wx,      wy,      wz + 1f,    1f, 1f,
                                 wx,      wy + 1f, wz + 1f,    1f, 0f,
@@ -88,7 +103,7 @@ namespace Mycraft.World
                             });
 
                         // Right
-                        if (cx == CHUNK_SIZE - 1 || blocks[cx + 1, cy, cz] == Block.Air)
+                        if (GetBlockExtended(cx + 1, cy, cz) <= Block.Void)
                             mesh.AddRange(new float[] {
                                 // Top       
                                 wx + 1f, wy,      wz,         1f, 1f,
@@ -98,7 +113,7 @@ namespace Mycraft.World
                             });
 
                         // Back
-                        if (cz == 0 || blocks[cx, cy, cz - 1] == Block.Air)
+                        if (GetBlockExtended(cx, cy, cz - 1) <= Block.Void)
                             mesh.AddRange(new float[] {
                                 wx,      wy,      wz,         1f, 1f,
                                 wx,      wy + 1f, wz,         1f, 0f,
@@ -107,7 +122,7 @@ namespace Mycraft.World
                             });
 
                         // Front
-                        if (cz == CHUNK_SIZE - 1 || blocks[cx, cy, cz + 1] == Block.Air)
+                        if (GetBlockExtended(cx, cy, cz + 1) <= Block.Void)
                             mesh.AddRange(new float[] {     
                                 wx + 1f, wy,      wz + 1f,    1f, 1f,
                                 wx + 1f, wy + 1f, wz + 1f,    1f, 0f,
