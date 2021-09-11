@@ -78,7 +78,7 @@
     <Compile Include="Graphics\ShaderProgram.cs" />
     <Compile Include="Utils\Camera.cs" />
     <Compile Include="Utils\FuncUtils.cs" />
-    <Compile Include="Utils\Ray.cs" />
+    <Compile Include="Utils\RayCasting.cs" />
     <Compile Include="Utils\Resources.cs" />
     <Compile Include="World\Chunk.cs" />
     <Compile Include="World\GameWorld.cs" />

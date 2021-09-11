@@ -120,12 +120,16 @@ namespace Mycraft
             camera.Translate(0f, MOVEMENT_SPEED * cameraVerticalInput, 0f);
             camera.UpdateTransformMatrix();
 
-            Vertex3f sel = camera.Position + new Vertex3f(3f, 0f, 0f);
-            selection.Selected = new Vertex3i(
-                (int)Math.Floor(sel.x),
-                (int)Math.Floor(sel.y),
-                (int)Math.Floor(sel.z)
-            );
+            if (RayCasting.Raycast(world, camera.Position, new Vertex3f(0f, -1f, 0f), out Hit hit))
+            {
+                selection.Selected = hit.blockCoords;
+                Text = $"Mycraft - {hit.blockCoords}";
+            }
+            else
+            {
+                selection.IsSelected = false;
+                Text = "Mycraft - None";
+            }
         }
 
         private void Render(object sender, GlControlEventArgs e)
