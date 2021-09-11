@@ -67,7 +67,7 @@ namespace Mycraft
         private readonly GlControl glControl;
 
         private VertexArray origin;
-        private Chunk world;
+        private GameWorld world;
 
         private const float MOVEMENT_SPEED = .05f, ROTATION_SPEED = .03f;
         private readonly Camera camera;
@@ -129,8 +129,8 @@ namespace Mycraft
             Gl.UseProgram(Resources.TexturedShader.glId);
             Resources.TexturedShader.Texture = 0;
 
-            world = new Chunk();
-            world.Generate();
+            world = new GameWorld();
+            world.GenerateSpawnArea();
             world.RegenerateMesh();
         }
 

@@ -3,7 +3,7 @@ using System;
 
 namespace Mycraft.Graphics
 {
-    public class TexturedShader : ShaderProgram
+    public class GameWorldShader : ShaderProgram
     {
         private const string VERTEX_SOURCE =
 @"#version 330 core
@@ -43,7 +43,7 @@ void main()
         private readonly int mvpLocation;
         private readonly int textureLocation;
 
-        public TexturedShader()
+        public GameWorldShader()
             : base(VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
             textureLocation = Gl.GetUniformLocation(glId, "tex");

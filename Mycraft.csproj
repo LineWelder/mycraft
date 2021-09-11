@@ -70,7 +70,7 @@
     </Compile>
     <Compile Include="Graphics\ColoredShader.cs" />
     <Compile Include="Graphics\Texture.cs" />
-    <Compile Include="Graphics\TexturedShader.cs" />
+    <Compile Include="Graphics\GameWorldShader.cs" />
     <Compile Include="Graphics\VertexArray.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="AssemblyInfo.cs" />
@@ -79,6 +79,7 @@
     <Compile Include="Utils\FuncUtils.cs" />
     <Compile Include="Utils\Resources.cs" />
     <Compile Include="World\Chunk.cs" />
+    <Compile Include="World\GameWorld.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
