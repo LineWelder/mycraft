@@ -37,7 +37,7 @@ void main()
 
         public int Texture
         {
-            set => Gl.Uniform1i(mvpLocation, 1, value);
+            set => Gl.Uniform1i(textureLocation, 1, value);
         }
 
         private readonly int mvpLocation;
