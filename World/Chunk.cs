@@ -1,4 +1,5 @@
 ﻿using Mycraft.Graphics;
+using Mycraft.Utils;
 using OpenGL;
 using System.Collections.Generic;
 
@@ -14,26 +15,18 @@ namespace Mycraft.World
         public const int CHUNK_SIZE = 16;
         public const int CHUNK_HEIGHT = 256;
 
-        private readonly Texture testTexture;
         private readonly Block[,,] blocks;
 
         public Chunk()
             : base(PrimitiveType.Quads, new int[] { 3, 2 })
         {
-            testTexture = new Texture(@"resources\textures\test_texture.png");
             blocks = new Block[CHUNK_SIZE, CHUNK_HEIGHT, CHUNK_SIZE];
         }
 
         public new void Draw()
         {
-            testTexture.Bind();
+            Resources.TestTexture.Bind();
             base.Draw();
-        }
-
-        public new void Dispose()
-        {
-            testTexture.Dispose();
-            base.Dispose();
         }
 
         public void Generate()

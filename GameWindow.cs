@@ -66,10 +66,7 @@ namespace Mycraft
 
         private readonly GlControl glControl;
 
-        private ColoredShader coloredShader;
         private VertexArray origin;
-
-        private TexturedShader texturedShader;
         private Chunk world;
 
         private const float MOVEMENT_SPEED = .05f, ROTATION_SPEED = .03f;
@@ -119,10 +116,9 @@ namespace Mycraft
 
         private void OnContextCreated(object sender, GlControlEventArgs e)
         {
-            OnResized(null, null);
+            Resources.LoadAll();
 
-            coloredShader = new ColoredShader();
-            texturedShader = new TexturedShader();
+            OnResized(null, null);
 
             origin = new VertexArray(PrimitiveType.Lines, new int[] { 3, 3 }, originVertices);
 
@@ -130,8 +126,8 @@ namespace Mycraft
             Gl.Enable(EnableCap.DepthTest);
             Gl.Enable(EnableCap.CullFace);
 
-            Gl.UseProgram(texturedShader.glId);
-            texturedShader.Texture = 0;
+            Gl.UseProgram(Resources.TexturedShader.glId);
+            Resources.TexturedShader.Texture = 0;
 
             world = new Chunk();
             world.Generate();
@@ -157,19 +153,18 @@ namespace Mycraft
             Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             Matrix4x4f mvp = projection * camera.TransformMatrix;
 
-            Gl.UseProgram(coloredShader.glId);
-            coloredShader.MVP = mvp;
+            Gl.UseProgram(Resources.ColoredShader.glId);
+            Resources.ColoredShader.MVP = mvp;
             origin.Draw();
 
-            Gl.UseProgram(texturedShader.glId);
-            texturedShader.MVP = mvp;
+            Gl.UseProgram(Resources.TexturedShader.glId);
+            Resources.TexturedShader.MVP = mvp;
             world.Draw();
         }
 
         private void OnContextDestroyed(object sender, GlControlEventArgs e)
         {
-            texturedShader.Dispose();
-            coloredShader.Dispose();
+            Resources.DisposeAll();
             world.Dispose();
             origin.Dispose();
         }

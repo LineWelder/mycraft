@@ -77,6 +77,7 @@
     <Compile Include="Graphics\ShaderProgram.cs" />
     <Compile Include="Utils\Camera.cs" />
     <Compile Include="Utils\FuncUtils.cs" />
+    <Compile Include="Utils\Resources.cs" />
     <Compile Include="World\Chunk.cs" />
     <None Include="packages.config" />
   </ItemGroup>
