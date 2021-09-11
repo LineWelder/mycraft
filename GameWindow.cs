@@ -6,6 +6,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using Mycraft.Graphics;
+using Mycraft.GUI;
 
 namespace Mycraft
 {
@@ -16,6 +17,7 @@ namespace Mycraft
         private Origin origin;
         private GameWorld world;
         private Selection selection;
+        private GUIRectangle cross;
 
         private const float MOVEMENT_SPEED = .05f, MOUSE_SENSIVITY = .002f;
         private readonly Camera camera;
@@ -123,6 +125,14 @@ namespace Mycraft
         {
             Gl.Viewport(0, 0, ClientSize.Width, ClientSize.Height);
             projection = Matrix4x4f.Perspective(70, (float)ClientSize.Width / ClientSize.Height, .01f, 100f);
+
+            Gl.UseProgram(Resources.GUIShader.glId);
+            Resources.GUIShader.Projection = Matrix4x4f.Ortho2D(0f, ClientSize.Width - 1, ClientSize.Height - 1, 0f);
+
+            cross = new GUIRectangle(
+                new Vertex2i(ClientSize.Width / 2 - 20, ClientSize.Height / 2 - 20),
+                new Vertex2i(40, 40)
+            );
         }
 
         private void OnContextCreated(object sender, GlControlEventArgs e)
@@ -138,9 +148,6 @@ namespace Mycraft
             Gl.LineWidth(2f);
             Gl.Enable(EnableCap.CullFace);
             Gl.Enable(EnableCap.Multisample);
-
-            Gl.UseProgram(Resources.TexturedShader.glId);
-            Resources.TexturedShader.Texture = 0;
 
             world = new GameWorld();
             world.GenerateSpawnArea();
@@ -163,9 +170,9 @@ namespace Mycraft
                 selection.Deselect();
         }
 
-        private void DrawCamera(Camera camera)
+        private void DrawPosition(Vertex3f position)
         {
-            float[] positionVertices = {
+            float[] vertices = {
                  -.1f,   0f,   0f,
                   .1f,   0f,   0f,
                    0f, -.1f,   0f,
@@ -174,25 +181,15 @@ namespace Mycraft
                    0f,   0f,  .1f
             };
 
-            Vertex3f look = camera.Forward;
-            float[] lookVertices = {
-                0f,     0f,     0f,
-                look.x, look.y, look.z
-            };
-
             Resources.WorldUIShader.Model = Matrix4x4f.Translated(
-                camera.Position.x,
-                camera.Position.y,
-                camera.Position.z
+                position.x,
+                position.y,
+                position.z
             );
 
             Resources.WorldUIShader.Color = new Vertex3f(0f, 0f, 0f);
-            using (VertexArray positionGraphics = new VertexArray(PrimitiveType.Lines, new int[] { 3 }, positionVertices))
-                positionGraphics.Draw();
-
-            Resources.WorldUIShader.Color = new Vertex3f(1f, 0f, 0f);
-            using (VertexArray lookGraphics = new VertexArray(PrimitiveType.Lines, new int[] { 3 }, lookVertices))
-                lookGraphics.Draw();
+            using (VertexArray vao = new VertexArray(PrimitiveType.Lines, new int[] { 3 }, vertices))
+                vao.Draw();
         }
 
         private void Render(object sender, GlControlEventArgs e)
@@ -201,9 +198,9 @@ namespace Mycraft
             Matrix4x4f vp = projection * camera.TransformMatrix;
 
             // Draw the world
-            Gl.UseProgram(Resources.TexturedShader.glId);
+            Gl.UseProgram(Resources.GameWorldShader.glId);
             Gl.Enable(EnableCap.DepthTest);
-            Resources.TexturedShader.MVP = vp;
+            Resources.GameWorldShader.MVP = vp;
             world.Draw();
 
             // Draw UI stuff
@@ -214,20 +211,10 @@ namespace Mycraft
             origin.Draw();
             selection.Draw();
 
-            Resources.WorldUIShader.VP = Matrix4x4f.Identity;
-            Resources.WorldUIShader.Model = Matrix4x4f.Identity;
-            Resources.WorldUIShader.Color = new Vertex3f(.1f, .1f, .1f);
+            Gl.UseProgram(Resources.GUIShader.glId);
             Gl.Disable(EnableCap.DepthTest);
-            using (VertexArray cursor = new VertexArray(
-                PrimitiveType.Lines, new int[] { 3 }, new float[]
-                {
-                    -.05f,  .0f,  .0f,
-                     .05f,  .0f,  .0f,
-                     .0f,  -.07f, .0f,
-                     .0f,   .07f, .0f
-                })
-            )
-                cursor.Draw();
+            Resources.CrossTexture.Bind();
+            cross.Draw();
         }
 
         private void OnContextDestroyed(object sender, GlControlEventArgs e)
