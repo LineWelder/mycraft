@@ -22,7 +22,7 @@ namespace Mycraft
         private Box testBox;
         private Vertex3f testBoxPos;
 
-        private const float MOVEMENT_SPEED = .05f, MOUSE_SENSIVITY = .002f;
+        private const float MOVEMENT_SPEED = .05f, MOUSE_SENSIVITY = .004f;
         private readonly Camera camera;
         private Matrix4x4f projection;
 
@@ -64,7 +64,7 @@ namespace Mycraft
             camera = new Camera(new Vertex3f(.5f, 3.5f, .5f), new Vertex2f(0f, 0f));
         }
 
-        private void OnMouseMove(object sender, MouseEventArgs e)
+        private (float dx, float dy) GrabCursor()
         {
             Point screenLocation = Location;
             Point screenCenter = new Point(ClientSize.Width / 2, ClientSize.Height / 2);
@@ -77,7 +77,13 @@ namespace Mycraft
             float dy = Cursor.Position.Y - cursorPos.Y;
 
             Cursor.Position = cursorPos;
-            camera.Rotate(MOUSE_SENSIVITY * dx, -MOUSE_SENSIVITY * dy);
+
+            return (dx, dy);
+        }
+
+        private void OnMouseMove(object sender, MouseEventArgs e)
+        {
+            var (dx, dy) = GrabCursor();
 
             Vertex2f rotation = camera.Rotation;
             rotation.x += MOUSE_SENSIVITY * dx;
