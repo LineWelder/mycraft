@@ -177,6 +177,9 @@ namespace Mycraft
             int cameraHorizontalInput = FuncUtils.GetInput1d(Keys.D, Keys.A);
             int cameraVerticalInput   = FuncUtils.GetInput1d(Keys.Space, Keys.LShiftKey);
 
+            int boxForwardInput = FuncUtils.GetInput1d(Keys.U, Keys.J);
+            int boxHorizontalInput = FuncUtils.GetInput1d(Keys.H, Keys.K);
+
             camera.MoveRelativeToYaw(MOVEMENT_SPEED * cameraForwardInput, MOVEMENT_SPEED * cameraHorizontalInput);
             camera.Translate(0f, MOVEMENT_SPEED * cameraVerticalInput, 0f);
             camera.UpdateTransformMatrix();
@@ -191,6 +194,9 @@ namespace Mycraft
             else
                 Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
 
+            testBox.Position += new Vertex3f(boxHorizontalInput, 0f, boxForwardInput) * MOVEMENT_SPEED;
+            if (testBox.IsGrounded && FuncUtils.IsKeyPressed(Keys.Y))
+                testBox.Velocity += new Vertex3f(0f, .1f, 0f);
             testBox.Update();
         }
 
