@@ -22,7 +22,7 @@ namespace Mycraft.Utils
 
     public static class RayCasting
     {
-        public static bool Raycast(GameWorld world, Vertex3f origin, Vertex3f direction, out Hit ray, float maxDistance = 10f)
+        public static bool Raycast(GameWorld world, Vertex3f origin, Vertex3f direction, out Hit ray, float maxDistance = 6f)
         {
             // If the ray is parallel to a plane, it will never go through the faces parallel to it
             bool doCheckXY = direction.z != 0;
