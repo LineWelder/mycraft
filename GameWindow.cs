@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using Mycraft.Graphics;
 using Mycraft.GUI;
+using Mycraft.Physics;
 
 namespace Mycraft
 {
@@ -19,9 +20,8 @@ namespace Mycraft
         private Selection selection;
         private GUIRectangle cross;
 
-        private Box testBox;
-        private Vertex3f testBoxPos;
-        private Vertex3f testBoxVel;
+        private Box testBoxGraphics;
+        private BoxBody testBox;
 
         private const float MOVEMENT_SPEED = .05f, MOUSE_SENSIVITY = .004f;
         private Camera camera;
@@ -156,10 +156,6 @@ namespace Mycraft
             origin = new Origin();
             selection = new Selection();
 
-            testBox = new Box(new Vertex3f(-.25f, 0f, -.25f), new Vertex3f(.25f, .5f, .25f), new Vertex3f(0f, 0f, 1f));
-            testBoxPos = new Vertex3f(.5f, 5f, -4.5f);
-            testBoxVel = new Vertex3f(.05f, .02f, 0f);
-
             Gl.LineWidth(2f);
             Gl.Enable(EnableCap.CullFace);
             Gl.Enable(EnableCap.Multisample);
@@ -167,6 +163,12 @@ namespace Mycraft
             world = new GameWorld();
             world.GenerateSpawnArea();
             world.RegenerateMesh();
+
+            testBoxGraphics = new Box(new Vertex3f(0f, 0f, 0f), new Vertex3f(.5f, .5f, .5f), new Vertex3f(0f, 0f, 1f));
+            testBox = new BoxBody(world, new Vertex3f(.25f, 5f, -4.75f), new Vertex3f(.5f, .5f, .5f))
+            {
+                Velocity = new Vertex3f(.05f, .02f, 0f)
+            };
         }
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)
@@ -189,14 +191,7 @@ namespace Mycraft
             else
                 Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
 
-            testBoxPos += testBoxVel;
-            testBoxVel -= new Vertex3f(0f, .002f, 0f);
-
-            if (world.GetBlock((int)Math.Floor(testBoxPos.x), (int)Math.Floor(testBoxPos.y), (int)Math.Floor(testBoxPos.z)) > Block.Void)
-            {
-                testBoxPos.y = (float)Math.Ceiling(testBoxPos.y);
-                testBoxVel = new Vertex3f();
-            }
+            testBox.Update();
         }
 
         private void DrawPosition(Vertex3f position)
@@ -240,9 +235,12 @@ namespace Mycraft
             Resources.WorldUIShader.Model = Matrix4x4f.Identity;
             origin.Draw();
 
-            Resources.WorldUIShader.Model = Matrix4x4f.Translated(testBoxPos.x, testBoxPos.y, testBoxPos.z);
-            testBox.Draw();
-            DrawPosition(testBoxPos);
+            Resources.WorldUIShader.Model = Matrix4x4f.Translated(
+                testBox.Position.x,
+                testBox.Position.y,
+                testBox.Position.z
+            );
+            testBoxGraphics.Draw();
 
             // Draw GUI
             Gl.UseProgram(Resources.GUIShader.glId);
