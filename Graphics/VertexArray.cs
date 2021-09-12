@@ -9,7 +9,7 @@ namespace Mycraft.Graphics
     {
         public readonly uint glId;
 
-        public float[] Data
+        protected float[] Data
         {
             set
             {
