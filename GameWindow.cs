@@ -19,6 +19,8 @@ namespace Mycraft
         private Selection selection;
         private GUIRectangle cross;
 
+        private Box testBox;
+
         private const float MOVEMENT_SPEED = .05f, MOUSE_SENSIVITY = .002f;
         private readonly Camera camera;
         private Matrix4x4f projection;
@@ -143,6 +145,7 @@ namespace Mycraft
 
             origin = new Origin();
             selection = new Selection();
+            testBox = new Box(new Vertex3f(.25f, .25f, .25f), new Vertex3f(.75f, .75f, .75f), new Vertex3f(0f, 0f, 1f));
 
             Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
             Gl.LineWidth(2f);
@@ -205,11 +208,14 @@ namespace Mycraft
 
             // Draw UI stuff
             Gl.UseProgram(Resources.WorldUIShader.glId);
-            
             Resources.WorldUIShader.VP = vp;
+
             Resources.WorldUIShader.Model = Matrix4x4f.Identity;
             origin.Draw();
             selection.Draw();
+
+            Resources.WorldUIShader.Model = Matrix4x4f.Translated(0f, 3f, 0f);
+            testBox.Draw();
 
             Gl.UseProgram(Resources.GUIShader.glId);
             Gl.Disable(EnableCap.DepthTest);

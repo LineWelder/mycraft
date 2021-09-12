@@ -70,6 +70,7 @@
     </Compile>
     <Compile Include="Graphics\GUIShader.cs" />
     <Compile Include="GUI\GUIRectangle.cs" />
+    <Compile Include="WorldUI\Box.cs" />
     <Compile Include="WorldUI\Origin.cs" />
     <Compile Include="Graphics\WorldUIShader.cs" />
     <Compile Include="Graphics\Texture.cs" />
