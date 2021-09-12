@@ -47,6 +47,7 @@ namespace Mycraft
             };
 
             Resize += OnResized;
+            glControl.MouseEnter += (o, e) => Cursor.Hide();
             glControl.MouseMove += OnMouseMove;
             glControl.MouseDown += OnMouseDown;
             glControl.ContextCreated += OnContextCreated;
@@ -55,7 +56,6 @@ namespace Mycraft
             glControl.Render += Render;
 
             Controls.Add(glControl);
-            Cursor.Hide();
             ResumeLayout(false);
 
             camera = new Camera(new Vertex3f(.5f, 3.5f, .5f), new Vertex2f(0f, 0f));
