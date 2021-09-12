@@ -20,6 +20,7 @@ namespace Mycraft
         private GUIRectangle cross;
 
         private Box testBox;
+        private Vertex3f testBoxPos;
 
         private const float MOVEMENT_SPEED = .05f, MOUSE_SENSIVITY = .002f;
         private readonly Camera camera;
@@ -146,8 +147,8 @@ namespace Mycraft
             origin = new Origin();
             selection = new Selection();
             testBox = new Box(new Vertex3f(.25f, .25f, .25f), new Vertex3f(.75f, .75f, .75f), new Vertex3f(0f, 0f, 1f));
+            testBoxPos = new Vertex3f(0f, 3f, 0f);
 
-            Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
             Gl.LineWidth(2f);
             Gl.Enable(EnableCap.CullFace);
             Gl.Enable(EnableCap.Multisample);
@@ -171,6 +172,13 @@ namespace Mycraft
                 selection.Select(hit.blockCoords, hit.side);
             else
                 selection.Deselect();
+
+            if (camera.Position.y < 0)
+                Gl.ClearColor(.05f, .05f, .05f, 1f);
+            else
+                Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
+
+            testBoxPos -= new Vertex3f(0f, .001f, 0f);
         }
 
         private void DrawPosition(Vertex3f position)
@@ -209,16 +217,18 @@ namespace Mycraft
             // Draw UI stuff
             Gl.UseProgram(Resources.WorldUIShader.glId);
             Resources.WorldUIShader.VP = vp;
+            selection.Draw();
 
             Resources.WorldUIShader.Model = Matrix4x4f.Identity;
             origin.Draw();
-            selection.Draw();
 
-            Resources.WorldUIShader.Model = Matrix4x4f.Translated(0f, 3f, 0f);
+            Resources.WorldUIShader.Model = Matrix4x4f.Translated(testBoxPos.x, testBoxPos.y, testBoxPos.z);
             testBox.Draw();
 
+            // Draw GUI
             Gl.UseProgram(Resources.GUIShader.glId);
             Gl.Disable(EnableCap.DepthTest);
+
             Resources.CrossTexture.Bind();
             cross.Draw();
         }
