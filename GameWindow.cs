@@ -211,12 +211,7 @@ namespace Mycraft
                    0f,   0f,  .1f
             };
 
-            Resources.WorldUIShader.Model = Matrix4x4f.Translated(
-                position.x,
-                position.y,
-                position.z
-            );
-
+            Resources.WorldUIShader.Model = FuncUtils.TranslateBy(position);
             Resources.WorldUIShader.Color = new Vertex3f(0f, 0f, 0f);
             using (VertexArray vao = new VertexArray(PrimitiveType.Lines, new int[] { 3 }, vertices))
                 vao.Draw();
@@ -241,11 +236,7 @@ namespace Mycraft
             Resources.WorldUIShader.Model = Matrix4x4f.Identity;
             origin.Draw();
 
-            Resources.WorldUIShader.Model = Matrix4x4f.Translated(
-                testBox.Position.x,
-                testBox.Position.y,
-                testBox.Position.z
-            );
+            Resources.WorldUIShader.Model = FuncUtils.TranslateBy(testBox.Position);
             testBoxGraphics.Draw();
 
             // Draw GUI

@@ -54,7 +54,7 @@ namespace Mycraft.Utils
         {
             TransformMatrix = Matrix4x4f.RotatedX(-Rotation.y * RADIANS_TO_DEGREES)
                             * Matrix4x4f.RotatedY(Rotation.x * RADIANS_TO_DEGREES)
-                            * Matrix4x4f.Translated(-Position.x, -Position.y, -Position.z);
+                            * FuncUtils.TranslateBy(-Position);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using OpenGL;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Mycraft.Utils
@@ -16,5 +17,12 @@ namespace Mycraft.Utils
 
         public static int GetInput1d(Keys up, Keys down)
             => GetKeyPressed(up) - GetKeyPressed(down);
+
+        public static Matrix4x4f TranslateBy(Vertex3f vector)
+            => Matrix4x4f.Translated(
+                vector.x,
+                vector.y,
+                vector.z
+            );
     }
 }
