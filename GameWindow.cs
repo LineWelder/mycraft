@@ -20,8 +20,8 @@ namespace Mycraft
         private Selection selection;
         private GUIRectangle cross;
 
-        private Box testBoxGraphics;
-        private BoxBody testBox;
+        private Box testBoxGraphics, playerBoxGraphics;
+        private AABB testBox, playerBox;
 
         private const float MOVEMENT_SPEED = .05f, MOUSE_SENSIVITY = .004f;
         private Camera camera;
@@ -164,11 +164,11 @@ namespace Mycraft
             world.GenerateSpawnArea();
             world.RegenerateMesh();
 
-            testBoxGraphics = new Box(new Vertex3f(0f, 0f, 0f), new Vertex3f(.5f, .5f, .5f), new Vertex3f(0f, 0f, 1f));
-            testBox = new BoxBody(world, new Vertex3f(.25f, 5f, -4.75f), new Vertex3f(.5f, .5f, .5f))
-            {
-                Velocity = new Vertex3f(.05f, .02f, 0f)
-            };
+            testBox = new AABB(new Vertex3f(3.25f, 3f, -4.75f), new Vertex3f(.5f, .5f, .5f));
+            playerBox = new AABB(new Vertex3f(.25f, 3f, -4.75f), new Vertex3f(.5f, .5f, .5f));
+
+            testBoxGraphics = new Box(new Vertex3f(0f, 0f, 0f), testBox.Size, new Vertex3f(1f, 0f, 0f));
+            playerBoxGraphics = new Box(new Vertex3f(0f, 0f, 0f), playerBox.Size, new Vertex3f(0f, 0f, 1f));
         }
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)
@@ -194,10 +194,9 @@ namespace Mycraft
             else
                 Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
 
-            testBox.Position += new Vertex3f(boxHorizontalInput, 0f, boxForwardInput) * MOVEMENT_SPEED;
-            if (testBox.IsGrounded && FuncUtils.IsKeyPressed(Keys.Y))
-                testBox.Velocity += new Vertex3f(0f, .1f, 0f);
-            testBox.Update();
+            playerBox.Move(new Vertex3f(boxHorizontalInput, 0f, boxForwardInput) * MOVEMENT_SPEED);
+            playerBox.Collide(testBox);
+            playerBox.End();
         }
 
         private void DrawPosition(Vertex3f position)
@@ -238,6 +237,9 @@ namespace Mycraft
 
             Resources.WorldUIShader.Model = FuncUtils.TranslateBy(testBox.Position);
             testBoxGraphics.Draw();
+
+            Resources.WorldUIShader.Model = FuncUtils.TranslateBy(playerBox.Position);
+            playerBoxGraphics.Draw();
 
             // Draw GUI
             Gl.UseProgram(Resources.GUIShader.glId);

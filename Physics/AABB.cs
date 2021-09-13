@@ -40,11 +40,10 @@ namespace Mycraft.Physics
             bool alignedInY = other.position.y - Size.y < position.y && position.y < other.position.y + other.Size.y;
             bool alignedInZ = other.position.z - Size.z < position.z && position.z < other.position.z + other.Size.z;
 
-
-             if (delta.x != 0 && alignedInY && alignedInZ)
+            if (delta.x != 0 && alignedInY && alignedInZ)
                 if (delta.x > 0
                     && lastPosition.x + Size.x <= other.position.x
-                    && other.position.x < position.x
+                    && other.position.x < position.x + Size.x
                    )
                     position.x = other.position.x - Size.x;
                 else if (
@@ -56,7 +55,7 @@ namespace Mycraft.Physics
             if (delta.y != 0 && alignedInX && alignedInZ)
                 if (delta.y > 0
                     && lastPosition.y + Size.y <= other.position.y
-                    && other.position.y < position.y
+                    && other.position.y < position.y + Size.y
                    )
                     position.y = other.position.y - Size.y;
                 else if (
@@ -68,7 +67,7 @@ namespace Mycraft.Physics
             if (delta.z != 0 && alignedInX && alignedInY)
                 if (delta.z > 0
                     && lastPosition.z + Size.z <= other.position.z
-                    && other.position.z < position.z
+                    && other.position.z < position.z + Size.z
                    )
                     position.z = other.position.z - Size.z;
                 else if (
