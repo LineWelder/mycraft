@@ -41,24 +41,31 @@ class AABB:
         self.last_pos = pos
         self.delta = (0, 0)
 
+    # Moves the box immediately
     def move(self, dx, dy):
         self.pos = (self.pos[0] + dx, self.pos[1] + dy)
         self.delta = (self.delta[0] + dx, self.delta[1] + dy)
 
-    def collide(self, other):
-        if self.delta[0] != 0 and other.pos[1] - self.size[1] < self.pos[1] < other.pos[1] + other.size[1]:
-            if self.delta[0] > 0 and self.last_pos[0] <= other.pos[0] - self.size[0] < self.pos[0]:
-                self.pos = (other.pos[0] - self.size[0], self.pos[1])
-            elif self.pos[0] < other.pos[0] + other.size[0] <= self.last_pos[0]:
-                self.pos = (other.pos[0] + other.size[0], self.pos[1])
+    # But then resolves the collision moving the box along one axis at a time
+    def collide(self, others):
+        self.pos = self.last_pos
 
-        if self.delta[1] != 0 and other.pos[0] - self.size[0] < self.pos[0] < other.pos[0] + other.size[0]:
-            if self.delta[1] > 0 and self.last_pos[1] <= other.pos[1] - self.size[1] < self.pos[1]:
-                self.pos = (self.pos[0], other.pos[1] - self.size[1])
-            elif self.pos[1] < other.pos[1] + other.size[1] <= self.last_pos[1]:
-                self.pos = (self.pos[0], other.pos[1] + other.size[1])
+        self.pos = (self.pos[0], self.last_pos[1] + self.delta[1])
+        for other in others:
+            if self.delta[1] != 0 and other.pos[0] - self.size[0] < self.pos[0] < other.pos[0] + other.size[0]:
+                if self.delta[1] > 0 and self.last_pos[1] <= other.pos[1] - self.size[1] < self.pos[1]:
+                    self.pos = (self.pos[0], other.pos[1] - self.size[1])
+                elif self.pos[1] < other.pos[1] + other.size[1] <= self.last_pos[1]:
+                    self.pos = (self.pos[0], other.pos[1] + other.size[1])
 
-    def end(self):
+        self.pos = (self.last_pos[0] + self.delta[0], self.pos[1])
+        for other in others:
+            if self.delta[0] != 0 and other.pos[1] - self.size[1] < self.pos[1] < other.pos[1] + other.size[1]:
+                if self.delta[0] > 0 and self.last_pos[0] <= other.pos[0] - self.size[0] < self.pos[0]:
+                    self.pos = (other.pos[0] - self.size[0], self.pos[1])
+                elif self.pos[0] < other.pos[0] + other.size[0] <= self.last_pos[0]:
+                    self.pos = (other.pos[0] + other.size[0], self.pos[1])
+
         self.last_pos = self.pos
         self.delta = (0, 0)
 
@@ -134,11 +141,9 @@ def main():
         for x in range(floor(player.pos[0]), floor(player.pos[0] + player.size[0]) + 1):
             for y in range(floor(player.pos[1]), floor(player.pos[1] + player.size[1]) + 1):
                 if 0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE and grid[x][y] == WALL:
-                    blockBox = AABB((float(x), float(y)), (float(1), float(1)))
-                    player.collide(blockBox)
-                    aabbs.append(blockBox)
+                    aabbs.append(AABB((float(x), float(y)), (float(1), float(1))))
 
-        player.end()
+        player.collide(aabbs)
 
         # Draw selection and walls
 
