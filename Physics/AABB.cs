@@ -35,10 +35,10 @@ namespace Mycraft.Physics
             delta += d;
         }
 
-        public void Update(IEnumerable<AABB> others)
+        protected bool CollideX(IEnumerable<AABB> others)
         {
-            position = lastPosition;
-            
+            bool hasCollided = false;
+
             position.x += delta.x;
             foreach (AABB other in others)
                 if (delta.x != 0
@@ -49,12 +49,25 @@ namespace Mycraft.Physics
                         && lastPosition.x + Size.x <= other.position.x
                         && other.position.x < position.x + Size.x
                        )
+                    {
                         position.x = other.position.x - Size.x;
+                        hasCollided = true;
+                    }
                     else if (
                         position.x < other.position.x + other.Size.x
                         && other.position.x + other.Size.x <= lastPosition.x
                        )
+                    {
                         position.x = other.position.x + other.Size.x;
+                        hasCollided = true;
+                    }
+
+            return hasCollided;
+        }
+
+        protected bool CollideY(IEnumerable<AABB> others)
+        {
+            bool hasCollided = false;
 
             position.y += delta.y;
             foreach (AABB other in others)
@@ -66,12 +79,25 @@ namespace Mycraft.Physics
                         && lastPosition.y + Size.y <= other.position.y
                         && other.position.y < position.y + Size.y
                        )
+                    {
                         position.y = other.position.y - Size.y;
+                        hasCollided = true;
+                    }
                     else if (
                         position.y < other.position.y + other.Size.y
                         && other.position.y + other.Size.y <= lastPosition.y
                        )
+                    {
                         position.y = other.position.y + other.Size.y;
+                        hasCollided = true;
+                    }
+
+            return hasCollided;
+        }
+
+        protected bool CollideZ(IEnumerable<AABB> others)
+        {
+            bool hasCollided = false;
 
             position.z += delta.z;
             foreach (AABB other in others)
@@ -83,15 +109,42 @@ namespace Mycraft.Physics
                         && lastPosition.z + Size.z <= other.position.z
                         && other.position.z < position.z + Size.z
                        )
+                    {
                         position.z = other.position.z - Size.z;
+                        hasCollided = true;
+                    }
                     else if (
                         position.z < other.position.z + other.Size.z
                         && other.position.z + other.Size.z <= lastPosition.z
                        )
+                    {
                         position.z = other.position.z + other.Size.z;
+                        hasCollided = true;
+                    }
 
+            return hasCollided;
+        }
+
+        protected void Start()
+        {
+            position = lastPosition;
+        }
+
+        protected void End()
+        {
             lastPosition = position;
             delta = new Vertex3f();
+        }
+
+        public void Collide(IEnumerable<AABB> others)
+        {
+            Start();
+
+            CollideX(others);
+            CollideY(others);
+            CollideZ(others);
+
+            End();
         }
     }
 }

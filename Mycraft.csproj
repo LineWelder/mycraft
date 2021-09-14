@@ -71,7 +71,7 @@
     <Compile Include="Graphics\GUIShader.cs" />
     <Compile Include="GUI\GUIRectangle.cs" />
     <Compile Include="Physics\AABB.cs" />
-    <Compile Include="Physics\BoxBody.cs" />
+    <Compile Include="Physics\FallingBox.cs" />
     <Compile Include="WorldUI\Box.cs" />
     <Compile Include="WorldUI\Origin.cs" />
     <Compile Include="Graphics\WorldUIShader.cs" />

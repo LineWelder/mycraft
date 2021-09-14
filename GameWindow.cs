@@ -22,7 +22,7 @@ namespace Mycraft
         private GUIRectangle cross;
 
         private Box playerBoxGraphics;
-        private AABB playerBox;
+        private FallingBox playerBox;
 
         private const float MOVEMENT_SPEED = .05f, MOUSE_SENSIVITY = .004f;
         private Camera camera;
@@ -164,7 +164,7 @@ namespace Mycraft
             world.GenerateSpawnArea();
             world.RegenerateMesh();
 
-            playerBox = new AABB(new Vertex3f(.25f, 3f, -4.75f), new Vertex3f(.5f, .5f, .5f));
+            playerBox = new FallingBox(world, new Vertex3f(.25f, 3f, -4.75f), new Vertex3f(.5f, .5f, .5f));
             playerBoxGraphics = new Box(new Vertex3f(0f, 0f, 0f), playerBox.Size, new Vertex3f(0f, 0f, 1f));
         }
 
@@ -192,27 +192,13 @@ namespace Mycraft
                 Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
 
             playerBox.Move(new Vertex3f(boxHorizontalInput, 0f, boxForwardInput) * MOVEMENT_SPEED);
-
-            Vertex3f playerBoxEnd_ = playerBox.Position + playerBox.Size;
-            Vertex3i playerBoxStart = new Vertex3i(
-                (int)Math.Floor(playerBox.Position.x),
-                (int)Math.Floor(playerBox.Position.y),
-                (int)Math.Floor(playerBox.Position.z)
-            );
-            Vertex3i playerBoxEnd = new Vertex3i(
-                (int)Math.Floor(playerBoxEnd_.x),
-                (int)Math.Floor(playerBoxEnd_.y),
-                (int)Math.Floor(playerBoxEnd_.z)
-            );
-
-            List<AABB> aabbs = new List<AABB>();
-            for (int x = playerBoxStart.x; x <= playerBoxEnd.x; x++)
-                for (int y = playerBoxStart.y; y <= playerBoxEnd.y; y++)
-                    for (int z = playerBoxStart.z; z <= playerBoxEnd.z; z++)
-                        if (world.GetBlock(x, y, z) > Block.Void)
-                            aabbs.Add(new AABB(new Vertex3f(x, y, z), new Vertex3f(1f, 1f, 1f)) );
-
-            playerBox.Update(aabbs);
+            playerBox.Update();
+            if (playerBox.IsGrounded && FuncUtils.IsKeyPressed(Keys.Y))
+            {
+                Vertex3f velocity = playerBox.Velocity;
+                velocity.y = .1f;
+                playerBox.Velocity = velocity;
+            }
         }
 
         private void DrawPosition(Vertex3f position)
