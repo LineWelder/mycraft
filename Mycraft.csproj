@@ -80,6 +80,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Blocks\AirBlock.cs" />
+    <Compile Include="Blocks\Block.cs" />
+    <Compile Include="Blocks\BlockRegistry.cs" />
+    <Compile Include="Blocks\MultiTexturedBlock.cs" />
     <Compile Include="GameWindow.cs">
       <SubType>Form</SubType>
     </Compile>

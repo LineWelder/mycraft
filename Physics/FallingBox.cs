@@ -43,7 +43,7 @@ namespace Mycraft.Physics
             for (int x = boxStart.x; x <= boxEnd.x; x++)
                 for (int y = boxStart.y; y <= boxEnd.y; y++)
                     for (int z = boxStart.z; z <= boxEnd.z; z++)
-                        if (world.GetBlock(x, y, z) > Block.Void)
+                        if (world.GetBlock(x, y, z).HasCollider)
                             aabbs.Add(new AABB(new Vertex3f(x, y, z), new Vertex3f(1f, 1f, 1f)));
 
             Start();

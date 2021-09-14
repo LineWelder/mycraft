@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using Mycraft.GUI;
 using Mycraft.Physics;
 using System.Diagnostics;
+using Mycraft.Blocks;
 
 namespace Mycraft
 {
@@ -105,22 +106,22 @@ namespace Mycraft
                         selection.Position.x,
                         selection.Position.y,
                         selection.Position.z,
-                        Block.Air
+                        BlockRegistry.Air
                     );
                 }
                 else if (e.Button == MouseButtons.Right)
                 {
-                    Vertex3i placeBlockCoords = GameWorld.GetNeighbour(selection.Position, selection.Side);
+                    Vertex3i placeBlockCoords = Block.GetNeighbour(selection.Position, selection.Side);
                     world.SetBlock(
                         placeBlockCoords.x,
                         placeBlockCoords.y,
                         placeBlockCoords.z,
-                        Block.Test
+                        BlockRegistry.Stone
                     );
                 }
             }
         }
-
+           
         private void OnResized(object sender, EventArgs e)
         {
             Gl.Viewport(0, 0, ClientSize.Width, ClientSize.Height);
@@ -154,7 +155,7 @@ namespace Mycraft
             world.GenerateSpawnArea();
             world.Update();
 
-            playerBox = new FallingBox(world, new Vertex3f(.25f, 3f, -4.75f), new Vertex3f(.75f, 1.7f, .75f));
+            playerBox = new FallingBox(world, new Vertex3f(.25f, 20f, .25f), new Vertex3f(.75f, 1.7f, .75f));
             camera = new Camera(new Vertex3f(.5f, 3.5f, .5f), new Vertex2f(0f, 0f));
         }
 

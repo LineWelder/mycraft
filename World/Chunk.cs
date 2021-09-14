@@ -1,22 +1,11 @@
-﻿using Mycraft.Graphics;
+﻿using Mycraft.Blocks;
+using Mycraft.Graphics;
 using Mycraft.Utils;
 using OpenGL;
 using System.Collections.Generic;
 
 namespace Mycraft.World
 {
-    public enum BlockSide
-    {
-        Front, Back,
-        Right, Left,
-        Top, Bottom
-    }
-
-    public enum Block
-    {
-        Air, Void, Test
-    }
-
     public class Chunk : VertexArray
     {
         public const int SIZE = 16;
@@ -39,7 +28,7 @@ namespace Mycraft.World
 
         public new void Draw()
         {
-            Resources.TestTexture.Bind();
+            Resources.BlocksTexture.Bind();
             base.Draw();
         }
 
@@ -47,14 +36,21 @@ namespace Mycraft.World
         {
             for (int x = 0; x < SIZE; x++)
                 for (int z = 0; z < SIZE; z++)
-                    for (int y = 0; y < 3; y++)
-                        blocks[x, y, z] = Block.Test;
+                    for (int y = 0; y < HEIGHT; y++)
+                        if (y < 16)
+                            blocks[x, y, z] = BlockRegistry.Stone;
+                        else if(16 <= y && y < 19)
+                            blocks[x, y, z] = BlockRegistry.Dirt;
+                        else if (y == 19)
+                            blocks[x, y, z] = BlockRegistry.Grass;
+                        else
+                            blocks[x, y, z] = BlockRegistry.Air;
         }
 
         private Block GetBlockExtended(int x, int y, int z)
         {
             if (y < 0 || y >= HEIGHT)
-                return Block.Void;
+                return BlockRegistry.Void;
 
             if (x >= 0 && x < SIZE
              && z >= 0 && z < SIZE)
@@ -62,6 +58,9 @@ namespace Mycraft.World
 
             return world.GetBlock(chunkX * SIZE + x, y, chunkZ * SIZE + z);
         }
+
+        private Vertex4f GetTextureCoords(int textureId)
+            => new Vertex4f(textureId * .25f, 0f, (textureId + 1f) * .25f, 1f);
 
         public void UpToDateMesh()
         {
@@ -77,7 +76,9 @@ namespace Mycraft.World
                 for (int cz = 0; cz < SIZE; cz++)
                     for (int cy = 0; cy < HEIGHT; cy++)
                     {
-                        if (blocks[cx, cy, cz] == Block.Air)
+                        Block block = blocks[cx, cy, cz];
+
+                        if (!block.IsVisible)
                             continue;
 
                         float wx = chunkX + cx;
@@ -85,59 +86,77 @@ namespace Mycraft.World
                         float wy = cy;
 
                         // Bottom
-                        if (GetBlockExtended(cx, cy - 1, cz) <= Block.Void)
+                        if (GetBlockExtended(cx, cy - 1, cz).IsTransparent)
+                        {
+                            Vertex4f texCoords = GetTextureCoords(block.GetTexture(BlockSide.Bottom));
                             mesh.AddRange(new float[] {
-                                wx,      wy,      wz + 1f,    1f, 1f,
-                                wx,      wy,      wz,         1f, 0f,
-                                wx + 1f, wy,      wz,         0f, 0f,
-                                wx + 1f, wy,      wz + 1f,    0f, 1f
+                                wx,      wy,      wz + 1f,    texCoords.z, texCoords.w,
+                                wx,      wy,      wz,         texCoords.z, texCoords.y,
+                                wx + 1f, wy,      wz,         texCoords.x, texCoords.y,
+                                wx + 1f, wy,      wz + 1f,    texCoords.x, texCoords.w
                             });
+                        }
 
                         // Top
-                        if (GetBlockExtended(cx, cy + 1, cz) <= Block.Void)
+                        if (GetBlockExtended(cx, cy + 1, cz).IsTransparent)
+                        {
+                            Vertex4f texCoords = GetTextureCoords(block.GetTexture(BlockSide.Top));
                             mesh.AddRange(new float[] {
-                                wx + 1f, wy + 1f, wz + 1f,    1f, 1f,
-                                wx + 1f, wy + 1f, wz,         1f, 0f,
-                                wx,      wy + 1f, wz,         0f, 0f,
-                                wx,      wy + 1f, wz + 1f,    0f, 1f
+                                wx + 1f, wy + 1f, wz + 1f,    texCoords.z, texCoords.w,
+                                wx + 1f, wy + 1f, wz,         texCoords.z, texCoords.y,
+                                wx,      wy + 1f, wz,         texCoords.x, texCoords.y,
+                                wx,      wy + 1f, wz + 1f,    texCoords.x, texCoords.w
                             });
+                        }
 
                         // Left
-                        if (GetBlockExtended(cx - 1, cy, cz) <= Block.Void)
+                        if (GetBlockExtended(cx - 1, cy, cz).IsTransparent)
+                        {
+                            Vertex4f texCoords = GetTextureCoords(block.GetTexture(BlockSide.Left));
                             mesh.AddRange(new float[] {
-                                wx,      wy,      wz + 1f,    1f, 1f,
-                                wx,      wy + 1f, wz + 1f,    1f, 0f,
-                                wx,      wy + 1f, wz,         0f, 0f,
-                                wx,      wy,      wz,         0f, 1f
+                                wx,      wy,      wz + 1f,    texCoords.z, texCoords.w,
+                                wx,      wy + 1f, wz + 1f,    texCoords.z, texCoords.y,
+                                wx,      wy + 1f, wz,         texCoords.x, texCoords.y,
+                                wx,      wy,      wz,         texCoords.x, texCoords.w
                             });
+                        }
 
                         // Right
-                        if (GetBlockExtended(cx + 1, cy, cz) <= Block.Void)
+                        if (GetBlockExtended(cx + 1, cy, cz).IsTransparent)
+                        {
+                            Vertex4f texCoords = GetTextureCoords(block.GetTexture(BlockSide.Right));
                             mesh.AddRange(new float[] {
                                 // Top       
-                                wx + 1f, wy,      wz,         1f, 1f,
-                                wx + 1f, wy + 1f, wz,         1f, 0f,
-                                wx + 1f, wy + 1f, wz + 1f,    0f, 0f,
-                                wx + 1f, wy,      wz + 1f,    0f, 1f
+                                wx + 1f, wy,      wz,         texCoords.z, texCoords.w,
+                                wx + 1f, wy + 1f, wz,         texCoords.z, texCoords.y,
+                                wx + 1f, wy + 1f, wz + 1f,    texCoords.x, texCoords.y,
+                                wx + 1f, wy,      wz + 1f,    texCoords.x, texCoords.w
                             });
+                        }
 
                         // Back
-                        if (GetBlockExtended(cx, cy, cz - 1) <= Block.Void)
+                        if (GetBlockExtended(cx, cy, cz - 1).IsTransparent)
+                        {
+                            Vertex4f texCoords = GetTextureCoords(block.GetTexture(BlockSide.Back));
                             mesh.AddRange(new float[] {
-                                wx,      wy,      wz,         1f, 1f,
-                                wx,      wy + 1f, wz,         1f, 0f,
-                                wx + 1f, wy + 1f, wz,         0f, 0f,
-                                wx + 1f, wy,      wz,         0f, 1f
+                                wx,      wy,      wz,         texCoords.z, texCoords.w,
+                                wx,      wy + 1f, wz,         texCoords.z, texCoords.y,
+                                wx + 1f, wy + 1f, wz,         texCoords.x, texCoords.y,
+                                wx + 1f, wy,      wz,         texCoords.x, texCoords.w
                             });
+                        }
 
                         // Front
-                        if (GetBlockExtended(cx, cy, cz + 1) <= Block.Void)
-                            mesh.AddRange(new float[] {     
-                                wx + 1f, wy,      wz + 1f,    1f, 1f,
-                                wx + 1f, wy + 1f, wz + 1f,    1f, 0f,
-                                wx,      wy + 1f, wz + 1f,    0f, 0f,
-                                wx,      wy,      wz + 1f,    0f, 1f
+                        if (GetBlockExtended(cx, cy, cz + 1).IsTransparent)
+                        {
+                            Vertex4f texCoords = GetTextureCoords(block.GetTexture(BlockSide.Front));
+                            mesh.AddRange(new float[] {
+                                wx + 1f, wy,      wz + 1f,    texCoords.z, texCoords.w,
+                                wx + 1f, wy + 1f, wz + 1f,    texCoords.z, texCoords.y,
+                                wx,      wy + 1f, wz + 1f,    texCoords.x, texCoords.y,
+                                wx,      wy,      wz + 1f,    texCoords.x, texCoords.w
                             });
+                        }
                     }
 
             Data = mesh.ToArray();

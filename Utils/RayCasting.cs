@@ -1,4 +1,5 @@
-﻿using Mycraft.World;
+﻿using Mycraft.Blocks;
+using Mycraft.World;
 using OpenGL;
 using System;
 
@@ -169,7 +170,7 @@ namespace Mycraft.Utils
                 }
 
                 Block hitBlock = world.GetBlock(hitCoords.x, hitCoords.y, hitCoords.z);
-                if (hitBlock > Block.Void)
+                if (hitBlock.HasCollider)
                 {
                     ray = new Hit(currentPoint, hitSide, hitCoords, hitBlock);
                     return true;
