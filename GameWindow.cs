@@ -7,12 +7,14 @@ using System.Drawing;
 using System.Windows.Forms;
 using Mycraft.GUI;
 using Mycraft.Physics;
+using System.Diagnostics;
 
 namespace Mycraft
 {
     public class GameWindow : Form
     {
         private readonly GlControl glControl;
+        private readonly Stopwatch stopwatch;
 
         private Origin origin;
         private GameWorld world;
@@ -21,7 +23,7 @@ namespace Mycraft
 
         private FallingBox playerBox;
 
-        private const float MOVEMENT_SPEED = .05f, MOUSE_SENSIVITY = .004f;
+        private const float MOVEMENT_SPEED = 3.7f, MOUSE_SENSIVITY = .003f;
         private Camera camera;
         private Matrix4x4f projection;
 
@@ -59,6 +61,9 @@ namespace Mycraft
 
             Controls.Add(glControl);
             ResumeLayout(false);
+
+            stopwatch = new Stopwatch();
+            stopwatch.Start();
         }
 
         private (float dx, float dy) GrabCursor()
@@ -155,17 +160,22 @@ namespace Mycraft
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)
         {
+            double deltaTime = stopwatch.Elapsed.TotalSeconds;
+            stopwatch.Restart();
             world.Update();
 
             int forwardInput    = FuncUtils.GetInput1d(Keys.W, Keys.S);
             int horizontalInput = FuncUtils.GetInput1d(Keys.D, Keys.A);
 
-            playerBox.Move(camera.RelativeToYaw(MOVEMENT_SPEED * forwardInput, MOVEMENT_SPEED * horizontalInput));
-            playerBox.Update();
+            playerBox.Move(camera.RelativeToYaw(
+                forwardInput,
+                horizontalInput
+            ) * (deltaTime * MOVEMENT_SPEED));
+            playerBox.Update(deltaTime);
             if (playerBox.IsGrounded && FuncUtils.IsKeyPressed(Keys.Space))
             {
                 Vertex3f velocity = playerBox.Velocity;
-                velocity.y = .1f;
+                velocity.y = 8f;
                 playerBox.Velocity = velocity;
             }
 
@@ -176,8 +186,14 @@ namespace Mycraft
                 playerBox.Velocity = velocity;
             }
 
-            // camera.MoveRelativeToYaw(MOVEMENT_SPEED * forwardInput, MOVEMENT_SPEED * horizontalInput);
-            // camera.Translate(0f, FuncUtils.GetInput1d(Keys.Space, Keys.LShiftKey) * MOVEMENT_SPEED, 0f);
+            /*
+            float speed = deltaTime * MOVEMENT_SPEED;
+            camera.MoveRelativeToYaw(
+                speed * forwardInput,
+                speed * horizontalInput
+            );
+            camera.Translate(0f, FuncUtils.GetInput1d(Keys.Space, Keys.LShiftKey) * speed, 0f);
+            */
             camera.Position = playerBox.Position + new Vertex3f(.375f, 1.5f, .375f);
             camera.UpdateTransformMatrix();
 

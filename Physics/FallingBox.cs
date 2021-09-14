@@ -7,7 +7,7 @@ namespace Mycraft.Physics
 {
     public class FallingBox : AABB
     {
-        private const float GRAVITY = .005f;
+        private const float GRAVITY = 0.4f;
 
         public Vertex3f Velocity { get => velocity; set => velocity = value; }
 
@@ -29,9 +29,9 @@ namespace Mycraft.Physics
                 (int)Math.Floor(coords.z)
             );
 
-        public void Update()
+        public void Update(double deltaTime)
         {
-            Move(velocity);
+            Move(velocity * deltaTime);
             velocity.y -= GRAVITY;
             IsGrounded = false;
 
