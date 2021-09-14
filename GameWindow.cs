@@ -178,6 +178,13 @@ namespace Mycraft
                 playerBox.Velocity = velocity;
             }
 
+            if (playerBox.Position.y < -64f)
+            {
+                Vertex3f velocity = playerBox.Velocity;
+                velocity.y *= -1f;
+                playerBox.Velocity = velocity;
+            }
+
             camera.Position = playerBox.Position + new Vertex3f(.375f, 1.5f, .375f);
             camera.UpdateTransformMatrix();
 

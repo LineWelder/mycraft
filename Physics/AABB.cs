@@ -6,29 +6,42 @@ namespace Mycraft.Physics
     public class AABB
     {
         public Vertex3f Size { get; set; }
-        public Vertex3f Position
-        {
-            get => position;
-            set
-            {
-                lastPosition = value;
-                position = value;
-                delta = new Vertex3f();
-            }
-        }
+        public Vertex3f Position => position;
 
         private Vertex3f position, lastPosition;
         private Vertex3f delta;
 
         public AABB(Vertex3f position, Vertex3f size)
         {
-            Position = position;
+            this.position = position;
             Size = size;
 
             lastPosition = position;
             delta = new Vertex3f();
         }
 
+        /// <summary>
+        /// Teleport the box to the coords.
+        /// </summary>
+        /// <param name="pos">The coords</param>
+        public void ForceMoveTo(Vertex3f pos)
+        {
+            lastPosition = pos;
+            position = pos;
+            delta = new Vertex3f();
+        }
+
+        /// <summary>
+        /// Move the box ignoring collisions.
+        /// </summary>
+        /// <param name="d">The movement amount</param>
+        public void ForceMove(Vertex3f d)
+            => ForceMoveTo(position + d);
+
+        /// <summary>
+        /// Move the box.
+        /// </summary>
+        /// <param name="d">The movement amount</param>
         public void Move(Vertex3f d)
         {
             position += d;
