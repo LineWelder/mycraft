@@ -20,7 +20,6 @@ namespace Mycraft
         private Selection selection;
         private GUIRectangle cross;
 
-        private Box playerBoxGraphics;
         private FallingBox playerBox;
 
         private const float MOVEMENT_SPEED = .05f, MOUSE_SENSIVITY = .004f;
@@ -150,8 +149,6 @@ namespace Mycraft
             Cursor.Hide();
             GrabCursor();
 
-            camera = new Camera(new Vertex3f(.5f, 3.5f, .5f), new Vertex2f(0f, 0f));
-
             origin = new Origin();
             selection = new Selection();
 
@@ -164,7 +161,7 @@ namespace Mycraft
             world.RegenerateMesh();
 
             playerBox = new FallingBox(world, new Vertex3f(.25f, 3f, -4.75f), new Vertex3f(.75f, 1.7f, .75f));
-            playerBoxGraphics = new Box(new Vertex3f(0f, 0f, 0f), playerBox.Size, new Vertex3f(0f, 0f, 1f));
+            camera = new Camera(new Vertex3f(.5f, 3.5f, .5f), new Vertex2f(0f, 0f));
         }
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)
@@ -195,23 +192,6 @@ namespace Mycraft
                 Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
         }
 
-        private void DrawPosition(Vertex3f position)
-        {
-            float[] vertices = {
-                 -.1f,   0f,   0f,
-                  .1f,   0f,   0f,
-                   0f, -.1f,   0f,
-                   0f,  .1f,   0f,
-                   0f,   0f, -.1f,
-                   0f,   0f,  .1f
-            };
-
-            Resources.WorldUIShader.Model = FuncUtils.TranslateBy(position);
-            Resources.WorldUIShader.Color = new Vertex3f(0f, 0f, 0f);
-            using (VertexArray vao = new VertexArray(PrimitiveType.Lines, new int[] { 3 }, vertices))
-                vao.Draw();
-        }
-
         private void Render(object sender, GlControlEventArgs e)
         {
             Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -230,9 +210,6 @@ namespace Mycraft
 
             Resources.WorldUIShader.Model = Matrix4x4f.Identity;
             origin.Draw();
-
-            Resources.WorldUIShader.Model = FuncUtils.TranslateBy(playerBox.Position);
-            playerBoxGraphics.Draw();
 
             // Draw GUI
             Gl.UseProgram(Resources.GUIShader.glId);
