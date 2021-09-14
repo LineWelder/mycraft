@@ -42,13 +42,20 @@ namespace Mycraft.Utils
             Rotation.y += pitchDelta;
         }
 
-        public void MoveRelativeToYaw(float forward, float right)
+        public Vertex3f RelativeToYaw(float forward, float right)
         {
-            Position.z -= (float)Math.Cos(Rotation.x) * forward
-                        - (float)Math.Sin(Rotation.x) * right;
-            Position.x += (float)Math.Cos(Rotation.x) * right
-                        + (float)Math.Sin(Rotation.x) * forward;
+            float cos = (float)Math.Cos(Rotation.x);
+            float sin = (float)Math.Sin(Rotation.x);
+
+            return new Vertex3f(
+                cos * right + sin * forward,
+                0f,
+                sin * right - cos * forward
+            );
         }
+
+        public void MoveRelativeToYaw(float forward, float right)
+            => Position += RelativeToYaw(forward, right);
 
         public void UpdateTransformMatrix()
         {

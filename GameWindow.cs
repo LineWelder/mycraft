@@ -8,7 +8,6 @@ using System.Windows.Forms;
 using Mycraft.Graphics;
 using Mycraft.GUI;
 using Mycraft.Physics;
-using System.Collections.Generic;
 
 namespace Mycraft
 {
@@ -164,21 +163,25 @@ namespace Mycraft
             world.GenerateSpawnArea();
             world.RegenerateMesh();
 
-            playerBox = new FallingBox(world, new Vertex3f(.25f, 3f, -4.75f), new Vertex3f(.5f, .5f, .5f));
+            playerBox = new FallingBox(world, new Vertex3f(.25f, 3f, -4.75f), new Vertex3f(.75f, 1.7f, .75f));
             playerBoxGraphics = new Box(new Vertex3f(0f, 0f, 0f), playerBox.Size, new Vertex3f(0f, 0f, 1f));
         }
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)
         {
-            int cameraForwardInput    = FuncUtils.GetInput1d(Keys.W, Keys.S);
-            int cameraHorizontalInput = FuncUtils.GetInput1d(Keys.D, Keys.A);
-            int cameraVerticalInput   = FuncUtils.GetInput1d(Keys.Space, Keys.LShiftKey);
+            int forwardInput    = FuncUtils.GetInput1d(Keys.W, Keys.S);
+            int horizontalInput = FuncUtils.GetInput1d(Keys.D, Keys.A);
 
-            int boxForwardInput = FuncUtils.GetInput1d(Keys.U, Keys.J);
-            int boxHorizontalInput = FuncUtils.GetInput1d(Keys.H, Keys.K);
+            playerBox.Move(camera.RelativeToYaw(MOVEMENT_SPEED * forwardInput, MOVEMENT_SPEED * horizontalInput));
+            playerBox.Update();
+            if (playerBox.IsGrounded && FuncUtils.IsKeyPressed(Keys.Space))
+            {
+                Vertex3f velocity = playerBox.Velocity;
+                velocity.y = .1f;
+                playerBox.Velocity = velocity;
+            }
 
-            camera.MoveRelativeToYaw(MOVEMENT_SPEED * cameraForwardInput, MOVEMENT_SPEED * cameraHorizontalInput);
-            camera.Translate(0f, MOVEMENT_SPEED * cameraVerticalInput, 0f);
+            camera.Position = playerBox.Position + new Vertex3f(.375f, 1.5f, .375f);
             camera.UpdateTransformMatrix();
 
             if (RayCasting.Raycast(world, camera.Position, camera.Forward, out Hit hit))
@@ -190,15 +193,6 @@ namespace Mycraft
                 Gl.ClearColor(.05f, .05f, .05f, 1f);
             else
                 Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
-
-            playerBox.Move(new Vertex3f(boxHorizontalInput, 0f, boxForwardInput) * MOVEMENT_SPEED);
-            playerBox.Update();
-            if (playerBox.IsGrounded && FuncUtils.IsKeyPressed(Keys.Y))
-            {
-                Vertex3f velocity = playerBox.Velocity;
-                velocity.y = .1f;
-                playerBox.Velocity = velocity;
-            }
         }
 
         private void DrawPosition(Vertex3f position)
