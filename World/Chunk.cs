@@ -22,6 +22,7 @@ namespace Mycraft.World
         public const int SIZE = 16;
         public const int HEIGHT = 256;
 
+        public bool needsUpdate;
         public readonly Block[,,] blocks;
 
         private readonly GameWorld world;
@@ -62,8 +63,11 @@ namespace Mycraft.World
             return world.GetBlock(chunkX * SIZE + x, y, chunkZ * SIZE + z);
         }
 
-        public void RegenerateMesh()
+        public void UpToDateMesh()
         {
+            if (!needsUpdate) return;
+            needsUpdate = false;
+
             List<float> mesh = new List<float>();
 
             float chunkX = this.chunkX * SIZE;

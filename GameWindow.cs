@@ -102,7 +102,6 @@ namespace Mycraft
                         selection.Position.z,
                         Block.Air
                     );
-                    world.RegenerateMesh();
                 }
                 else if (e.Button == MouseButtons.Right)
                 {
@@ -113,7 +112,6 @@ namespace Mycraft
                         placeBlockCoords.z,
                         Block.Test
                     );
-                    world.RegenerateMesh();
                 }
             }
         }
@@ -149,7 +147,7 @@ namespace Mycraft
 
             world = new GameWorld();
             world.GenerateSpawnArea();
-            world.RegenerateMesh();
+            world.Update();
 
             playerBox = new FallingBox(world, new Vertex3f(.25f, 3f, -4.75f), new Vertex3f(.75f, 1.7f, .75f));
             camera = new Camera(new Vertex3f(.5f, 3.5f, .5f), new Vertex2f(0f, 0f));
@@ -157,6 +155,8 @@ namespace Mycraft
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)
         {
+            world.Update();
+
             int forwardInput    = FuncUtils.GetInput1d(Keys.W, Keys.S);
             int horizontalInput = FuncUtils.GetInput1d(Keys.D, Keys.A);
 
@@ -176,6 +176,8 @@ namespace Mycraft
                 playerBox.Velocity = velocity;
             }
 
+            // camera.MoveRelativeToYaw(MOVEMENT_SPEED * forwardInput, MOVEMENT_SPEED * horizontalInput);
+            // camera.Translate(0f, FuncUtils.GetInput1d(Keys.Space, Keys.LShiftKey) * MOVEMENT_SPEED, 0f);
             camera.Position = playerBox.Position + new Vertex3f(.375f, 1.5f, .375f);
             camera.UpdateTransformMatrix();
 

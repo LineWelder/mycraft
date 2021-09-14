@@ -60,7 +60,21 @@ namespace Mycraft.World
 
             if (y < Chunk.HEIGHT && y >= 0
              && chunks.TryGetValue((chunkX, chunkZ), out Chunk chunk))
+            {
                 chunk.blocks[blockX, y, blockZ] = block;
+                chunk.needsUpdate = true;
+
+                Chunk neighbour;
+                if (blockX == 0 && chunks.TryGetValue((chunkX - 1, chunkZ), out neighbour))
+                    neighbour.needsUpdate = true;
+                else if (blockX == Chunk.SIZE - 1 && chunks.TryGetValue((chunkX + 1, chunkZ), out neighbour))
+                    neighbour.needsUpdate = true;
+
+                if (blockZ == 0 && chunks.TryGetValue((chunkX, chunkZ - 1), out neighbour))
+                    neighbour.needsUpdate = true;
+                else if (blockZ == Chunk.SIZE - 1 && chunks.TryGetValue((chunkX, chunkZ + 1), out neighbour))
+                    neighbour.needsUpdate = true;
+            }
         }
 
         public void GenerateSpawnArea()
@@ -68,20 +82,26 @@ namespace Mycraft.World
             for (int x = -SPAWN_AREA_RADIUS; x <= SPAWN_AREA_RADIUS; x++)
                 for (int z = -SPAWN_AREA_RADIUS; z <= SPAWN_AREA_RADIUS; z++)
                     LoadChunk(x, z);
-
-            RegenerateMesh();
         }
 
-        public void RegenerateMesh()
+        public void Update()
         {
             foreach (var chunk in chunks.Values)
-                chunk.RegenerateMesh();
+                chunk.UpToDateMesh();
         }
 
         public void LoadChunk(int x, int z)
         {
             Chunk newChunk = new Chunk(this, x, z);
             newChunk.Generate();
+            newChunk.needsUpdate = true;
+
+            Chunk chunk;
+            if (chunks.TryGetValue((x - 1, z), out chunk)) chunk.needsUpdate = true;
+            if (chunks.TryGetValue((x + 1, z), out chunk)) chunk.needsUpdate = true;
+            if (chunks.TryGetValue((x, z - 1), out chunk)) chunk.needsUpdate = true;
+            if (chunks.TryGetValue((x, z + 1), out chunk)) chunk.needsUpdate = true;
+
             chunks.Add((x, z), newChunk);
         }
 
