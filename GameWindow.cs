@@ -5,7 +5,6 @@ using OpenGL;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using Mycraft.Graphics;
 using Mycraft.GUI;
 using Mycraft.Physics;
 
@@ -80,21 +79,13 @@ namespace Mycraft
 
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
+            const float HALF_PI = .5f * (float)Math.PI;
+
             var (dx, dy) = GrabCursor();
 
             Vertex2f rotation = camera.Rotation;
-            rotation.x += MOUSE_SENSIVITY * dx;
-            rotation.y += -MOUSE_SENSIVITY * dy;
-
-            if (rotation.x >= 2f * (float)Math.PI)
-                rotation.x -= 2f * (float)Math.PI;
-            else if (rotation.x < 0)
-                rotation.x += 2f * (float)Math.PI;
-
-            if (rotation.y > .5f * (float)Math.PI)
-                rotation.y = .5f * (float)Math.PI;
-            else if (rotation.y < -.5f * (float)Math.PI)
-                rotation.y = -.5f * (float)Math.PI;
+            rotation.x = FuncUtils.FixRotation(rotation.x + MOUSE_SENSIVITY * dx);
+            rotation.y = FuncUtils.Clamp(-HALF_PI, rotation.y - MOUSE_SENSIVITY * dy, HALF_PI);
 
             camera.Rotation = rotation;
         }

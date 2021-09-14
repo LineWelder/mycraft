@@ -1,4 +1,5 @@
 ﻿using OpenGL;
+using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -24,5 +25,28 @@ namespace Mycraft.Utils
                 vector.y,
                 vector.z
             );
+
+        public static float FixRotation(float val)
+        {
+            const float TWO_PI = 2f * (float)Math.PI;
+
+            if (val > TWO_PI)
+                val -= TWO_PI;
+            else if (val < 0)
+                val += TWO_PI;
+
+            return val;
+        }
+
+        public static float Clamp(float min, float val, float max)
+        {
+            if (val > max)
+                return max;
+
+            if (val < min)
+                return min;
+
+            return val;
+        }
     }
 }
