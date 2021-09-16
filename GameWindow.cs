@@ -210,7 +210,7 @@ namespace Mycraft
             playerBox = new FallingBox(world, new Vertex3f(.25f, 20f, .25f), new Vertex3f(.75f, 1.7f, .75f));
             camera = new Camera(new Vertex3f(.5f, 20.5f, 1.5f), new Vertex2f(0f, 0f));
 
-            particles = new ParticleSystem(world, .2f);
+            particles = new ParticleSystem(world, .2f, .5d);
         }
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)

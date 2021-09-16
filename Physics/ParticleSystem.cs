@@ -12,11 +12,13 @@ namespace Mycraft.Physics
         private class Particle : FallingBox
         {
             public Block block;
+            public double lifeLeft;
 
-            public Particle(GameWorld world, Block block, Vertex3f position, Vertex3f velocity)
+            public Particle(GameWorld world, Block block, double lifeSpan, Vertex3f position, Vertex3f velocity)
                 : base(world, position, new Vertex3f())
             {
                 this.block = block;
+                lifeLeft = lifeSpan;
                 Velocity = velocity;
             }
         }
@@ -24,34 +26,42 @@ namespace Mycraft.Physics
         private readonly List<Particle> particles;
         private readonly GameWorld world;
         private readonly float size;
+        private readonly double lifeSpan;
 
         public float GetRangedRandom(Random rand, float start, float end)
             => (float)(rand.NextDouble() * (end - start) + start);
 
-        public ParticleSystem(GameWorld world, float size)
+        public ParticleSystem(GameWorld world, float size, double lifeSpan)
             : base(PrimitiveType.Quads, new int[] { 3, 2, 2 })
         {
             particles = new List<Particle>();
             this.world = world;
             this.size = size;
+            this.lifeSpan = lifeSpan;
             UpdateVertices();
         }
 
         public void Spawn(Vertex3f spawnAreaStart, Vertex3f spawnAreaEnd, int count, Block block)
         {
             Particle[] newParticles = new Particle[count];
+            Vertex3f center = (spawnAreaStart + spawnAreaEnd) / 2f;
 
             Random rand = new Random();
             for (int i = 0; i < count; i++)
+            {
+                Vertex3f position = new Vertex3f(
+                    GetRangedRandom(rand, spawnAreaStart.x, spawnAreaEnd.x),
+                    GetRangedRandom(rand, spawnAreaStart.y, spawnAreaEnd.y),
+                    GetRangedRandom(rand, spawnAreaStart.z, spawnAreaEnd.z)
+                );
+
                 newParticles[i] = new Particle(
                     world, block,
-                    new Vertex3f(
-                        GetRangedRandom(rand, spawnAreaStart.x, spawnAreaEnd.x),
-                        GetRangedRandom(rand, spawnAreaStart.y, spawnAreaEnd.y),
-                        GetRangedRandom(rand, spawnAreaStart.z, spawnAreaEnd.z)
-                    ),
-                    new Vertex3f()
+                    lifeSpan,
+                    position,
+                    (position - center) * 4f
                 );
+            }
 
             particles.AddRange(newParticles);
             UpdateVertices();
@@ -59,8 +69,17 @@ namespace Mycraft.Physics
 
         public void Update(double deltaTime)
         {
-            foreach (Particle particle in particles)
+            for (int i = particles.Count - 1; i >= 0; i--)
+            {
+                Particle particle = particles[i];
+
+                particle.lifeLeft -= deltaTime;
+                if (particle.lifeLeft <= 0)
+                    particles.RemoveAt(i);
+
                 particle.Update(deltaTime);
+            }
+
             UpdateVertices();
         }
           

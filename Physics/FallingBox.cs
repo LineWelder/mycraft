@@ -51,7 +51,7 @@ namespace Mycraft.Physics
             if (CollideY(aabbs))
             {
                 IsGrounded = velocity.y < 0;
-                velocity.y = 0f;
+                velocity = new Vertex3f();
             }
             if (CollideZ(aabbs)) velocity.z = 0f;
             End();
