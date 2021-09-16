@@ -118,11 +118,32 @@ namespace Mycraft
             {
                 if (e.Button == MouseButtons.Left)
                 {
+                    Vertex3i position = selection.Position;
+                    Block block = world.GetBlock(
+                        position.x,
+                        position.y,
+                        position.z
+                    );
+
                     world.SetBlock(
-                        selection.Position.x,
-                        selection.Position.y,
-                        selection.Position.z,
+                        position.x,
+                        position.y,
+                        position.z,
                         BlockRegistry.Air
+                    );
+
+                    particles.Spawn(
+                        new Vertex3f(
+                            position.x,
+                            position.y,
+                            position.z
+                        ),
+                        new Vertex3f(
+                            position.x + 1f,
+                            position.y + 1f,
+                            position.z + 1f
+                        ),
+                        20, block
                     );
                 }
                 else if (e.Button == MouseButtons.Right)
@@ -187,9 +208,9 @@ namespace Mycraft
             world.Update();
 
             playerBox = new FallingBox(world, new Vertex3f(.25f, 20f, .25f), new Vertex3f(.75f, 1.7f, .75f));
-            camera = new Camera(new Vertex3f(.5f, 3.5f, .5f), new Vertex2f(0f, 0f));
+            camera = new Camera(new Vertex3f(.5f, 20.5f, 1.5f), new Vertex2f(0f, 0f));
 
-            particles = new ParticleSystem(new Vertex3f(0f, 0f, 0f), new Vertex3f(1f, 1f, 1f), 10, .1f, BlockRegistry.Stone);
+            particles = new ParticleSystem(world, .2f);
         }
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)
@@ -219,16 +240,15 @@ namespace Mycraft
                 velocity.y *= -1f;
                 playerBox.Velocity = velocity;
             }
-
             
-            float speed = (float)(deltaTime * MOVEMENT_SPEED);
-            camera.MoveRelativeToYaw(
-                speed * forwardInput,
-                speed * horizontalInput
-            );
-            camera.Translate(0f, FuncUtils.GetInput1d(Keys.Space, Keys.LShiftKey) * speed, 0f);
+            // float speed = (float)(deltaTime * MOVEMENT_SPEED);
+            // camera.MoveRelativeToYaw(
+            //     speed * forwardInput,
+            //     speed * horizontalInput
+            // );
+            // camera.Translate(0f, FuncUtils.GetInput1d(Keys.Space, Keys.LShiftKey) * speed, 0f);
             
-            // camera.Position = playerBox.Position + new Vertex3f(.375f, 1.5f, .375f);
+            camera.Position = playerBox.Position + new Vertex3f(.375f, 1.5f, .375f);
             camera.UpdateTransformMatrix();
 
             if (RayCasting.Raycast(world, camera.Position, camera.Forward, out Hit hit))
@@ -240,6 +260,8 @@ namespace Mycraft
                 Gl.ClearColor(.05f, .05f, .05f, 1f);
             else
                 Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
+
+            particles.Update(deltaTime);
         }
 
         private void Render(object sender, GlControlEventArgs e)
@@ -250,21 +272,20 @@ namespace Mycraft
             // Draw the world
             Gl.UseProgram(Resources.GameWorldShader.glId);
             Gl.Enable(EnableCap.DepthTest);
-            // Gl.Enable(EnableCap.CullFace);
+            Gl.Enable(EnableCap.CullFace);
             Resources.GameWorldShader.MVP = vp;
-            // world.Draw();
+            world.Draw();
 
             Gl.UseProgram(Resources.ParticleShader.glId);
             Resources.ParticleShader.View = camera.TransformMatrix;
             Resources.ParticleShader.Projection = projection;
             Resources.BlocksTexture.Bind();
-            particles.UpdateVertices();
             particles.Draw();
 
             // Draw UI stuff
             Gl.UseProgram(Resources.WorldUIShader.glId);
             Resources.WorldUIShader.VP = vp;
-            // selection.Draw();
+            selection.Draw();
 
             Resources.WorldUIShader.Model = Matrix4x4f.Identity;
             origin.Draw();
@@ -275,7 +296,7 @@ namespace Mycraft
             Gl.Disable(EnableCap.CullFace);
 
             Resources.CrossTexture.Bind();
-            //cross.Draw();
+            cross.Draw();
             
             hotbar.Draw();
         }
