@@ -41,7 +41,7 @@ void main()
 
         public Matrix4x4f Projection
         {
-            set => Gl.UniformMatrix4f(viewLocation, 1, false, value);
+            set => Gl.UniformMatrix4f(projectionLocation, 1, false, value);
         }
 
         public int Texture
