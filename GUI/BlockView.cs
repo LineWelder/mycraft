@@ -17,22 +17,22 @@ namespace Mycraft.GUI
 
             Data = new float[] {
                 // Top
-                position.x + size.x,       position.y + tilt,            topTexture.x,   topTexture.y,
-                position.x + size.x * .5f, position.y,                   topTexture.z,   topTexture.y,
-                position.x,                position.y + tilt,            topTexture.z,   topTexture.w,
-                position.x + size.x * .5f, position.y + tilt * 2f,       topTexture.x,   topTexture.w,
+                position.x + size.x,       position.y + tilt,            topTexture.z,   topTexture.y,
+                position.x + size.x * .5f, position.y,                   topTexture.x,   topTexture.y,
+                position.x,                position.y + tilt,            topTexture.x,   topTexture.w,
+                position.x + size.x * .5f, position.y + tilt * 2f,       topTexture.z,   topTexture.w,
 
                 // Front
-                position.x,                position.y + tilt,            frontTexture.z, frontTexture.y,
-                position.x,                position.y + size.y - tilt,   frontTexture.z, frontTexture.w,
-                position.x + size.x * .5f, position.y + size.y,          frontTexture.x, frontTexture.w,
-                position.x + size.x * .5f, position.y + tilt * 2f,       frontTexture.x, frontTexture.y,
+                position.x,                position.y + tilt,            frontTexture.x, frontTexture.y,
+                position.x,                position.y + size.y - tilt,   frontTexture.x, frontTexture.w,
+                position.x + size.x * .5f, position.y + size.y,          frontTexture.z, frontTexture.w,
+                position.x + size.x * .5f, position.y + tilt * 2f,       frontTexture.z, frontTexture.y,
 
                 // Right
-                position.x + size.x * .5f, position.y + tilt * 2f,       rightTexture.z, rightTexture.y,
-                position.x + size.x * .5f, position.y + size.y,          rightTexture.z, rightTexture.w,
-                position.x + size.x,       position.y + size.y - tilt,   rightTexture.x, rightTexture.w,
-                position.x + size.x,       position.y + tilt,            rightTexture.x, rightTexture.y
+                position.x + size.x * .5f, position.y + tilt * 2f,       rightTexture.x, rightTexture.y,
+                position.x + size.x * .5f, position.y + size.y,          rightTexture.x, rightTexture.w,
+                position.x + size.x,       position.y + size.y - tilt,   rightTexture.z, rightTexture.w,
+                position.x + size.x,       position.y + tilt,            rightTexture.z, rightTexture.y
             };
         }
     }
