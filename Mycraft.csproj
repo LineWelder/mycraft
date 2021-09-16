@@ -87,12 +87,14 @@
     <Compile Include="GameWindow.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Graphics\ParticleShader.cs" />
     <Compile Include="Graphics\GUIShader.cs" />
     <Compile Include="GUI\BlockView.cs" />
     <Compile Include="GUI\GUIRectangle.cs" />
     <Compile Include="GUI\Hotbar.cs" />
     <Compile Include="Physics\AABB.cs" />
     <Compile Include="Physics\FallingBox.cs" />
+    <Compile Include="Physics\ParticleSystem.cs" />
     <Compile Include="WorldUI\Box.cs" />
     <Compile Include="WorldUI\Origin.cs" />
     <Compile Include="Graphics\WorldUIShader.cs" />

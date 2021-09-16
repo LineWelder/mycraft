@@ -28,6 +28,7 @@ namespace Mycraft
         private Hotbar hotbar;
 
         private FallingBox playerBox;
+        private ParticleSystem particles;
 
         private const float MOVEMENT_SPEED = 3.7f, MOUSE_SENSIVITY = .003f;
         private Camera camera;
@@ -187,6 +188,8 @@ namespace Mycraft
 
             playerBox = new FallingBox(world, new Vertex3f(.25f, 20f, .25f), new Vertex3f(.75f, 1.7f, .75f));
             camera = new Camera(new Vertex3f(.5f, 3.5f, .5f), new Vertex2f(0f, 0f));
+
+            particles = new ParticleSystem(new Vertex3f(0f, 20f, 0f), new Vertex3f(1f, 21f, 0f), 1, .1f, BlockRegistry.Stone);
         }
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)
@@ -250,6 +253,12 @@ namespace Mycraft
             Gl.Enable(EnableCap.CullFace);
             Resources.GameWorldShader.MVP = vp;
             world.Draw();
+
+            Gl.UseProgram(Resources.ParticleShader.glId);
+            Resources.ParticleShader.View = camera.TransformMatrix;
+            Resources.ParticleShader.Projection = projection;
+            particles.UpdateVertices();
+            particles.Draw();
 
             // Draw UI stuff
             Gl.UseProgram(Resources.WorldUIShader.glId);
