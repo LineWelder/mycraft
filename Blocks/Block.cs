@@ -53,5 +53,8 @@ namespace Mycraft.Blocks
                     return coords;
             }
         }
+
+        public static Vertex4f GetTextureCoords(int textureId)
+            => new Vertex4f(textureId * .25f, 0f, (textureId + 1f) * .25f, 1f);
     }
 }

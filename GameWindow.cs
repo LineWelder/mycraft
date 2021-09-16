@@ -10,6 +10,8 @@ using Mycraft.Physics;
 using System.Diagnostics;
 using Mycraft.Blocks;
 
+// TODO make good file not found handling
+
 namespace Mycraft
 {
     public class GameWindow : Form
@@ -21,6 +23,8 @@ namespace Mycraft
         private GameWorld world;
         private Selection selection;
         private GUIRectangle cross;
+
+        private Hotbar hotbar;
 
         private FallingBox playerBox;
 
@@ -55,6 +59,7 @@ namespace Mycraft
             glControl.MouseEnter += (o, e) => Cursor.Hide();
             glControl.MouseMove += OnMouseMove;
             glControl.MouseDown += OnMouseDown;
+            glControl.MouseWheel += OnMouseWheel;
             glControl.ContextCreated += OnContextCreated;
             glControl.ContextDestroying += OnContextDestroyed;
             glControl.ContextUpdate += OnContextUpdate;
@@ -65,6 +70,15 @@ namespace Mycraft
 
             stopwatch = new Stopwatch();
             stopwatch.Start();
+        }
+
+        private void OnMouseWheel(object sender, MouseEventArgs e)
+        {
+            int select = hotbar.Selected - e.Delta / 120;
+            if (select < 0)
+                hotbar.Selected = Hotbar.CAPACITY - 1;
+            else
+                hotbar.Selected = select % Hotbar.CAPACITY;
         }
 
         private (float dx, float dy) GrabCursor()
@@ -116,7 +130,7 @@ namespace Mycraft
                         placeBlockCoords.x,
                         placeBlockCoords.y,
                         placeBlockCoords.z,
-                        BlockRegistry.Stone
+                        hotbar.SelectedBlock
                     );
                 }
             }
@@ -130,9 +144,23 @@ namespace Mycraft
             Gl.UseProgram(Resources.GUIShader.glId);
             Resources.GUIShader.Projection = Matrix4x4f.Ortho2D(0f, ClientSize.Width - 1, ClientSize.Height - 1, 0f);
 
+            int pixelSize = ClientSize.Height / 200;
+
             cross = new GUIRectangle(
-                new Vertex2i(ClientSize.Width / 2 - 20, ClientSize.Height / 2 - 20),
-                new Vertex2i(40, 40)
+                new Vertex2i(
+                    ClientSize.Width / 2 - 6 * pixelSize,
+                    ClientSize.Height / 2 - 6 * pixelSize
+                ),
+                new Vertex2i(12 * pixelSize, 12 * pixelSize)
+            );
+
+            hotbar = new Hotbar(
+                new Vertex2i(
+                    ClientSize.Width / 2 - 91 * pixelSize,
+                    ClientSize.Height - 21 * pixelSize
+                ),
+                pixelSize,
+                1, new Block[] { BlockRegistry.Stone, BlockRegistry.Grass, BlockRegistry.Dirt, null, null, null, null, null, null, null }
             );
         }
 
@@ -231,9 +259,12 @@ namespace Mycraft
             // Draw GUI
             Gl.UseProgram(Resources.GUIShader.glId);
             Gl.Disable(EnableCap.DepthTest);
+            Gl.Disable(EnableCap.CullFace);
 
             Resources.CrossTexture.Bind();
             cross.Draw();
+            
+            hotbar.Draw();
         }
 
         private void OnContextDestroyed(object sender, GlControlEventArgs e)
@@ -242,6 +273,7 @@ namespace Mycraft
             world.Dispose();
             origin.Dispose();
             selection.Dispose();
+            hotbar.Dispose();
         }
     }
 }

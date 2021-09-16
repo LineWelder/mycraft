@@ -11,6 +11,8 @@ namespace Mycraft.Utils
 
         public static Texture BlocksTexture { get; private set; }
         public static Texture CrossTexture { get; private set; }
+        public static Texture HotbarTexture { get; private set; }
+        public static Texture HotbarSelectorTexture { get; private set; }
 
         public static void LoadAll()
         {
@@ -20,6 +22,8 @@ namespace Mycraft.Utils
 
             BlocksTexture = new Texture(@"resources\textures\blocks.png");
             CrossTexture = new Texture(@"resources\textures\cross.png");
+            HotbarTexture = new Texture(@"resources\textures\hotbar.png");
+            HotbarSelectorTexture = new Texture(@"resources\textures\hotbar_selector.png");
 
             GC.Collect();
         }
@@ -29,7 +33,11 @@ namespace Mycraft.Utils
             WorldUIShader.Dispose();
             GUIShader.Dispose();
             GameWorldShader.Dispose();
+
             BlocksTexture.Dispose();
+            CrossTexture.Dispose();
+            HotbarTexture.Dispose();
+            HotbarSelectorTexture.Dispose();
         }
     }
 }
