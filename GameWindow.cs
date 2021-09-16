@@ -11,6 +11,7 @@ using System.Diagnostics;
 using Mycraft.Blocks;
 
 // TODO make good file not found handling
+// TODO check if there is a player when placing a block
 
 namespace Mycraft
 {
@@ -125,13 +126,16 @@ namespace Mycraft
                 }
                 else if (e.Button == MouseButtons.Right)
                 {
-                    Vertex3i placeBlockCoords = Block.GetNeighbour(selection.Position, selection.Side);
-                    world.SetBlock(
-                        placeBlockCoords.x,
-                        placeBlockCoords.y,
-                        placeBlockCoords.z,
-                        hotbar.SelectedBlock
-                    );
+                    if (!(hotbar.SelectedBlock is null))
+                    {
+                        Vertex3i placeBlockCoords = Block.GetNeighbour(selection.Position, selection.Side);
+                        world.SetBlock(
+                            placeBlockCoords.x,
+                            placeBlockCoords.y,
+                            placeBlockCoords.z,
+                            hotbar.SelectedBlock
+                        );
+                    }
                 }
             }
         }
@@ -176,8 +180,6 @@ namespace Mycraft
             selection = new Selection();
 
             Gl.LineWidth(2f);
-            Gl.Enable(EnableCap.CullFace);
-            Gl.Enable(EnableCap.Multisample);
 
             world = new GameWorld();
             world.GenerateSpawnArea();
@@ -245,6 +247,7 @@ namespace Mycraft
             // Draw the world
             Gl.UseProgram(Resources.GameWorldShader.glId);
             Gl.Enable(EnableCap.DepthTest);
+            Gl.Enable(EnableCap.CullFace);
             Resources.GameWorldShader.MVP = vp;
             world.Draw();
 
