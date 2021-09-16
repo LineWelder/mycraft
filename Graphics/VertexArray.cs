@@ -65,7 +65,7 @@ namespace Mycraft.Graphics
 
         public void Draw()
         {
-            Debug.Assert(verticesCount > 0, "The vertex array is empty");
+            if (verticesCount == 0) return;
 
             Gl.BindVertexArray(glId);
             Gl.DrawArrays(primitiveType, 0, verticesCount);
