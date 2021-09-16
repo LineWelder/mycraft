@@ -1,6 +1,5 @@
 ﻿using Mycraft.Blocks;
 using Mycraft.Graphics;
-using Mycraft.Utils;
 using OpenGL;
 using System;
 using System.Collections.Generic;
@@ -53,10 +52,10 @@ namespace Mycraft.Physics
                 float offset = size / 2f;
 
                 mesh.AddRange(new float[] {
-                    pos.x, pos.y, pos.z,  -offset,  offset,  texCoords.z, texCoords.w,
-                    pos.x, pos.y, pos.z,  -offset, -offset,  texCoords.z, texCoords.y,
-                    pos.x, pos.y, pos.z,   offset, -offset,  texCoords.x, texCoords.y,
-                    pos.x, pos.y, pos.z,   offset,  offset,  texCoords.x, texCoords.w
+                    pos.x, pos.y, pos.z,   offset, -offset,  texCoords.z, texCoords.w,
+                    pos.x, pos.y, pos.z,   offset,  offset,  texCoords.z, texCoords.y,
+                    pos.x, pos.y, pos.z,  -offset,  offset,  texCoords.x, texCoords.y,
+                    pos.x, pos.y, pos.z,  -offset, -offset,  texCoords.x, texCoords.w
                 });
             }
 
