@@ -6,7 +6,8 @@ namespace Mycraft.World
 {
     public class GameWorld : IDisposable
     {
-        private const int LOAD_DISTANCE = 4;
+        public const int LOAD_DISTANCE = 7;
+        public const int UNLOAD_DISTANCE = 9;
 
         private readonly Dictionary<(int x, int z), Chunk> chunks;
 
@@ -74,8 +75,8 @@ namespace Mycraft.World
 
             List<(int x, int z)> chunksToUnload = new List<(int x, int z)>();
             foreach (var coords in chunks.Keys)
-                if (Math.Abs(coords.x - playerChunkX) > LOAD_DISTANCE
-                 || Math.Abs(coords.z - playerChunkZ) > LOAD_DISTANCE)
+                if (Math.Abs(coords.x - playerChunkX) > UNLOAD_DISTANCE
+                 || Math.Abs(coords.z - playerChunkZ) > UNLOAD_DISTANCE)
                     chunksToUnload.Add(coords);
 
             foreach (var coords in chunksToUnload)

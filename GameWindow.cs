@@ -165,7 +165,10 @@ namespace Mycraft
         private void OnResized(object sender, EventArgs e)
         {
             Gl.Viewport(0, 0, ClientSize.Width, ClientSize.Height);
-            projection = Matrix4x4f.Perspective(70, (float)ClientSize.Width / ClientSize.Height, .01f, 100f);
+            projection = Matrix4x4f.Perspective(
+                70, (float)ClientSize.Width / ClientSize.Height,
+                .01f, GameWorld.LOAD_DISTANCE * Chunk.SIZE * 2f
+            );
 
             Gl.UseProgram(Resources.GUIShader.glId);
             Resources.GUIShader.Projection = Matrix4x4f.Ortho2D(0f, ClientSize.Width - 1, ClientSize.Height - 1, 0f);
