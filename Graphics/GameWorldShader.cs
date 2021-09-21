@@ -50,13 +50,8 @@ void main()
         public GameWorldShader()
             : base(VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
-            textureLocation = Gl.GetUniformLocation(glId, "tex");
-            if (textureLocation < 0)
-                throw new InvalidOperationException("tex variable not found");
-
-            mvpLocation = Gl.GetUniformLocation(glId, "mvp");
-            if (mvpLocation < 0)
-                throw new InvalidOperationException("mvp variable not found");
+            textureLocation = FindVariable("tex");
+            mvpLocation = FindVariable("mvp");
         }
     }
 }

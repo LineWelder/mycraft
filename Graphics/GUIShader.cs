@@ -49,13 +49,8 @@ void main()
         public GUIShader()
             : base(VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
-            textureLocation = Gl.GetUniformLocation(glId, "tex");
-            if (textureLocation < 0)
-                throw new InvalidOperationException("tex variable not found");
-
-            projectionLocation = Gl.GetUniformLocation(glId, "projection");
-            if (projectionLocation < 0)
-                throw new InvalidOperationException("projection variable not found");
+            textureLocation = FindVariable("tex");
+            projectionLocation = FindVariable("projection");
         }
     }
 }

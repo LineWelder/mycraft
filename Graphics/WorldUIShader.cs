@@ -46,17 +46,9 @@ void main()
         public WorldUIShader()
             : base(VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
-            colorLocation = Gl.GetUniformLocation(glId, "color");
-            if (colorLocation < 0)
-                throw new InvalidOperationException("color variable not found");
-
-            modelLocation = Gl.GetUniformLocation(glId, "model");
-            if (modelLocation < 0)
-                throw new InvalidOperationException("model variable not found");
-
-            vpLocation = Gl.GetUniformLocation(glId, "vp");
-            if (vpLocation < 0)
-                throw new InvalidOperationException("mp variable not found");
+            colorLocation = FindVariable("color");
+            modelLocation = FindVariable("model");
+            vpLocation = FindVariable("vp");
         }
     }
 }
