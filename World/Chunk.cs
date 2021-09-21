@@ -18,13 +18,14 @@ namespace Mycraft.World
         private readonly GameWorld world;
         private readonly int chunkX, chunkZ;
 
-        public Chunk(GameWorld world, int x, int z)
+        public Chunk(GameWorld world, int chunkX, int chunkZ)
             : base(PrimitiveType.Quads, new int[] { 3, 2, 1 })
         {
             blocks = new Block[SIZE, HEIGHT, SIZE];
+
             this.world = world;
-            chunkX = x;
-            chunkZ = z;
+            this.chunkX = chunkX;
+            this.chunkZ = chunkZ;
         }
 
         public new void Draw()

@@ -100,11 +100,11 @@ namespace Mycraft.World
                 return;
 
             Chunk newChunk = new Chunk(this, x, z);
+            chunks.Add((x, z), newChunk);
+
+            OnChunkUpdate(x, z);
             newChunk.Generate();
             newChunk.needsUpdate = true;
-
-            chunks.Add((x, z), newChunk);
-            OnChunkUpdate(x, z);
         }
 
         private void UnloadChunk(int x, int z)
