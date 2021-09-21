@@ -18,7 +18,7 @@ namespace Mycraft.World
         private readonly int chunkX, chunkZ;
 
         public Chunk(GameWorld world, int x, int z)
-            : base(PrimitiveType.Quads, new int[] { 3, 2 })
+            : base(PrimitiveType.Quads, new int[] { 3, 2, 1 })
         {
             blocks = new Block[SIZE, HEIGHT, SIZE];
             this.world = world;
@@ -87,10 +87,10 @@ namespace Mycraft.World
                         {
                             Vertex4f texCoords = Block.GetTextureCoords(block.GetTexture(BlockSide.Bottom));
                             mesh.AddRange(new float[] {
-                                wx,      wy,      wz + 1f,    texCoords.z, texCoords.w,
-                                wx,      wy,      wz,         texCoords.z, texCoords.y,
-                                wx + 1f, wy,      wz,         texCoords.x, texCoords.y,
-                                wx + 1f, wy,      wz + 1f,    texCoords.x, texCoords.w
+                                wx,      wy,      wz + 1f,    texCoords.z, texCoords.w, .7f,
+                                wx,      wy,      wz,         texCoords.z, texCoords.y, .7f,
+                                wx + 1f, wy,      wz,         texCoords.x, texCoords.y, .7f,
+                                wx + 1f, wy,      wz + 1f,    texCoords.x, texCoords.w, .7f
                             });
                         }
 
@@ -99,10 +99,10 @@ namespace Mycraft.World
                         {
                             Vertex4f texCoords = Block.GetTextureCoords(block.GetTexture(BlockSide.Top));
                             mesh.AddRange(new float[] {
-                                wx + 1f, wy + 1f, wz + 1f,    texCoords.z, texCoords.w,
-                                wx + 1f, wy + 1f, wz,         texCoords.z, texCoords.y,
-                                wx,      wy + 1f, wz,         texCoords.x, texCoords.y,
-                                wx,      wy + 1f, wz + 1f,    texCoords.x, texCoords.w
+                                wx + 1f, wy + 1f, wz + 1f,    texCoords.z, texCoords.w, 1f,
+                                wx + 1f, wy + 1f, wz,         texCoords.z, texCoords.y, 1f,
+                                wx,      wy + 1f, wz,         texCoords.x, texCoords.y, 1f,
+                                wx,      wy + 1f, wz + 1f,    texCoords.x, texCoords.w, 1f
                             });
                         }
 
@@ -111,10 +111,10 @@ namespace Mycraft.World
                         {
                             Vertex4f texCoords = Block.GetTextureCoords(block.GetTexture(BlockSide.Left));
                             mesh.AddRange(new float[] {
-                                wx,      wy,      wz + 1f,    texCoords.z, texCoords.w,
-                                wx,      wy + 1f, wz + 1f,    texCoords.z, texCoords.y,
-                                wx,      wy + 1f, wz,         texCoords.x, texCoords.y,
-                                wx,      wy,      wz,         texCoords.x, texCoords.w
+                                wx,      wy,      wz + 1f,    texCoords.z, texCoords.w, .8f,
+                                wx,      wy + 1f, wz + 1f,    texCoords.z, texCoords.y, .8f,
+                                wx,      wy + 1f, wz,         texCoords.x, texCoords.y, .8f,
+                                wx,      wy,      wz,         texCoords.x, texCoords.w, .8f
                             });
                         }
 
@@ -123,10 +123,10 @@ namespace Mycraft.World
                         {
                             Vertex4f texCoords = Block.GetTextureCoords(block.GetTexture(BlockSide.Right));
                             mesh.AddRange(new float[] {
-                                wx + 1f, wy,      wz,         texCoords.z, texCoords.w,
-                                wx + 1f, wy + 1f, wz,         texCoords.z, texCoords.y,
-                                wx + 1f, wy + 1f, wz + 1f,    texCoords.x, texCoords.y,
-                                wx + 1f, wy,      wz + 1f,    texCoords.x, texCoords.w
+                                wx + 1f, wy,      wz,         texCoords.z, texCoords.w, .8f,
+                                wx + 1f, wy + 1f, wz,         texCoords.z, texCoords.y, .8f,
+                                wx + 1f, wy + 1f, wz + 1f,    texCoords.x, texCoords.y, .8f,
+                                wx + 1f, wy,      wz + 1f,    texCoords.x, texCoords.w, .8f
                             });
                         }
 
@@ -135,10 +135,10 @@ namespace Mycraft.World
                         {
                             Vertex4f texCoords = Block.GetTextureCoords(block.GetTexture(BlockSide.Back));
                             mesh.AddRange(new float[] {
-                                wx,      wy,      wz,         texCoords.z, texCoords.w,
-                                wx,      wy + 1f, wz,         texCoords.z, texCoords.y,
-                                wx + 1f, wy + 1f, wz,         texCoords.x, texCoords.y,
-                                wx + 1f, wy,      wz,         texCoords.x, texCoords.w
+                                wx,      wy,      wz,         texCoords.z, texCoords.w, .7f,
+                                wx,      wy + 1f, wz,         texCoords.z, texCoords.y, .7f,
+                                wx + 1f, wy + 1f, wz,         texCoords.x, texCoords.y, .7f,
+                                wx + 1f, wy,      wz,         texCoords.x, texCoords.w, .7f
                             });
                         }
 
@@ -147,10 +147,10 @@ namespace Mycraft.World
                         {
                             Vertex4f texCoords = Block.GetTextureCoords(block.GetTexture(BlockSide.Front));
                             mesh.AddRange(new float[] {
-                                wx + 1f, wy,      wz + 1f,    texCoords.z, texCoords.w,
-                                wx + 1f, wy + 1f, wz + 1f,    texCoords.z, texCoords.y,
-                                wx,      wy + 1f, wz + 1f,    texCoords.x, texCoords.y,
-                                wx,      wy,      wz + 1f,    texCoords.x, texCoords.w
+                                wx + 1f, wy,      wz + 1f,    texCoords.z, texCoords.w, .9f,
+                                wx + 1f, wy + 1f, wz + 1f,    texCoords.z, texCoords.y, .9f,
+                                wx,      wy + 1f, wz + 1f,    texCoords.x, texCoords.y, .9f,
+                                wx,      wy,      wz + 1f,    texCoords.x, texCoords.w, .9f
                             });
                         }
                     }

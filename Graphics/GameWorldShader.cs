@@ -10,12 +10,15 @@ namespace Mycraft.Graphics
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec2 textureCoords;
+layout(location = 2) in float light;
 uniform mat4 mvp;
-out vec2 texCoords;
+out vec2 _textureCoords;
+out float _light;
 
 void main()
 {
-    texCoords = textureCoords;
+    _textureCoords = textureCoords;
+    _light = light;
     gl_Position = mvp * vec4(position, 1.0);
 }";
 
@@ -23,11 +26,12 @@ void main()
 @"#version 330 core
 
 uniform sampler2D tex;
-in vec2 texCoords;
+in vec2 _textureCoords;
+in float _light;
 
 void main()
 {
-    gl_FragColor = texture(tex, texCoords);
+    gl_FragColor = texture(tex, _textureCoords) * _light;
 }";
 
         public Matrix4x4f MVP
