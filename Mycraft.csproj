@@ -95,6 +95,7 @@
     <Compile Include="Physics\AABB.cs" />
     <Compile Include="Physics\FallingBox.cs" />
     <Compile Include="Physics\ParticleSystem.cs" />
+    <Compile Include="Utils\FastNoise.cs" />
     <Compile Include="WorldUI\Box.cs" />
     <Compile Include="WorldUI\Origin.cs" />
     <Compile Include="Graphics\WorldUIShader.cs" />

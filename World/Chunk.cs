@@ -2,6 +2,7 @@
 using Mycraft.Graphics;
 using Mycraft.Utils;
 using OpenGL;
+using System;
 using System.Collections.Generic;
 
 namespace Mycraft.World
@@ -34,17 +35,32 @@ namespace Mycraft.World
 
         public void Generate()
         {
+            FastNoiseLite noise = new FastNoiseLite();
+            noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
+
+            int offsetX = chunkX * SIZE;
+            int offsetZ = chunkZ * SIZE;
+
             for (int x = 0; x < SIZE; x++)
                 for (int z = 0; z < SIZE; z++)
+                {
+                    float NoiseLayer(float scale, float amplitude)
+                            => noise.GetNoise((x + offsetX) * scale, (z + offsetZ) * scale) * amplitude;
+
+                    int height = (int)Math.Round(
+                        19f + NoiseLayer(1f, 8f) + NoiseLayer(4f, 2f)
+                    );
+
                     for (int y = 0; y < HEIGHT; y++)
-                        if (y < 16)
+                        if (y < height - 3)
                             blocks[x, y, z] = BlockRegistry.Stone;
-                        else if(16 <= y && y < 19)
+                        else if (height - 3 <= y && y < height)
                             blocks[x, y, z] = BlockRegistry.Dirt;
-                        else if (y == 19)
+                        else if (y == height)
                             blocks[x, y, z] = BlockRegistry.Grass;
                         else
                             blocks[x, y, z] = BlockRegistry.Air;
+                }
         }
 
         private Block GetBlockExtended(int x, int y, int z)
