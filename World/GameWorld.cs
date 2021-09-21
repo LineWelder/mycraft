@@ -6,13 +6,13 @@ namespace Mycraft.World
 {
     public class GameWorld : IDisposable
     {
-        private const int SPAWN_AREA_RADIUS = 1;
+        private const int LOAD_DISTANCE = 4;
 
-        private readonly Dictionary<(int, int), Chunk> chunks;
+        private readonly Dictionary<(int x, int z), Chunk> chunks;
 
         public GameWorld()
         {
-            chunks = new Dictionary<(int, int), Chunk>();
+            chunks = new Dictionary<(int x, int z), Chunk>();
         }
 
         private (int chunk, int block) ToChunkCoord(int v)
@@ -58,30 +58,59 @@ namespace Mycraft.World
 
         public void GenerateSpawnArea()
         {
-            for (int x = -SPAWN_AREA_RADIUS; x <= SPAWN_AREA_RADIUS; x++)
-                for (int z = -SPAWN_AREA_RADIUS; z <= SPAWN_AREA_RADIUS; z++)
+            for (int x = -LOAD_DISTANCE; x <= LOAD_DISTANCE; x++)
+                for (int z = -LOAD_DISTANCE; z <= LOAD_DISTANCE; z++)
                     LoadChunk(x, z);
         }
 
-        public void Update()
+        public void Update(int playerX, int playerZ)
         {
-            foreach (var chunk in chunks.Values)
+            int playerChunkX = ToChunkCoord(playerX).chunk;
+            int playerChunkZ = ToChunkCoord(playerZ).chunk;
+
+            for (int x = playerChunkX - LOAD_DISTANCE; x <= playerChunkX + LOAD_DISTANCE; x++)
+                for (int z = playerChunkZ - LOAD_DISTANCE; z <= playerChunkZ + LOAD_DISTANCE; z++)
+                    LoadChunk(x, z);
+
+            List<(int x, int z)> chunksToUnload = new List<(int x, int z)>();
+            foreach (var coords in chunks.Keys)
+                if (Math.Abs(coords.x - playerChunkX) > LOAD_DISTANCE
+                 || Math.Abs(coords.z - playerChunkZ) > LOAD_DISTANCE)
+                    chunksToUnload.Add(coords);
+
+            foreach (var coords in chunksToUnload)
+                UnloadChunk(coords.x, coords.z);
+
+            foreach (Chunk chunk in chunks.Values)
                 chunk.UpToDateMesh();
         }
 
-        public void LoadChunk(int x, int z)
+        private void OnChunkUpdate(int x, int z)
         {
-            Chunk newChunk = new Chunk(this, x, z);
-            newChunk.Generate();
-            newChunk.needsUpdate = true;
-
             Chunk chunk;
             if (chunks.TryGetValue((x - 1, z), out chunk)) chunk.needsUpdate = true;
             if (chunks.TryGetValue((x + 1, z), out chunk)) chunk.needsUpdate = true;
             if (chunks.TryGetValue((x, z - 1), out chunk)) chunk.needsUpdate = true;
             if (chunks.TryGetValue((x, z + 1), out chunk)) chunk.needsUpdate = true;
+        }
+
+        private void LoadChunk(int x, int z)
+        {
+            if (chunks.ContainsKey((x, z)))
+                return;
+
+            Chunk newChunk = new Chunk(this, x, z);
+            newChunk.Generate();
+            newChunk.needsUpdate = true;
 
             chunks.Add((x, z), newChunk);
+            OnChunkUpdate(x, z);
+        }
+
+        private void UnloadChunk(int x, int z)
+        {
+            chunks.Remove((x, z));
+            OnChunkUpdate(x, z);
         }
 
         public void Draw()

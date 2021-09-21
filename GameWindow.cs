@@ -205,7 +205,7 @@ namespace Mycraft
 
             world = new GameWorld();
             world.GenerateSpawnArea();
-            world.Update();
+            world.Update(0, 0);
 
             playerBox = new FallingBox(world, new Vertex3f(.25f, 20f, .25f), new Vertex3f(.75f, 1.7f, .75f));
             camera = new Camera(new Vertex3f(.5f, 20.5f, 1.5f), new Vertex2f(0f, 0f));
@@ -217,7 +217,8 @@ namespace Mycraft
         {
             double deltaTime = stopwatch.Elapsed.TotalSeconds;
             stopwatch.Restart();
-            world.Update();
+
+            Text = $"Mycraft - UPS: {(int)Math.Floor(1d / deltaTime)}";
 
             int forwardInput    = FuncUtils.GetInput1d(Keys.W, Keys.S);
             int horizontalInput = FuncUtils.GetInput1d(Keys.D, Keys.A);
@@ -241,15 +242,20 @@ namespace Mycraft
                 playerBox.Velocity = velocity;
             }
             
-            // float speed = (float)(deltaTime * MOVEMENT_SPEED);
-            // camera.MoveRelativeToYaw(
-            //     speed * forwardInput,
-            //     speed * horizontalInput
-            // );
-            // camera.Translate(0f, FuncUtils.GetInput1d(Keys.Space, Keys.LShiftKey) * speed, 0f);
+            float speed = (float)(deltaTime * MOVEMENT_SPEED);
+            camera.MoveRelativeToYaw(
+                speed * forwardInput,
+                speed * horizontalInput
+            );
+            camera.Translate(0f, FuncUtils.GetInput1d(Keys.Space, Keys.LShiftKey) * speed, 0f);
             
-            camera.Position = playerBox.Position + new Vertex3f(.375f, 1.5f, .375f);
+            // camera.Position = playerBox.Position + new Vertex3f(.375f, 1.5f, .375f);
             camera.UpdateTransformMatrix();
+
+            world.Update(
+                (int)Math.Floor(camera.Position.x),
+                (int)Math.Floor(camera.Position.z)
+            );
 
             if (RayCasting.Raycast(world, camera.Position, camera.Forward, out Hit hit))
                 selection.Select(hit.blockCoords, hit.side);
