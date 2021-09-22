@@ -6,14 +6,22 @@ namespace Mycraft.World
 {
     public class GameWorld : IDisposable
     {
+        private struct BlockToBeSet
+        {
+            public int x, y, z;
+            public Block block;
+        }
+
         public const int LOAD_DISTANCE = 7;
         public const int UNLOAD_DISTANCE = 9;
 
         private readonly Dictionary<(int x, int z), Chunk> chunks;
+        private readonly Dictionary<(int chunkX, int chunkZ), List<BlockToBeSet>> toBeSet;
 
         public GameWorld()
         {
             chunks = new Dictionary<(int x, int z), Chunk>();
+            toBeSet = new Dictionary<(int chunkX, int chunkZ), List<BlockToBeSet>>();
         }
 
         private (int chunk, int block) ToChunkCoord(int v)
@@ -38,8 +46,10 @@ namespace Mycraft.World
             var (chunkX, blockX) = ToChunkCoord(x);
             var (chunkZ, blockZ) = ToChunkCoord(z);
 
-            if (y < Chunk.HEIGHT && y >= 0
-             && chunks.TryGetValue((chunkX, chunkZ), out Chunk chunk))
+            if (y >= Chunk.HEIGHT && y < 0)
+                return;
+
+            if (chunks.TryGetValue((chunkX, chunkZ), out Chunk chunk))
             {
                 chunk.blocks[blockX, y, blockZ] = block;
                 chunk.needsUpdate = true;
@@ -54,6 +64,19 @@ namespace Mycraft.World
                     neighbour.needsUpdate = true;
                 else if (blockZ == Chunk.SIZE - 1 && chunks.TryGetValue((chunkX, chunkZ + 1), out neighbour))
                     neighbour.needsUpdate = true;
+            }
+            else
+            {
+                if (!toBeSet.ContainsKey( (chunkX, chunkZ) ))
+                    toBeSet[(chunkX, chunkZ)] = new List<BlockToBeSet>();
+
+                toBeSet[(chunkX, chunkZ)].Add(new BlockToBeSet
+                {
+                    x = blockX,
+                    y = y,
+                    z = blockZ,
+                    block = block
+                });
             }
         }
 
@@ -102,10 +125,14 @@ namespace Mycraft.World
 
             Chunk newChunk = new Chunk(this, x, z);
             chunks.Add((x, z), newChunk);
-
-            OnChunkUpdate(x, z);
+            
             newChunk.Generate();
+            if (toBeSet.TryGetValue((x, z), out List<BlockToBeSet> blocks))
+                foreach (BlockToBeSet block in blocks)
+                    newChunk.blocks[block.x, block.y, block.z] = block.block;
+
             newChunk.needsUpdate = true;
+            OnChunkUpdate(x, z);
         }
 
         private void UnloadChunk(int x, int z)
