@@ -167,7 +167,7 @@ namespace Mycraft
             Gl.Viewport(0, 0, ClientSize.Width, ClientSize.Height);
             projection = Matrix4x4f.Perspective(
                 70, (float)ClientSize.Width / ClientSize.Height,
-                .01f, GameWorld.LOAD_DISTANCE * Chunk.SIZE * 2f
+                .01f, GameWorld.UNLOAD_DISTANCE * Chunk.SIZE * 2f 
             );
 
             Gl.UseProgram(Resources.GUIShader.glId);
