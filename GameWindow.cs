@@ -189,7 +189,15 @@ namespace Mycraft
                     ClientSize.Height - 21 * pixelSize
                 ),
                 pixelSize,
-                1, new Block[] { BlockRegistry.Stone, BlockRegistry.Grass, BlockRegistry.Dirt, null, null, null, null, null, null, null }
+                1, new Block[]
+                {
+                    BlockRegistry.Stone,
+                    BlockRegistry.Grass,
+                    BlockRegistry.Dirt,
+                    BlockRegistry.Log,
+                    BlockRegistry.Leaves,
+                    null, null, null, null, null
+                }
             );
         }
 
@@ -205,6 +213,7 @@ namespace Mycraft
             selection = new Selection();
 
             Gl.LineWidth(2f);
+            Gl.Enable(EnableCap.Multisample);
 
             world = new GameWorld();
             world.GenerateSpawnArea();
