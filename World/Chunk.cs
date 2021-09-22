@@ -56,7 +56,7 @@ namespace Mycraft.World
             for (int dx = -2; dx <= 2; dx++)
                 for (int dz = -2; dz <= 2; dz++)
                     for (int dy = 4; dy <= 5; dy++)
-                        if (dx != 0 || dy != 0)
+                        if (dx != 0 || dz != 0)
                             SetBlockExtended(x + dx, y + dy, z + dz, BlockRegistry.Leaves);
 
             for (int dx = -1; dx <= 1; dx++)
