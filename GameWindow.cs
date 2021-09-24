@@ -192,14 +192,15 @@ namespace Mycraft
                     ClientSize.Height - 21 * pixelSize
                 ),
                 pixelSize,
-                1, new Block[]
+                0, new Block[]
                 {
                     BlockRegistry.Stone,
                     BlockRegistry.Grass,
                     BlockRegistry.Dirt,
                     BlockRegistry.Log,
                     BlockRegistry.Leaves,
-                    null, null, null, null, null
+                    BlockRegistry.Water,
+                    null, null, null, null
                 }
             );
         }
