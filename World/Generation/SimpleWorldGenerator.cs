@@ -6,6 +6,8 @@ namespace Mycraft.World.Generation
 {
     public class SimpleWorldGenerator : IWorldGenerator
     {
+        private const int WATER_LEVEL = 18;
+
         private GameWorld world;
         private Chunk chunk;
 
@@ -69,7 +71,12 @@ namespace Mycraft.World.Generation
                         else if (height - 3 <= y && y < height)
                             chunk.blocks[x, y, z] = BlockRegistry.Dirt;
                         else if (y == height)
-                            chunk.blocks[x, y, z] = BlockRegistry.Grass;
+                            if (height < WATER_LEVEL)
+                                chunk.blocks[x, y, z] = BlockRegistry.Dirt;
+                            else
+                                chunk.blocks[x, y, z] = BlockRegistry.Grass;
+                        else if (y <= WATER_LEVEL)
+                            chunk.blocks[x, y, z] = BlockRegistry.Water;
                         else
                             chunk.blocks[x, y, z] = BlockRegistry.Air;
 
@@ -79,7 +86,7 @@ namespace Mycraft.World.Generation
             Random random = new Random(((short)offsetZ << 16) + offsetX);
             for (int x = 0; x < Chunk.SIZE; x++)
                 for (int z = 0; z < Chunk.SIZE; z++)
-                    if (random.Next(100) < 1)
+                    if (chunk.groundLevel[x, z] >= WATER_LEVEL && random.Next(100) < 1)
                         GenerateTree(x, z);
         }
     }

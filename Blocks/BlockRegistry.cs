@@ -9,5 +9,6 @@
         public static readonly Block Grass = new MultiTexturedBlock(1, 2, 3);
         public static readonly Block Log = new MultiTexturedBlock(4, 5, 4);
         public static readonly Block Leaves = new Block(6);
+        public static readonly Block Water = new LiquidBlock(7);
     }
 }
