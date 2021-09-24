@@ -1,4 +1,5 @@
 ﻿using Mycraft.Blocks;
+using Mycraft.World.Generation;
 using System;
 using System.Collections.Generic;
 
@@ -17,11 +18,13 @@ namespace Mycraft.World
 
         private readonly Dictionary<(int x, int z), Chunk> chunks;
         private readonly Dictionary<(int chunkX, int chunkZ), List<BlockToBeSet>> toBeSet;
+        private readonly IWorldGenerator generator;
 
-        public GameWorld()
+        public GameWorld(IWorldGenerator generator)
         {
             chunks = new Dictionary<(int x, int z), Chunk>();
             toBeSet = new Dictionary<(int chunkX, int chunkZ), List<BlockToBeSet>>();
+            this.generator = generator;
         }
 
         private (int chunk, int block) ToChunkCoord(int v)
@@ -125,8 +128,8 @@ namespace Mycraft.World
 
             Chunk newChunk = new Chunk(this, x, z);
             chunks.Add((x, z), newChunk);
-            
-            newChunk.Generate();
+
+            generator.GenerateChunk(this, newChunk);
             if (toBeSet.TryGetValue((x, z), out List<BlockToBeSet> blocks))
                 foreach (BlockToBeSet block in blocks)
                     newChunk.blocks[block.x, block.y, block.z] = block.block;

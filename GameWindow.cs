@@ -9,6 +9,7 @@ using Mycraft.GUI;
 using Mycraft.Physics;
 using System.Diagnostics;
 using Mycraft.Blocks;
+using Mycraft.World.Generation;
 
 // TODO make good file not found handling
 // TODO check if there is a player when placing a block
@@ -217,7 +218,7 @@ namespace Mycraft
             Gl.LineWidth(2f);
             Gl.Enable(EnableCap.Multisample);
 
-            world = new GameWorld();
+            world = new GameWorld(new SimpleWorldGenerator());
             world.GenerateSpawnArea();
             world.Update(0, 0);
 

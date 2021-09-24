@@ -1,0 +1,85 @@
+﻿using Mycraft.Blocks;
+using Mycraft.Utils;
+using System;
+
+namespace Mycraft.World.Generation
+{
+    public class SimpleWorldGenerator : IWorldGenerator
+    {
+        private GameWorld world;
+        private Chunk chunk;
+
+        private void SetBlockExtended(int x, int y, int z, Block block)
+        {
+            if (y < 0 || y >= Chunk.HEIGHT)
+                return;
+
+            if (x >= 0 && x < Chunk.SIZE
+             && z >= 0 && z < Chunk.SIZE)
+                chunk.blocks[x, y, z] = block;
+            else
+                world.SetBlock(chunk.chunkX * Chunk.SIZE + x, y, chunk.chunkZ * Chunk.SIZE + z, block);
+        }
+
+        private void GenerateTree(int x, int y, int z)
+        {
+            chunk.blocks[x, y, z] = BlockRegistry.Dirt;
+
+            for (int dy = 1; dy <= 5; dy++)
+                chunk.blocks[x, y + dy, z] = BlockRegistry.Log;
+
+            for (int dx = -2; dx <= 2; dx++)
+                for (int dz = -2; dz <= 2; dz++)
+                    for (int dy = 4; dy <= 5; dy++)
+                        if (dx != 0 || dz != 0)
+                            SetBlockExtended(x + dx, y + dy, z + dz, BlockRegistry.Leaves);
+
+            for (int dx = -1; dx <= 1; dx++)
+                for (int dz = -1; dz <= 1; dz++)
+                    for (int dy = 6; dy <= 7; dy++)
+                        SetBlockExtended(x + dx, y + dy, z + dz, BlockRegistry.Leaves);
+        }
+
+        public void GenerateChunk(GameWorld world, Chunk chunk)
+        {
+            this.world = world;
+            this.chunk = chunk;
+
+            FastNoiseLite noise = new FastNoiseLite();
+            noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
+
+            int offsetX = chunk.chunkX * Chunk.SIZE;
+            int offsetZ = chunk.chunkZ * Chunk.SIZE;
+            int[,] groundLevel = new int[Chunk.SIZE, Chunk.SIZE];
+
+            for (int x = 0; x < Chunk.SIZE; x++)
+                for (int z = 0; z < Chunk.SIZE; z++)
+                {
+                    float NoiseLayer(float scale, float amplitude)
+                        => noise.GetNoise((x + offsetX) * scale, (z + offsetZ) * scale) * amplitude;
+
+                    int height = (int)Math.Round(
+                        19f + NoiseLayer(1f, 8f) + NoiseLayer(4f, 2f)
+                    );
+
+                    for (int y = 0; y < Chunk.HEIGHT; y++)
+                        if (y < height - 3)
+                            chunk.blocks[x, y, z] = BlockRegistry.Stone;
+                        else if (height - 3 <= y && y < height)
+                            chunk.blocks[x, y, z] = BlockRegistry.Dirt;
+                        else if (y == height)
+                            chunk.blocks[x, y, z] = BlockRegistry.Grass;
+                        else
+                            chunk.blocks[x, y, z] = BlockRegistry.Air;
+
+                    groundLevel[x, z] = height;
+                }
+
+            Random random = new Random(((short)offsetZ << 16) + offsetX);
+            for (int x = 0; x < Chunk.SIZE; x++)
+                for (int z = 0; z < Chunk.SIZE; z++)
+                    if (random.Next(100) < 1)
+                        GenerateTree(x, groundLevel[x, z], z);
+        }
+    }
+}

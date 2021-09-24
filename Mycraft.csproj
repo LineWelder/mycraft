@@ -112,6 +112,8 @@
     <Compile Include="World\Chunk.cs" />
     <Compile Include="World\GameWorld.cs" />
     <Compile Include="WorldUI\Selection.cs" />
+    <Compile Include="World\Generation\IWorldGenerator.cs" />
+    <Compile Include="World\Generation\SimpleWorldGenerator.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
