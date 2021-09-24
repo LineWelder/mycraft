@@ -20,7 +20,7 @@ namespace Mycraft.World.Generation
              && z >= 0 && z < Chunk.SIZE)
                 chunk.blocks[x, y, z] = block;
             else
-                world.SetBlock(chunk.chunkX * Chunk.SIZE + x, y, chunk.chunkZ * Chunk.SIZE + z, block);
+                world.SetBlock(chunk.xOffset + x, y, chunk.zOffset + z, block);
         }
 
         private void GenerateTree(int x, int z)
@@ -52,14 +52,14 @@ namespace Mycraft.World.Generation
             FastNoiseLite noise = new FastNoiseLite();
             noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
 
-            int offsetX = chunk.chunkX * Chunk.SIZE;
-            int offsetZ = chunk.chunkZ * Chunk.SIZE;
-
             for (int x = 0; x < Chunk.SIZE; x++)
                 for (int z = 0; z < Chunk.SIZE; z++)
                 {
                     float NoiseLayer(float scale, float amplitude)
-                        => noise.GetNoise((x + offsetX) * scale, (z + offsetZ) * scale) * amplitude;
+                        => noise.GetNoise(
+                            (x + chunk.xOffset) * scale,
+                            (z + chunk.zOffset) * scale
+                        ) * amplitude;
 
                     int height = (int)Math.Round(
                         19f + NoiseLayer(1f, 8f) + NoiseLayer(4f, 2f)
@@ -83,7 +83,7 @@ namespace Mycraft.World.Generation
                     chunk.groundLevel[x, z] = height;
                 }
 
-            Random random = new Random(((short)offsetZ << 16) + offsetX);
+            Random random = new Random(((short)chunk.zOffset << 16) + chunk.xOffset);
             for (int x = 0; x < Chunk.SIZE; x++)
                 for (int z = 0; z < Chunk.SIZE; z++)
                     if (chunk.groundLevel[x, z] >= WATER_LEVEL && random.Next(100) < 1)
