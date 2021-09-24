@@ -47,7 +47,7 @@ namespace Mycraft.GUI
             blockViews = new BlockView[10];
             for (int i = 0; i < CAPACITY; i++)
                 if (!(blocks[i] is null))
-                    this.blockViews[i] = new BlockView(
+                    blockViews[i] = new BlockView(
                         position + new Vertex2i((int)((3.5 + 18 * i) * scale), 3 * scale),
                         new Vertex2i(13 * scale, 14 * scale),
                         blocks[i]
