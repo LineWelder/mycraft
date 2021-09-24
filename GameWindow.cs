@@ -222,7 +222,11 @@ namespace Mycraft
             world.GenerateSpawnArea();
             world.Update(0, 0);
 
-            playerBox = new FallingBox(world, new Vertex3f(.25f, 20f, .25f), new Vertex3f(.75f, 1.7f, .75f));
+            playerBox = new FallingBox(
+                world,
+                new Vertex3f(.25f, world.GetGroundLevel(0, 0) + 1f, .25f),
+                new Vertex3f(.75f, 1.7f, .75f)
+            );
             camera = new Camera(new Vertex3f(.5f, 20.5f, 1.5f), new Vertex2f(0f, 0f));
 
             particles = new ParticleSystem(world, .2f, .5d);
@@ -257,14 +261,14 @@ namespace Mycraft
                 playerBox.Velocity = velocity;
             }
             
-            float speed = (float)(deltaTime * MOVEMENT_SPEED);
-            camera.MoveRelativeToYaw(
-                speed * forwardInput,
-                speed * horizontalInput
-            );
-            camera.Translate(0f, FuncUtils.GetInput1d(Keys.Space, Keys.LShiftKey) * speed, 0f);
+            // float speed = (float)(deltaTime * MOVEMENT_SPEED);
+            // camera.MoveRelativeToYaw(
+            //     speed * forwardInput,
+            //     speed * horizontalInput
+            // );
+            // camera.Translate(0f, FuncUtils.GetInput1d(Keys.Space, Keys.LShiftKey) * speed, 0f);
             
-            // camera.Position = playerBox.Position + new Vertex3f(.375f, 1.5f, .375f);
+            camera.Position = playerBox.Position + new Vertex3f(.375f, 1.5f, .375f);
             camera.UpdateTransformMatrix();
 
             world.Update(
