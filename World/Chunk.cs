@@ -15,7 +15,7 @@ namespace Mycraft.World
         public readonly Block[,,] blocks;
         public readonly int[,] groundLevel;
 
-        private readonly GameWorld world;
+        public readonly GameWorld world;
         public readonly int xOffset, zOffset;
 
         public Chunk(GameWorld world, int x, int z)
@@ -47,7 +47,7 @@ namespace Mycraft.World
                     for (int cy = 0; cy < HEIGHT; cy++)
                     {
                         Block block = blocks[cx, cy, cz];
-                        block.EmitVertices(mesh, world, this, cx, cy, cz);
+                        block.EmitVertices(mesh, this, cx, cy, cz);
                     }
 
             Data = mesh.ToArray();

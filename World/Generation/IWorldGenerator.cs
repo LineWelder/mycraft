@@ -2,6 +2,6 @@
 {
     public interface IWorldGenerator
     {
-        void GenerateChunk(GameWorld world, Chunk chunk);
+        void GenerateChunk(Chunk chunk);
     }
 }

@@ -8,7 +8,6 @@ namespace Mycraft.World.Generation
     {
         private const int WATER_LEVEL = 18;
 
-        private GameWorld world;
         private Chunk chunk;
 
         private void SetBlockExtended(int x, int y, int z, Block block)
@@ -20,7 +19,7 @@ namespace Mycraft.World.Generation
              && z >= 0 && z < Chunk.SIZE)
                 chunk.blocks[x, y, z] = block;
             else
-                world.SetBlock(chunk.xOffset + x, y, chunk.zOffset + z, block);
+                chunk.world.SetBlock(chunk.xOffset + x, y, chunk.zOffset + z, block);
         }
 
         private void GenerateTree(int x, int z)
@@ -44,9 +43,8 @@ namespace Mycraft.World.Generation
                         SetBlockExtended(x + dx, y + dy, z + dz, BlockRegistry.Leaves);
         }
 
-        public void GenerateChunk(GameWorld world, Chunk chunk)
+        public void GenerateChunk(Chunk chunk)
         {
-            this.world = world;
             this.chunk = chunk;
 
             FastNoiseLite noise = new FastNoiseLite();

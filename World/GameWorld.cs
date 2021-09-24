@@ -140,7 +140,7 @@ namespace Mycraft.World
             Chunk newChunk = new Chunk(this, x, z);
             chunks.Add((x, z), newChunk);
 
-            generator.GenerateChunk(this, newChunk);
+            generator.GenerateChunk(newChunk);
             if (toBeSet.TryGetValue((x, z), out List<BlockToBeSet> blocks))
                 foreach (BlockToBeSet block in blocks)
                     newChunk.blocks[block.x, block.y, block.z] = block.block;
