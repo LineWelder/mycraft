@@ -13,6 +13,7 @@ using Mycraft.World.Generation;
 
 // TODO make good file not found handling
 // TODO check if there is a player when placing a block
+// TODO make pretty methods for creating planes for mesh generation
 
 namespace Mycraft
 {
