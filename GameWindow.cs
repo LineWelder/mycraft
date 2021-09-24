@@ -42,7 +42,7 @@ namespace Mycraft
             Name = "GameWindow";
             Text = "Mycraft";
             KeyPreview = true;
-            ClientSize = new Size(1920, 1080);
+            WindowState = FormWindowState.Maximized;
 
             glControl = new GlControl
             {
