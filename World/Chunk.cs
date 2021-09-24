@@ -13,6 +13,7 @@ namespace Mycraft.World
 
         public bool needsUpdate;
         public readonly Block[,,] blocks;
+        public readonly int[,] groundLevel;
 
         private readonly GameWorld world;
         public readonly int chunkX, chunkZ;
@@ -21,6 +22,7 @@ namespace Mycraft.World
             : base(PrimitiveType.Quads, new int[] { 3, 2, 1 })
         {
             blocks = new Block[SIZE, HEIGHT, SIZE];
+            groundLevel = new int[SIZE, SIZE];
 
             this.world = world;
             this.chunkX = chunkX;

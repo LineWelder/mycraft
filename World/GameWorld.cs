@@ -83,6 +83,17 @@ namespace Mycraft.World
             }
         }
 
+        public int GetGroundLevel(int x, int z)
+        {
+            var (chunkX, blockX) = ToChunkCoord(x);
+            var (chunkZ, blockZ) = ToChunkCoord(z);
+
+            if (!chunks.TryGetValue((chunkX, chunkZ), out Chunk chunk))
+                return -1;
+
+            return chunk.groundLevel[blockX, blockZ];
+        }
+
         public void GenerateSpawnArea()
         {
             for (int x = -LOAD_DISTANCE; x <= LOAD_DISTANCE; x++)

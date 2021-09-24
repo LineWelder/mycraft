@@ -21,8 +21,10 @@ namespace Mycraft.World.Generation
                 world.SetBlock(chunk.chunkX * Chunk.SIZE + x, y, chunk.chunkZ * Chunk.SIZE + z, block);
         }
 
-        private void GenerateTree(int x, int y, int z)
+        private void GenerateTree(int x, int z)
         {
+            int y = chunk.groundLevel[x, z];
+
             chunk.blocks[x, y, z] = BlockRegistry.Dirt;
 
             for (int dy = 1; dy <= 5; dy++)
@@ -50,7 +52,6 @@ namespace Mycraft.World.Generation
 
             int offsetX = chunk.chunkX * Chunk.SIZE;
             int offsetZ = chunk.chunkZ * Chunk.SIZE;
-            int[,] groundLevel = new int[Chunk.SIZE, Chunk.SIZE];
 
             for (int x = 0; x < Chunk.SIZE; x++)
                 for (int z = 0; z < Chunk.SIZE; z++)
@@ -72,14 +73,14 @@ namespace Mycraft.World.Generation
                         else
                             chunk.blocks[x, y, z] = BlockRegistry.Air;
 
-                    groundLevel[x, z] = height;
+                    chunk.groundLevel[x, z] = height;
                 }
 
             Random random = new Random(((short)offsetZ << 16) + offsetX);
             for (int x = 0; x < Chunk.SIZE; x++)
                 for (int z = 0; z < Chunk.SIZE; z++)
                     if (random.Next(100) < 1)
-                        GenerateTree(x, groundLevel[x, z], z);
+                        GenerateTree(x, z);
         }
     }
 }
