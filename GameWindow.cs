@@ -250,7 +250,7 @@ namespace Mycraft
             if (playerBox.IsGrounded && FuncUtils.IsKeyPressed(Keys.Space))
             {
                 Vertex3f velocity = playerBox.Velocity;
-                velocity.y = 8f;
+                velocity.y = 6f;
                 playerBox.Velocity = velocity;
             }
 
