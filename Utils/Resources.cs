@@ -5,6 +5,8 @@ namespace Mycraft.Utils
 {
     public static class Resources
     {
+        public static bool AreLoaded { get; private set; }
+
         public static WorldUIShader WorldUIShader { get; private set; }
         public static GUIShader GUIShader { get; private set; }
         public static GameWorldShader GameWorldShader { get; private set; }
@@ -17,6 +19,9 @@ namespace Mycraft.Utils
 
         public static void LoadAll()
         {
+            if (AreLoaded) return;
+            AreLoaded = true;
+
             WorldUIShader = new WorldUIShader();
             GUIShader = new GUIShader();
             GameWorldShader = new GameWorldShader();

@@ -164,6 +164,8 @@ namespace Mycraft
            
         private void OnResized(object sender, EventArgs e)
         {
+            if (!Resources.AreLoaded) return;
+
             Gl.Viewport(0, 0, ClientSize.Width, ClientSize.Height);
             projection = Matrix4x4f.Perspective(
                 70, (float)ClientSize.Width / ClientSize.Height,
