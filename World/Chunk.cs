@@ -47,6 +47,10 @@ namespace Mycraft.World
             return world.GetBlock(chunkX * SIZE + x, y, chunkZ * SIZE + z);
         }
 
+        private bool HasFace(Block block, Block neighbour)
+            => !block.IsTransparent && neighbour.IsTransparent
+            || block.IsTransparent && !neighbour.IsVisible;
+
         public void UpToDateMesh()
         {
             if (!needsUpdate) return;
@@ -71,7 +75,7 @@ namespace Mycraft.World
                         float wy = cy;
 
                         // Bottom
-                        if (GetBlockExtended(cx, cy - 1, cz).IsTransparent)
+                        if (HasFace(block, GetBlockExtended(cx, cy - 1, cz)))
                         {
                             Vertex4f texCoords = Block.GetTextureCoords(block.GetTexture(BlockSide.Bottom));
                             mesh.AddRange(new float[] {
@@ -83,7 +87,7 @@ namespace Mycraft.World
                         }
 
                         // Top
-                        if (GetBlockExtended(cx, cy + 1, cz).IsTransparent)
+                        if (HasFace(block, GetBlockExtended(cx, cy + 1, cz)))
                         {
                             Vertex4f texCoords = Block.GetTextureCoords(block.GetTexture(BlockSide.Top));
                             mesh.AddRange(new float[] {
@@ -95,7 +99,7 @@ namespace Mycraft.World
                         }
 
                         // Left
-                        if (GetBlockExtended(cx - 1, cy, cz).IsTransparent)
+                        if (HasFace(block, GetBlockExtended(cx - 1, cy, cz)))
                         {
                             Vertex4f texCoords = Block.GetTextureCoords(block.GetTexture(BlockSide.Left));
                             mesh.AddRange(new float[] {
@@ -107,7 +111,7 @@ namespace Mycraft.World
                         }
 
                         // Right
-                        if (GetBlockExtended(cx + 1, cy, cz).IsTransparent)
+                        if (HasFace(block, GetBlockExtended(cx + 1, cy, cz)))
                         {
                             Vertex4f texCoords = Block.GetTextureCoords(block.GetTexture(BlockSide.Right));
                             mesh.AddRange(new float[] {
@@ -119,7 +123,7 @@ namespace Mycraft.World
                         }
 
                         // Back
-                        if (GetBlockExtended(cx, cy, cz - 1).IsTransparent)
+                        if (HasFace(block, GetBlockExtended(cx, cy, cz - 1)))
                         {
                             Vertex4f texCoords = Block.GetTextureCoords(block.GetTexture(BlockSide.Back));
                             mesh.AddRange(new float[] {
@@ -131,7 +135,7 @@ namespace Mycraft.World
                         }
 
                         // Front
-                        if (GetBlockExtended(cx, cy, cz + 1).IsTransparent)
+                        if (HasFace(block, GetBlockExtended(cx, cy, cz + 1)))
                         {
                             Vertex4f texCoords = Block.GetTextureCoords(block.GetTexture(BlockSide.Front));
                             mesh.AddRange(new float[] {
