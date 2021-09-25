@@ -13,14 +13,14 @@ namespace Mycraft.Blocks
         public LiquidBlock(int textureId)
             : base(textureId) { }
 
-        public override void EmitVertices(List<float> mesh, Chunk chunk, int x, int y, int z)
+        public override void EmitMesh(List<Quad> mesh, Chunk chunk, int x, int y, int z)
         {
             const float HEIGHT = 15f / 16f;
 
             Block topNeighbour = GetChunkBlock(chunk, x, y + 1, z);
             if (topNeighbour is LiquidBlock)
             {
-                base.EmitVertices(mesh, chunk, x, y, z);
+                base.EmitMesh(mesh, chunk, x, y, z);
                 return;
             }
 
@@ -30,74 +30,70 @@ namespace Mycraft.Blocks
 
             // Top
             {
-                Vertex4f texCoords = GetTextureCoords(GetTexture(BlockSide.Top));
-                mesh.AddRange(new float[] {
-                    wx + 1f, wy + HEIGHT, wz + 1f,    texCoords.z, texCoords.w, 1f,
-                    wx + 1f, wy + HEIGHT, wz,         texCoords.z, texCoords.y, 1f,
-                    wx,      wy + HEIGHT, wz,         texCoords.x, texCoords.y, 1f,
-                    wx,      wy + HEIGHT, wz + 1f,    texCoords.x, texCoords.w, 1f
-                });
+                mesh.Add(new Quad(
+                    new Vertex3f(wx + 1f, wy + HEIGHT, wz + 1f),
+                    new Vertex3f(wx + 1f, wy + HEIGHT, wz),
+                    new Vertex3f(wx,      wy + HEIGHT, wz),
+                    new Vertex3f(wx,      wy + HEIGHT, wz + 1f),
+                    GetTextureCoords(GetTexture(BlockSide.Top)),
+                    1f
+                ));
             }
 
             // Bottom
             if (HasFace(GetChunkBlock(chunk, x, y - 1, z)))
-            {
-                Vertex4f texCoords = GetTextureCoords(GetTexture(BlockSide.Bottom));
-                mesh.AddRange(new float[] {
-                    wx,      wy,          wz + 1f,    texCoords.z, texCoords.w, .7f,
-                    wx,      wy,          wz,         texCoords.z, texCoords.y, .7f,
-                    wx + 1f, wy,          wz,         texCoords.x, texCoords.y, .7f,
-                    wx + 1f, wy,          wz + 1f,    texCoords.x, texCoords.w, .7f
-                });
-            }
+                mesh.Add(new Quad(
+                    new Vertex3f(wx,      wy,          wz + 1f),
+                    new Vertex3f(wx,      wy,          wz),
+                    new Vertex3f(wx + 1f, wy,          wz),
+                    new Vertex3f(wx + 1f, wy,          wz + 1f),
+                    GetTextureCoords(GetTexture(BlockSide.Bottom)),
+                    .7f
+                ));
 
             // Left
             if (HasFace(GetChunkBlock(chunk, x - 1, y, z)))
-            {
-                Vertex4f texCoords = GetTextureCoords(GetTexture(BlockSide.Left));
-                mesh.AddRange(new float[] {
-                    wx,      wy,          wz + 1f,    texCoords.z, texCoords.w, .8f,
-                    wx,      wy + HEIGHT, wz + 1f,    texCoords.z, texCoords.y, .8f,
-                    wx,      wy + HEIGHT, wz,         texCoords.x, texCoords.y, .8f,
-                    wx,      wy,          wz,         texCoords.x, texCoords.w, .8f
-                });
-            }
+                mesh.Add(new Quad(
+                    new Vertex3f(wx,      wy,          wz + 1f),
+                    new Vertex3f(wx,      wy + HEIGHT, wz + 1f),
+                    new Vertex3f(wx,      wy + HEIGHT, wz),
+                    new Vertex3f(wx,      wy,          wz),
+                    GetTextureCoords(GetTexture(BlockSide.Left)),
+                    .8f
+                ));
 
             // Right
             if (HasFace(GetChunkBlock(chunk, x + 1, y, z)))
-            {
-                Vertex4f texCoords = GetTextureCoords(GetTexture(BlockSide.Right));
-                mesh.AddRange(new float[] {
-                    wx + 1f, wy,          wz,         texCoords.z, texCoords.w, .8f,
-                    wx + 1f, wy + HEIGHT, wz,         texCoords.z, texCoords.y, .8f,
-                    wx + 1f, wy + HEIGHT, wz + 1f,    texCoords.x, texCoords.y, .8f,
-                    wx + 1f, wy,          wz + 1f,    texCoords.x, texCoords.w, .8f
-                });
-            }
+                mesh.Add(new Quad(
+                    new Vertex3f(wx + 1f, wy,          wz),
+                    new Vertex3f(wx + 1f, wy + HEIGHT, wz),
+                    new Vertex3f(wx + 1f, wy + HEIGHT, wz + 1f),
+                    new Vertex3f(wx + 1f, wy,          wz + 1f),
+                    GetTextureCoords(GetTexture(BlockSide.Right)),
+                    .8f
+                ));
 
             // Back
             if (HasFace(GetChunkBlock(chunk, x, y, z - 1)))
-            {
-                Vertex4f texCoords = GetTextureCoords(GetTexture(BlockSide.Back));
-                mesh.AddRange(new float[] {
-                    wx,      wy,          wz,         texCoords.z, texCoords.w, .7f,
-                    wx,      wy + HEIGHT, wz,         texCoords.z, texCoords.y, .7f,
-                    wx + 1f, wy + HEIGHT, wz,         texCoords.x, texCoords.y, .7f,
-                    wx + 1f, wy,          wz,         texCoords.x, texCoords.w, .7f
-                });
-            }
+                mesh.Add(new Quad(
+                    new Vertex3f(wx,      wy,          wz),
+                    new Vertex3f(wx,      wy + HEIGHT, wz),
+                    new Vertex3f(wx + 1f, wy + HEIGHT, wz),
+                    new Vertex3f(wx + 1f, wy,          wz),
+                    GetTextureCoords(GetTexture(BlockSide.Back)),
+                    .7f
+                ));
 
             // Front
             if (HasFace(GetChunkBlock(chunk, x, y, z + 1)))
-            {
-                Vertex4f texCoords = GetTextureCoords(GetTexture(BlockSide.Front));
-                mesh.AddRange(new float[] {
-                    wx + 1f, wy,          wz + 1f,    texCoords.z, texCoords.w, .9f,
-                    wx + 1f, wy + HEIGHT, wz + 1f,    texCoords.z, texCoords.y, .9f,
-                    wx,      wy + HEIGHT, wz + 1f,    texCoords.x, texCoords.y, .9f,
-                    wx,      wy,          wz + 1f,    texCoords.x, texCoords.w, .9f
-                });
-            }
+                mesh.Add(new Quad(
+                    new Vertex3f(wx + 1f, wy,          wz + 1f),
+                    new Vertex3f(wx + 1f, wy + HEIGHT, wz + 1f),
+                    new Vertex3f(wx,      wy + HEIGHT, wz + 1f),
+                    new Vertex3f(wx,      wy,          wz + 1f),
+                    GetTextureCoords(GetTexture(BlockSide.Front)),
+                    .9f
+                ));
         }
     }
 }

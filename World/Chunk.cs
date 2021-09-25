@@ -4,6 +4,7 @@ using Mycraft.Utils;
 using OpenGL;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Mycraft.World
 {
@@ -54,13 +55,41 @@ namespace Mycraft.World
             Gl.Disable(EnableCap.Blend);
         }
 
+        private float[] ToFloatArray(List<Quad> quads)
+        {
+            const int QUAD_SIZE = 6 * 4;
+
+            float[] array = new float[quads.Count * QUAD_SIZE];
+            void SaveVertex(int i, Vertex vertex)
+            {
+                array[i]     = vertex.position.x;
+                array[i + 1] = vertex.position.y;
+                array[i + 2] = vertex.position.z;
+                array[i + 3] = vertex.texture.x;
+                array[i + 4] = vertex.texture.y;
+                array[i + 5] = vertex.light;
+            }
+
+            for (int i = 0; i < quads.Count; i++)
+            {
+                Quad quad = quads[i];
+
+                SaveVertex(i * QUAD_SIZE,      quad.a);
+                SaveVertex(i * QUAD_SIZE + 6,  quad.b);
+                SaveVertex(i * QUAD_SIZE + 12, quad.c);
+                SaveVertex(i * QUAD_SIZE + 18, quad.d);
+            }
+
+            return array;
+        }
+
         public void UpToDateMesh(int cameraX, int cameraY, int cameraZ)
         {
             if (!needsUpdate) return;
             needsUpdate = false;
 
-            List<float> solidVertices = new List<float>();
-            List<float> liquidVertices = new List<float>();
+            List<Quad> solidQuads = new List<Quad>();
+            List<Quad> liquidQuads = new List<Quad>();
 
             for (int cx = 0; cx < SIZE; cx++)
                 for (int cz = 0; cz < SIZE; cz++)
@@ -69,13 +98,13 @@ namespace Mycraft.World
                         Block block = blocks[cx, cy, cz];
 
                         if (block is LiquidBlock)
-                            block.EmitVertices(liquidVertices, this, cx, cy, cz);
+                            block.EmitMesh(liquidQuads, this, cx, cy, cz);
                         else
-                            block.EmitVertices(solidVertices, this, cx, cy, cz);
+                            block.EmitMesh(solidQuads, this, cx, cy, cz);
                     }
 
-            solidMesh.Data = solidVertices.ToArray();
-            waterMesh.Data = liquidVertices.ToArray();
+            solidMesh.Data = ToFloatArray(solidQuads);
+            waterMesh.Data = ToFloatArray(liquidQuads);
         }
 
         public void Dispose()
