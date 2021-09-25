@@ -232,7 +232,7 @@ namespace Mycraft
             );
             camera = new Camera(new Vertex3f(.5f, 20.5f, 1.5f), new Vertex2f(0f, 0f));
 
-            world.Update(0, (int)Math.Floor(camera.Position.y), 0, true);
+            world.Update(camera.Position, true);
 
             particles = new ParticleSystem(world, .2f, .5d);
         }
@@ -276,11 +276,7 @@ namespace Mycraft
             camera.Position = playerBox.Position + new Vertex3f(.375f, 1.5f, .375f);
             camera.UpdateTransformMatrix();
 
-            world.Update(
-                (int)Math.Floor(camera.Position.x),
-                (int)Math.Floor(camera.Position.y),
-                (int)Math.Floor(camera.Position.z)
-            );
+            world.Update(camera.Position);
 
             if (RayCasting.Raycast(world, camera.Position, camera.Forward, out Hit hit))
                 selection.Select(hit.blockCoords, hit.side);

@@ -1,5 +1,6 @@
 ﻿using Mycraft.Blocks;
 using Mycraft.World.Generation;
+using OpenGL;
 using System;
 using System.Collections.Generic;
 
@@ -107,10 +108,10 @@ namespace Mycraft.World
                     LoadChunk(x, z);
         }
 
-        public void Update(int cameraX, int cameraY, int cameraZ, bool firstUpdate = false)
+        public void Update(Vertex3f cameraPosition, bool firstUpdate = false)
         {
-            int cameraChunkX = ToChunkCoord(cameraX).chunk;
-            int cameraChunkZ = ToChunkCoord(cameraZ).chunk;
+            int cameraChunkX = ToChunkCoord((int)Math.Floor(cameraPosition.x)).chunk;
+            int cameraChunkZ = ToChunkCoord((int)Math.Floor(cameraPosition.z)).chunk;
 
             if (firstUpdate || lastCameraChunkX != cameraChunkX || lastCameraChunkZ != cameraChunkZ)
             {
@@ -147,7 +148,7 @@ namespace Mycraft.World
             }
 
             foreach (var pair in renderQueue)
-                pair.chunk.UpToDateMesh(cameraX, cameraY, cameraZ);
+                pair.chunk.UpToDateMesh(cameraPosition);
         }
 
         private void OnChunkUpdate(int x, int z)

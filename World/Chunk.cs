@@ -83,7 +83,7 @@ namespace Mycraft.World
             return array;
         }
 
-        public void UpToDateMesh(int cameraX, int cameraY, int cameraZ)
+        public void UpToDateMesh(Vertex3f cameraPosition)
         {
             if (!needsUpdate) return;
             needsUpdate = false;
