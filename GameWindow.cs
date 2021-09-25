@@ -224,7 +224,7 @@ namespace Mycraft
 
             world = new GameWorld(new SimpleWorldGenerator());
             world.GenerateSpawnArea();
-            world.Update(0, 0);
+            world.Update(0, 0, true);
 
             playerBox = new FallingBox(
                 world,

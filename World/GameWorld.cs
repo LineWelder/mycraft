@@ -17,12 +17,18 @@ namespace Mycraft.World
         public const int UNLOAD_DISTANCE = 9;
 
         private readonly Dictionary<(int x, int z), Chunk> chunks;
+        private readonly List<(int distance, Chunk chunk)> renderQueue;
+
         private readonly Dictionary<(int chunkX, int chunkZ), List<BlockToBeSet>> toBeSet;
         private readonly IWorldGenerator generator;
+
+        private int lastPlayerChunkX, lastPlayerChunkZ;
 
         public GameWorld(IWorldGenerator generator)
         {
             chunks = new Dictionary<(int x, int z), Chunk>();
+            renderQueue = new List<(int distance, Chunk chunk)>();
+
             toBeSet = new Dictionary<(int chunkX, int chunkZ), List<BlockToBeSet>>();
             this.generator = generator;
         }
@@ -101,23 +107,44 @@ namespace Mycraft.World
                     LoadChunk(x, z);
         }
 
-        public void Update(int playerX, int playerZ)
+        public void Update(int playerX, int playerZ, bool firstUpdate = false)
         {
             int playerChunkX = ToChunkCoord(playerX).chunk;
             int playerChunkZ = ToChunkCoord(playerZ).chunk;
 
-            for (int x = playerChunkX - LOAD_DISTANCE; x <= playerChunkX + LOAD_DISTANCE; x++)
-                for (int z = playerChunkZ - LOAD_DISTANCE; z <= playerChunkZ + LOAD_DISTANCE; z++)
-                    LoadChunk(x, z);
+            if (firstUpdate || lastPlayerChunkX != playerChunkX || lastPlayerChunkZ != playerChunkZ)
+            {
+                lastPlayerChunkX = playerChunkX;
+                lastPlayerChunkZ = playerChunkZ;
 
-            List<(int x, int z)> chunksToUnload = new List<(int x, int z)>();
-            foreach (var coords in chunks.Keys)
-                if (Math.Abs(coords.x - playerChunkX) > UNLOAD_DISTANCE
-                 || Math.Abs(coords.z - playerChunkZ) > UNLOAD_DISTANCE)
-                    chunksToUnload.Add(coords);
+                for (int x = playerChunkX - LOAD_DISTANCE; x <= playerChunkX + LOAD_DISTANCE; x++)
+                    for (int z = playerChunkZ - LOAD_DISTANCE; z <= playerChunkZ + LOAD_DISTANCE; z++)
+                        LoadChunk(x, z);
 
-            foreach (var coords in chunksToUnload)
-                UnloadChunk(coords.x, coords.z);
+                List<(int x, int z)> chunksToUnload = new List<(int x, int z)>();
+                foreach (var coords in chunks.Keys)
+                    if (Math.Abs(coords.x - playerChunkX) > UNLOAD_DISTANCE
+                     || Math.Abs(coords.z - playerChunkZ) > UNLOAD_DISTANCE)
+                        chunksToUnload.Add(coords);
+
+                foreach (var coords in chunksToUnload)
+                    UnloadChunk(coords.x, coords.z);
+
+                renderQueue.Clear();
+                foreach (var pair in chunks)
+                {
+                    int dx = pair.Key.x - playerChunkX;
+                    int dz = pair.Key.z - playerChunkZ;
+                    int distance = dx * dx + dz * dz;
+
+                    renderQueue.Add((distance, pair.Value));
+                }
+
+                renderQueue.Sort(
+                    ((int distance, Chunk chunk) a, (int distance, Chunk chunk) b)
+                        => b.distance.CompareTo(a.distance)
+                );
+            }
 
             foreach (Chunk chunk in chunks.Values)
                 chunk.UpToDateMesh();
@@ -157,13 +184,13 @@ namespace Mycraft.World
 
         public void Draw()
         {
-            foreach (var chunk in chunks.Values)
-                chunk.Draw();
+            foreach (var pair in renderQueue)
+                pair.chunk.Draw();
         }
 
         public void Dispose()
         {
-            foreach (var chunk in chunks.Values)
+            foreach (Chunk chunk in chunks.Values)
                 chunk.Dispose();
         }
     }
