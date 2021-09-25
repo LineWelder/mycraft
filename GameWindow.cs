@@ -209,6 +209,9 @@ namespace Mycraft
         {
             Resources.LoadAll();
 
+            Gl.UseProgram(Resources.GameWorldShader.glId);
+            Resources.GameWorldShader.Alpha = .6f;
+
             OnResized(null, null);
             Cursor.Hide();
             GrabCursor();

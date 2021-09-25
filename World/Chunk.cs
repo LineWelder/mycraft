@@ -47,7 +47,11 @@ namespace Mycraft.World
         {
             Resources.BlocksTexture.Bind();
             solidMesh.Draw();
+
+            Gl.Enable(EnableCap.Blend);
+            Gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             waterMesh.Draw();
+            Gl.Disable(EnableCap.Blend);
         }
 
         public void UpToDateMesh()
