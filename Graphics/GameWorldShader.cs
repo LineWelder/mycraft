@@ -26,12 +26,17 @@ void main()
 @"#version 330 core
 
 uniform sampler2D tex;
+uniform float alpha;
+
 in vec2 _textureCoords;
 in float _light;
 
 void main()
 {
-    gl_FragColor = texture(tex, _textureCoords) * _light;
+    gl_FragColor = vec4(
+        texture(tex, _textureCoords).xyz * _light,
+        alpha
+    );
 }";
 
         public Matrix4x4f MVP
@@ -44,14 +49,21 @@ void main()
             set => Gl.Uniform1i(textureLocation, 1, value);
         }
 
+        public float Alpha
+        {
+            set => Gl.Uniform1f(alphaLocation, 1, value);
+        }
+
         private readonly int mvpLocation;
         private readonly int textureLocation;
+        private readonly int alphaLocation;
 
         public GameWorldShader()
             : base(VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
             textureLocation = FindVariable("tex");
             mvpLocation = FindVariable("mvp");
+            alphaLocation = FindVariable("alpha");
         }
     }
 }
