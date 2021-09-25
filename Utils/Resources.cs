@@ -27,9 +27,9 @@ namespace Mycraft.Utils
             GameWorldShader = new GameWorldShader();
             ParticleShader = new ParticleShader();
 
-            BlocksTexture = new Texture(@"resources\textures\blocks.png");
+            BlocksTexture = new Texture(@"resources\textures\blocks.png", 8, 8);
             CrossTexture = new Texture(@"resources\textures\cross.png");
-            HotbarTexture = new Texture(@"resources\textures\hotbar.png");
+            HotbarTexture = new Texture(@"resources\textures\hotbar.png", 20, 2);
             HotbarSelectorTexture = new Texture(@"resources\textures\hotbar_selector.png");
 
             GC.Collect();

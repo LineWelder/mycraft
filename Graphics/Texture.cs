@@ -2,6 +2,7 @@
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 
 namespace Mycraft.Graphics
 {
@@ -9,9 +10,28 @@ namespace Mycraft.Graphics
     {
         public readonly uint glId;
 
-        public Texture(string path)
+        public Texture(string path, int errorTextureWidth, int errorTextureHeight)
         {
-            Bitmap image = new Bitmap(path);
+            Bitmap image;
+
+            if (File.Exists(path))
+                image = new Bitmap(path);
+            else
+            {
+                image = new Bitmap(
+                    errorTextureWidth,
+                    errorTextureHeight
+                );
+                for (int x = 0; x < errorTextureWidth; x++)
+                    for (int y = 0; y < errorTextureHeight; y++)
+                        image.SetPixel(
+                            x, y,
+                            (x + y) % 2 == 0
+                                ? Color.Magenta
+                                : Color.Black
+                        );
+            }
+
             BitmapData data = image.LockBits(
                 new Rectangle(0, 0, image.Width, image.Height),
                 ImageLockMode.ReadOnly,
@@ -34,6 +54,9 @@ namespace Mycraft.Graphics
                 data.Scan0
             );
         }
+
+        public Texture(string path)
+            : this(path, 2, 2) { }
 
         public void Bind() => Gl.BindTexture(TextureTarget.Texture2d, glId);
         public void Dispose() => Gl.DeleteTextures(glId);
