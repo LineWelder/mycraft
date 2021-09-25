@@ -11,8 +11,6 @@ using System.Diagnostics;
 using Mycraft.Blocks;
 using Mycraft.World.Generation;
 
-// TODO make good file not found handling
-// TODO check if there is a player when placing a block
 // TODO make pretty methods for creating planes for mesh generation
 
 namespace Mycraft
@@ -135,16 +133,8 @@ namespace Mycraft
                     );
 
                     particles.Spawn(
-                        new Vertex3f(
-                            position.x,
-                            position.y,
-                            position.z
-                        ),
-                        new Vertex3f(
-                            position.x + 1f,
-                            position.y + 1f,
-                            position.z + 1f
-                        ),
+                        (Vertex3f)position,
+                        (Vertex3f)position + new Vertex3f(1f, 1f, 1f),
                         20, block
                     );
                 }
@@ -153,12 +143,21 @@ namespace Mycraft
                     if (!(hotbar.SelectedBlock is null))
                     {
                         Vertex3i placeBlockCoords = Block.GetNeighbour(selection.Position, selection.Side);
-                        world.SetBlock(
-                            placeBlockCoords.x,
-                            placeBlockCoords.y,
-                            placeBlockCoords.z,
-                            hotbar.SelectedBlock
-                        );
+                        
+                        if (!hotbar.SelectedBlock.HasCollider ||
+                            !playerBox.Intersects(
+                                new AABB(
+                                    (Vertex3f)placeBlockCoords,
+                                    new Vertex3f(1f, 1f, 1f)
+                                )
+                            )
+                        )
+                            world.SetBlock(
+                                placeBlockCoords.x,
+                                placeBlockCoords.y,
+                                placeBlockCoords.z,
+                                hotbar.SelectedBlock
+                            );
                     }
                 }
             }

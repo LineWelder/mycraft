@@ -159,5 +159,10 @@ namespace Mycraft.Physics
 
             End();
         }
+
+        public bool Intersects(AABB other)
+            => position.x + Size.x > other.position.x && position.x < other.position.x + other.Size.x
+            && position.y + Size.y > other.position.y && position.y < other.position.y + other.Size.y
+            && position.z + Size.z > other.position.z && position.z < other.position.z + other.Size.z;
     }
 }
