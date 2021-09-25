@@ -224,7 +224,6 @@ namespace Mycraft
 
             world = new GameWorld(new SimpleWorldGenerator());
             world.GenerateSpawnArea();
-            world.Update(0, 0, true);
 
             playerBox = new FallingBox(
                 world,
@@ -232,6 +231,8 @@ namespace Mycraft
                 new Vertex3f(.75f, 1.7f, .75f)
             );
             camera = new Camera(new Vertex3f(.5f, 20.5f, 1.5f), new Vertex2f(0f, 0f));
+
+            world.Update(0, (int)Math.Floor(camera.Position.y), 0, true);
 
             particles = new ParticleSystem(world, .2f, .5d);
         }
@@ -277,6 +278,7 @@ namespace Mycraft
 
             world.Update(
                 (int)Math.Floor(camera.Position.x),
+                (int)Math.Floor(camera.Position.y),
                 (int)Math.Floor(camera.Position.z)
             );
 

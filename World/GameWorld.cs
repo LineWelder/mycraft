@@ -22,7 +22,7 @@ namespace Mycraft.World
         private readonly Dictionary<(int chunkX, int chunkZ), List<BlockToBeSet>> toBeSet;
         private readonly IWorldGenerator generator;
 
-        private int lastPlayerChunkX, lastPlayerChunkZ;
+        private int lastCameraChunkX, lastCameraChunkZ;
 
         public GameWorld(IWorldGenerator generator)
         {
@@ -107,24 +107,24 @@ namespace Mycraft.World
                     LoadChunk(x, z);
         }
 
-        public void Update(int playerX, int playerZ, bool firstUpdate = false)
+        public void Update(int cameraX, int cameraY, int cameraZ, bool firstUpdate = false)
         {
-            int playerChunkX = ToChunkCoord(playerX).chunk;
-            int playerChunkZ = ToChunkCoord(playerZ).chunk;
+            int cameraChunkX = ToChunkCoord(cameraX).chunk;
+            int cameraChunkZ = ToChunkCoord(cameraZ).chunk;
 
-            if (firstUpdate || lastPlayerChunkX != playerChunkX || lastPlayerChunkZ != playerChunkZ)
+            if (firstUpdate || lastCameraChunkX != cameraChunkX || lastCameraChunkZ != cameraChunkZ)
             {
-                lastPlayerChunkX = playerChunkX;
-                lastPlayerChunkZ = playerChunkZ;
+                lastCameraChunkX = cameraChunkX;
+                lastCameraChunkZ = cameraChunkZ;
 
-                for (int x = playerChunkX - LOAD_DISTANCE; x <= playerChunkX + LOAD_DISTANCE; x++)
-                    for (int z = playerChunkZ - LOAD_DISTANCE; z <= playerChunkZ + LOAD_DISTANCE; z++)
+                for (int x = cameraChunkX - LOAD_DISTANCE; x <= cameraChunkX + LOAD_DISTANCE; x++)
+                    for (int z = cameraChunkZ - LOAD_DISTANCE; z <= cameraChunkZ + LOAD_DISTANCE; z++)
                         LoadChunk(x, z);
 
                 List<(int x, int z)> chunksToUnload = new List<(int x, int z)>();
                 foreach (var coords in chunks.Keys)
-                    if (Math.Abs(coords.x - playerChunkX) > UNLOAD_DISTANCE
-                     || Math.Abs(coords.z - playerChunkZ) > UNLOAD_DISTANCE)
+                    if (Math.Abs(coords.x - cameraChunkX) > UNLOAD_DISTANCE
+                     || Math.Abs(coords.z - cameraChunkZ) > UNLOAD_DISTANCE)
                         chunksToUnload.Add(coords);
 
                 foreach (var coords in chunksToUnload)
@@ -133,8 +133,8 @@ namespace Mycraft.World
                 renderQueue.Clear();
                 foreach (var pair in chunks)
                 {
-                    int dx = pair.Key.x - playerChunkX;
-                    int dz = pair.Key.z - playerChunkZ;
+                    int dx = pair.Key.x - cameraChunkX;
+                    int dz = pair.Key.z - cameraChunkZ;
                     int distance = dx * dx + dz * dz;
 
                     renderQueue.Add((distance, pair.Value));
@@ -146,8 +146,8 @@ namespace Mycraft.World
                 );
             }
 
-            foreach (Chunk chunk in chunks.Values)
-                chunk.UpToDateMesh();
+            foreach (var pair in renderQueue)
+                pair.chunk.UpToDateMesh(cameraX, cameraY, cameraZ);
         }
 
         private void OnChunkUpdate(int x, int z)

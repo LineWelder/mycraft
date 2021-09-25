@@ -54,7 +54,7 @@ namespace Mycraft.World
             Gl.Disable(EnableCap.Blend);
         }
 
-        public void UpToDateMesh()
+        public void UpToDateMesh(int cameraX, int cameraY, int cameraZ)
         {
             if (!needsUpdate) return;
             needsUpdate = false;
