@@ -48,7 +48,10 @@ namespace Mycraft.World
         public void Draw()
         {
             Resources.BlocksTexture.Bind();
+
+            Gl.Enable(EnableCap.CullFace);
             solidMesh.Draw();
+            Gl.Disable(EnableCap.CullFace);
 
             Gl.Enable(EnableCap.Blend);
             Gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
