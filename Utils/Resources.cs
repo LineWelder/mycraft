@@ -11,6 +11,7 @@ namespace Mycraft.Utils
         public static GUIShader GUIShader { get; private set; }
         public static GameWorldShader GameWorldShader { get; private set; }
         public static ParticleShader ParticleShader { get; private set; }
+        public static VignetteShader VignetteShader { get; private set; }
 
         public static Texture BlocksTexture { get; private set; }
         public static Texture CrossTexture { get; private set; }
@@ -26,6 +27,7 @@ namespace Mycraft.Utils
             GUIShader = new GUIShader();
             GameWorldShader = new GameWorldShader();
             ParticleShader = new ParticleShader();
+            VignetteShader = new VignetteShader();
 
             BlocksTexture = new Texture(@"resources\textures\blocks.png", 8, 8);
             CrossTexture = new Texture(@"resources\textures\cross.png");
@@ -41,6 +43,7 @@ namespace Mycraft.Utils
             GUIShader.Dispose();
             GameWorldShader.Dispose();
             ParticleShader.Dispose();
+            VignetteShader.Dispose();
 
             BlocksTexture.Dispose();
             CrossTexture.Dispose();

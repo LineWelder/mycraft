@@ -10,6 +10,7 @@ using Mycraft.Physics;
 using System.Diagnostics;
 using Mycraft.Blocks;
 using Mycraft.World.Generation;
+using Mycraft.Graphics;
 
 // TODO make pretty methods for creating planes for mesh generation
 
@@ -221,6 +222,7 @@ namespace Mycraft
 
             Gl.LineWidth(2f);
             Gl.Enable(EnableCap.Multisample);
+            Gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
             world = new GameWorld(new SimpleWorldGenerator());
             world.GenerateSpawnArea();
@@ -299,10 +301,11 @@ namespace Mycraft
             // Draw the world
             Gl.UseProgram(Resources.GameWorldShader.glId);
             Gl.Enable(EnableCap.DepthTest);
-            Gl.Enable(EnableCap.CullFace);
+
             Resources.GameWorldShader.MVP = vp;
             world.Draw();
 
+            // Draw particles
             Gl.UseProgram(Resources.ParticleShader.glId);
             Resources.ParticleShader.View = camera.TransformMatrix;
             Resources.ParticleShader.Projection = projection;
@@ -317,10 +320,39 @@ namespace Mycraft
             Resources.WorldUIShader.Model = Matrix4x4f.Identity;
             origin.Draw();
 
-            // Draw GUI
-            Gl.UseProgram(Resources.GUIShader.glId);
+            // Draw vignette
             Gl.Disable(EnableCap.DepthTest);
             Gl.Disable(EnableCap.CullFace);
+
+            Block block = world.GetBlock(
+                (int)Math.Floor(camera.Position.x),
+                (int)Math.Floor(camera.Position.y),
+                (int)Math.Floor(camera.Position.z)
+            );
+
+            if (block is LiquidBlock)
+            {
+                Gl.UseProgram(Resources.VignetteShader.glId);
+
+                Gl.Enable(EnableCap.Blend);
+
+                Resources.BlocksTexture.Bind();
+                Vertex4f texture = Block.GetTextureCoords(block.GetTexture(BlockSide.Top));
+                using (VertexArray vignette = new VertexArray(
+                    PrimitiveType.Quads, new int[] { 2, 2 },
+                    new float[]
+                    {
+                         1f,  1f,  texture.z, texture.y,
+                         1f, -1f,  texture.z, texture.w,
+                        -1f, -1f,  texture.x, texture.w,
+                        -1f,  1f,  texture.x, texture.y
+                    }
+                )) vignette.Draw();
+            }
+
+            // Draw GUI
+            Gl.UseProgram(Resources.GUIShader.glId);
+            Gl.Disable(EnableCap.Blend);
 
             Resources.CrossTexture.Bind();
             cross.Draw();

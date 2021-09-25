@@ -90,6 +90,7 @@
     </Compile>
     <Compile Include="Graphics\ParticleShader.cs" />
     <Compile Include="Graphics\GUIShader.cs" />
+    <Compile Include="Graphics\VignetteShader.cs" />
     <Compile Include="GUI\BlockView.cs" />
     <Compile Include="GUI\GUIRectangle.cs" />
     <Compile Include="GUI\Hotbar.cs" />

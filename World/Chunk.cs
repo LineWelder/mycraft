@@ -54,7 +54,6 @@ namespace Mycraft.World
             Gl.Disable(EnableCap.CullFace);
 
             Gl.Enable(EnableCap.Blend);
-            Gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             waterMesh.Draw();
             Gl.Disable(EnableCap.Blend);
         }
