@@ -2,7 +2,6 @@
 {
     public class AirBlock : Block
     {
-        
         public override bool IsTransparent => true;
         public override bool HasCollider => false;
         public override bool IsVisible => false;
