@@ -12,6 +12,7 @@ using Mycraft.Blocks;
 using Mycraft.World.Generation;
 using Mycraft.Graphics;
 
+// TODO make good in-water physics
 // TODO make pretty methods for creating planes for mesh generation
 
 namespace Mycraft
@@ -254,7 +255,7 @@ namespace Mycraft
                 horizontalInput
             ) * (deltaTime * MOVEMENT_SPEED));
             playerBox.Update(deltaTime);
-            if (playerBox.IsGrounded && FuncUtils.IsKeyPressed(Keys.Space))
+            if ((playerBox.IsGrounded || playerBox.IsInWater) && FuncUtils.IsKeyPressed(Keys.Space))
             {
                 Vertex3f velocity = playerBox.Velocity;
                 velocity.y = 6f;
