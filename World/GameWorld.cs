@@ -3,6 +3,7 @@ using Mycraft.World.Generation;
 using OpenGL;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Mycraft.World
 {
@@ -147,8 +148,12 @@ namespace Mycraft.World
                 );
             }
 
+            Parallel.ForEach(renderQueue, (pair) =>
+                pair.chunk.GenerateMesh(cameraPosition)
+            );
+
             foreach (var pair in renderQueue)
-                pair.chunk.UpToDateMesh(cameraPosition);
+                pair.chunk.RefreshVertexData();
         }
 
         private void OnChunkUpdate(int x, int z)

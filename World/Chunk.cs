@@ -28,7 +28,8 @@ namespace Mycraft.World
         public readonly GameWorld world;
         public readonly int xOffset, zOffset;
 
-        private readonly List<Quad> liquidQuads;
+        private readonly List<Quad> waterQuads;
+        private float[] solidVertices, waterVertices;
         private readonly WorldGeometry solidMesh, waterMesh;
 
         public Chunk(GameWorld world, int x, int z)
@@ -40,7 +41,7 @@ namespace Mycraft.World
             xOffset = x * SIZE;
             zOffset = z * SIZE;
 
-            liquidQuads = new List<Quad>();
+            waterQuads = new List<Quad>();
             solidMesh = new WorldGeometry();
             waterMesh = new WorldGeometry();
         }
@@ -86,14 +87,14 @@ namespace Mycraft.World
             return array;
         }
 
-        public void UpToDateMesh(Vertex3f cameraPosition)
+        public void GenerateMesh(Vertex3f cameraPosition)
         {
             if (needsUpdate)
             {
                 needsUpdate = false;
 
                 List<Quad> solidQuads = new List<Quad>();
-                liquidQuads.Clear();
+                waterQuads.Clear();
 
                 for (int cx = 0; cx < SIZE; cx++)
                     for (int cz = 0; cz < SIZE; cz++)
@@ -102,20 +103,35 @@ namespace Mycraft.World
                             Block block = blocks[cx, cy, cz];
 
                             if (block is LiquidBlock)
-                                block.EmitMesh(liquidQuads, this, cx, cy, cz);
+                                block.EmitMesh(waterQuads, this, cx, cy, cz);
                             else
                                 block.EmitMesh(solidQuads, this, cx, cy, cz);
                         }
 
-                solidMesh.Data = ToFloatArray(solidQuads);
+                solidVertices = ToFloatArray(solidQuads);
             }
 
-            liquidQuads.Sort(
+            waterQuads.Sort(
                 (Quad a, Quad b) => (b.Center - cameraPosition).ModuleSquared()
                          .CompareTo((a.Center - cameraPosition).ModuleSquared())
             );
 
-            waterMesh.Data = ToFloatArray(liquidQuads);
+            waterVertices = ToFloatArray(waterQuads);
+        }
+
+        public void RefreshVertexData()
+        {
+            if (!(solidVertices is null))
+            {
+                solidMesh.Data = solidVertices;
+                solidVertices = null;
+            }
+
+            if (!(waterVertices is null))
+            {
+                waterMesh.Data = waterVertices;
+                waterVertices = null;
+            }
         }
 
         public void Dispose()
