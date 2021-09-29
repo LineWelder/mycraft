@@ -1,5 +1,6 @@
 ﻿using OpenGL;
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -19,6 +20,7 @@ namespace Mycraft.Utils
         public static int GetInput1d(Keys up, Keys down)
             => GetKeyPressed(up) - GetKeyPressed(down);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix4x4f TranslateBy(Vertex3f vector)
             => Matrix4x4f.Translated(
                 vector.x,
@@ -48,5 +50,9 @@ namespace Mycraft.Utils
 
             return val;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsBetween(float min, float val, float max)
+            => min < val && val < max;
     }
 }

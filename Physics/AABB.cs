@@ -1,4 +1,5 @@
-﻿using OpenGL;
+﻿using Mycraft.Utils;
+using OpenGL;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -51,20 +52,16 @@ namespace Mycraft.Physics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool IsBetween(float min, float val, float max)
-            => min < val && val < max;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool OverlapsX(AABB other)
-            => IsBetween(other.position.x - Size.x, position.x, other.position.x + other.Size.x);
+            => FuncUtils.IsBetween(other.position.x - Size.x, position.x, other.position.x + other.Size.x);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool OverlapsY(AABB other)
-            => IsBetween(other.position.y - Size.y, position.y, other.position.y + other.Size.y);
+            => FuncUtils.IsBetween(other.position.y - Size.y, position.y, other.position.y + other.Size.y);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool OverlapsZ(AABB other)
-            => IsBetween(other.position.z - Size.z, position.z, other.position.z + other.Size.z);
+            => FuncUtils.IsBetween(other.position.z - Size.z, position.z, other.position.z + other.Size.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool HandleCollision(
@@ -75,16 +72,14 @@ namespace Mycraft.Physics
         )
         {
             if (delta > 0
-             && lastPosition + thisSize <= otherPosition
-             && otherPosition < thisPosition + thisSize
+             && lastPosition + thisSize <= otherPosition && otherPosition < thisPosition + thisSize
                )
             {
                 thisPosition = otherPosition - thisSize;
                 return true;
             }
             else if (
-                thisPosition < otherPosition + otherSize
-             && otherPosition + otherSize <= lastPosition
+                thisPosition < otherPosition + otherSize && otherPosition + otherSize <= lastPosition
                )
             {
                 thisPosition = otherPosition + otherSize;
