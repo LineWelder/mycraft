@@ -8,6 +8,9 @@ namespace Mycraft.Physics
 {
     public class AABB
     {
+        // There was a bug caused by float perisision that the player could sometimes pass through the block above
+        private const float PERSISION_FIX = .001f;
+
         public Vertex3f Size { get; set; }
         public Vertex3f Position => position;
 
@@ -72,14 +75,16 @@ namespace Mycraft.Physics
         )
         {
             if (delta > 0
-             && lastPosition + thisSize <= otherPosition && otherPosition < thisPosition + thisSize
+             && lastPosition + thisSize <= otherPosition + PERSISION_FIX
+             && otherPosition - PERSISION_FIX < thisPosition + thisSize
                )
             {
                 thisPosition = otherPosition - thisSize;
                 return true;
             }
             else if (
-                thisPosition < otherPosition + otherSize && otherPosition + otherSize <= lastPosition
+                thisPosition < otherPosition + otherSize + PERSISION_FIX
+                && otherPosition + otherSize - PERSISION_FIX <= lastPosition
                )
             {
                 thisPosition = otherPosition + otherSize;
