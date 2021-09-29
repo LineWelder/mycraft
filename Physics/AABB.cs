@@ -1,5 +1,6 @@
 ﻿using OpenGL;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Mycraft.Physics
@@ -98,19 +99,15 @@ namespace Mycraft.Physics
             if (delta.x == 0)
                 return false;
 
-            bool hasCollided = false;
-
             position.x += delta.x;
-            foreach (AABB other in others)
-                if (OverlapsY(other) && OverlapsZ(other))
-                    if (HandleCollision(
-                        delta.x,
-                        ref position.x, Size.x,
-                        other.position.x, other.Size.x,
-                        lastPosition.x
-                    )) hasCollided = true;
-
-            return hasCollided;
+            return others.Where((other) =>
+                OverlapsX(other) && OverlapsZ(other)
+             && HandleCollision(
+                    delta.x,
+                    ref position.x, Size.x,
+                    other.position.x, other.Size.x,
+                    lastPosition.x
+                )).Any();
         }
 
         protected bool CollideY(IEnumerable<AABB> others)
@@ -118,19 +115,15 @@ namespace Mycraft.Physics
             if (delta.y == 0)
                 return false;
 
-            bool hasCollided = false;
-
             position.y += delta.y;
-            foreach (AABB other in others)
-                if (OverlapsX(other) && OverlapsZ(other))
-                    if (HandleCollision(
-                        delta.y,
-                        ref position.y, Size.y,
-                        other.position.y, other.Size.y,
-                        lastPosition.y
-                    )) hasCollided = true;
-
-            return hasCollided;
+            return others.Where((other) =>
+                OverlapsX(other) && OverlapsZ(other)
+             && HandleCollision(
+                    delta.y,
+                    ref position.y, Size.y,
+                    other.position.y, other.Size.y,
+                    lastPosition.y
+                )).Any();
         }
 
         protected bool CollideZ(IEnumerable<AABB> others)
@@ -138,19 +131,15 @@ namespace Mycraft.Physics
             if (delta.z == 0)
                 return false;
 
-            bool hasCollided = false;
-
             position.z += delta.z;
-            foreach (AABB other in others)
-                if (OverlapsX(other) && OverlapsY(other))
-                    if (HandleCollision(
-                        delta.z,
-                        ref position.z, Size.z,
-                        other.position.z, other.Size.z,
-                        lastPosition.z
-                    )) hasCollided = true;
-
-            return hasCollided;
+            return others.Where((other) =>
+                OverlapsX(other) && OverlapsZ(other)
+             && HandleCollision(
+                    delta.z,
+                    ref position.z, Size.z,
+                    other.position.z, other.Size.z,
+                    lastPosition.z
+                )).Any();
         }
 
         protected void Start()
