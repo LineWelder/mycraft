@@ -65,6 +65,34 @@ namespace Mycraft.Physics
         private bool OverlapsZ(AABB other)
             => IsBetween(other.position.z - Size.z, position.z, other.position.z + other.Size.z);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool HandleCollision(
+            float delta,
+            ref float thisPosition, float thisSize,
+            float otherPosition, float otherSize,
+            float lastPosition
+        )
+        {
+            if (delta > 0
+             && lastPosition + thisSize <= otherPosition
+             && otherPosition < thisPosition + thisSize
+               )
+            {
+                thisPosition = otherPosition - thisSize;
+                return true;
+            }
+            else if (
+                thisPosition < otherPosition + otherSize
+             && otherPosition + otherSize <= lastPosition
+               )
+            {
+                thisPosition = otherPosition + otherSize;
+                return true;
+            }
+
+            return false;
+        }
+
         protected bool CollideX(IEnumerable<AABB> others)
         {
             if (delta.x == 0)
@@ -75,22 +103,12 @@ namespace Mycraft.Physics
             position.x += delta.x;
             foreach (AABB other in others)
                 if (OverlapsY(other) && OverlapsZ(other))
-                    if (delta.x > 0
-                        && lastPosition.x + Size.x <= other.position.x
-                        && other.position.x < position.x + Size.x
-                       )
-                    {
-                        position.x = other.position.x - Size.x;
-                        hasCollided = true;
-                    }
-                    else if (
-                        position.x < other.position.x + other.Size.x
-                        && other.position.x + other.Size.x <= lastPosition.x
-                       )
-                    {
-                        position.x = other.position.x + other.Size.x;
-                        hasCollided = true;
-                    }
+                    if (HandleCollision(
+                        delta.x,
+                        ref position.x, Size.x,
+                        other.position.x, other.Size.x,
+                        lastPosition.x
+                    )) hasCollided = true;
 
             return hasCollided;
         }
@@ -105,22 +123,12 @@ namespace Mycraft.Physics
             position.y += delta.y;
             foreach (AABB other in others)
                 if (OverlapsX(other) && OverlapsZ(other))
-                    if (delta.y > 0
-                        && lastPosition.y + Size.y <= other.position.y
-                        && other.position.y < position.y + Size.y
-                       )
-                    {
-                        position.y = other.position.y - Size.y;
-                        hasCollided = true;
-                    }
-                    else if (
-                        position.y < other.position.y + other.Size.y
-                        && other.position.y + other.Size.y <= lastPosition.y
-                       )
-                    {
-                        position.y = other.position.y + other.Size.y;
-                        hasCollided = true;
-                    }
+                    if (HandleCollision(
+                        delta.y,
+                        ref position.y, Size.y,
+                        other.position.y, other.Size.y,
+                        lastPosition.y
+                    )) hasCollided = true;
 
             return hasCollided;
         }
@@ -135,22 +143,12 @@ namespace Mycraft.Physics
             position.z += delta.z;
             foreach (AABB other in others)
                 if (OverlapsX(other) && OverlapsY(other))
-                    if (delta.z > 0
-                        && lastPosition.z + Size.z <= other.position.z
-                        && other.position.z < position.z + Size.z
-                       )
-                    {
-                        position.z = other.position.z - Size.z;
-                        hasCollided = true;
-                    }
-                    else if (
-                        position.z < other.position.z + other.Size.z
-                        && other.position.z + other.Size.z <= lastPosition.z
-                       )
-                    {
-                        position.z = other.position.z + other.Size.z;
-                        hasCollided = true;
-                    }
+                    if (HandleCollision(
+                        delta.z,
+                        ref position.z, Size.z,
+                        other.position.z, other.Size.z,
+                        lastPosition.z
+                    )) hasCollided = true;
 
             return hasCollided;
         }
