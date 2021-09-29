@@ -1,5 +1,6 @@
 ﻿using OpenGL;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Mycraft.Physics
 {
@@ -48,16 +49,32 @@ namespace Mycraft.Physics
             delta += d;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool IsBetween(float min, float val, float max)
+            => min < val && val < max;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool OverlapsX(AABB other)
+            => IsBetween(other.position.x - Size.x, position.x, other.position.x + other.Size.x);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool OverlapsY(AABB other)
+            => IsBetween(other.position.y - Size.y, position.y, other.position.y + other.Size.y);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool OverlapsZ(AABB other)
+            => IsBetween(other.position.z - Size.z, position.z, other.position.z + other.Size.z);
+
         protected bool CollideX(IEnumerable<AABB> others)
         {
+            if (delta.x == 0)
+                return false;
+
             bool hasCollided = false;
 
             position.x += delta.x;
             foreach (AABB other in others)
-                if (delta.x != 0
-                    && other.position.y - Size.y < position.y && position.y < other.position.y + other.Size.y
-                    && other.position.z - Size.z < position.z && position.z < other.position.z + other.Size.z
-                   )
+                if (OverlapsY(other) && OverlapsZ(other))
                     if (delta.x > 0
                         && lastPosition.x + Size.x <= other.position.x
                         && other.position.x < position.x + Size.x
@@ -80,14 +97,14 @@ namespace Mycraft.Physics
 
         protected bool CollideY(IEnumerable<AABB> others)
         {
+            if (delta.y == 0)
+                return false;
+
             bool hasCollided = false;
 
             position.y += delta.y;
             foreach (AABB other in others)
-                if (delta.y != 0
-                    && other.position.x - Size.x < position.x && position.x < other.position.x + other.Size.x
-                    && other.position.z - Size.z < position.z && position.z < other.position.z + other.Size.z
-                   )
+                if (OverlapsX(other) && OverlapsZ(other))
                     if (delta.y > 0
                         && lastPosition.y + Size.y <= other.position.y
                         && other.position.y < position.y + Size.y
@@ -110,14 +127,14 @@ namespace Mycraft.Physics
 
         protected bool CollideZ(IEnumerable<AABB> others)
         {
+            if (delta.z == 0)
+                return false;
+
             bool hasCollided = false;
 
             position.z += delta.z;
             foreach (AABB other in others)
-                if (delta.z != 0
-                    && other.position.x - Size.x < position.x && position.x < other.position.x + other.Size.x
-                    && other.position.y - Size.y < position.y && position.y < other.position.y + other.Size.y
-                   )
+                if (OverlapsX(other) && OverlapsY(other))
                     if (delta.z > 0
                         && lastPosition.z + Size.z <= other.position.z
                         && other.position.z < position.z + Size.z
@@ -161,8 +178,6 @@ namespace Mycraft.Physics
         }
 
         public bool Intersects(AABB other)
-            => position.x + Size.x > other.position.x && position.x < other.position.x + other.Size.x
-            && position.y + Size.y > other.position.y && position.y < other.position.y + other.Size.y
-            && position.z + Size.z > other.position.z && position.z < other.position.z + other.Size.z;
+            => OverlapsX(other) && OverlapsY(other) && OverlapsZ(other);
     }
 }
