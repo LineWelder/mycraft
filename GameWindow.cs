@@ -255,10 +255,17 @@ namespace Mycraft
                 horizontalInput
             ) * (deltaTime * MOVEMENT_SPEED));
             playerBox.Update(deltaTime);
-            if ((playerBox.IsGrounded || playerBox.IsInWater) && FuncUtils.IsKeyPressed(Keys.Space))
+
+            if (FuncUtils.IsKeyPressed(Keys.Space))
             {
                 Vertex3f velocity = playerBox.Velocity;
-                velocity.y = 6f;
+
+                if (playerBox.IsGrounded)
+                    velocity.y = 6f;
+
+                if (playerBox.IsInWater)
+                    velocity.y += (float)(20f * deltaTime);
+
                 playerBox.Velocity = velocity;
             }
 
