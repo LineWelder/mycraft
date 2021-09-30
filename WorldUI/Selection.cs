@@ -1,8 +1,7 @@
-﻿using Mycraft.Blocks;
-using Mycraft.Graphics;
+﻿using OpenGL;
+using Mycraft.Blocks;
 using Mycraft.Utils;
-using Mycraft.World;
-using OpenGL;
+
 
 namespace Mycraft.WorldUI
 {

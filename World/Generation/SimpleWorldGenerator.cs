@@ -1,6 +1,6 @@
-﻿using Mycraft.Blocks;
+﻿using System;
+using Mycraft.Blocks;
 using Mycraft.Utils;
-using System;
 
 namespace Mycraft.World.Generation
 {

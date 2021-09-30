@@ -1,8 +1,8 @@
-﻿using Mycraft.Utils;
-using OpenGL;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using OpenGL;
+using Mycraft.Utils;
 
 namespace Mycraft.Physics
 {

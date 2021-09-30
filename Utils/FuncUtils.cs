@@ -1,8 +1,8 @@
-﻿using OpenGL;
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using OpenGL;
 
 namespace Mycraft.Utils
 {

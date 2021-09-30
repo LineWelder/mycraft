@@ -1,7 +1,8 @@
-﻿using Mycraft.Blocks;
-using Mycraft.World;
+﻿using System;
 using OpenGL;
-using System;
+
+using Mycraft.Blocks;
+using Mycraft.World;
 
 namespace Mycraft.Utils
 {

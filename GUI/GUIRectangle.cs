@@ -1,5 +1,5 @@
-﻿using Mycraft.Graphics;
-using OpenGL;
+﻿using OpenGL;
+using Mycraft.Graphics;
 
 namespace Mycraft.GUI
 {

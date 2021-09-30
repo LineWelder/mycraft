@@ -1,9 +1,10 @@
-﻿using Mycraft.Blocks;
+﻿using System;
+using System.Collections.Generic;
+using OpenGL;
+
+using Mycraft.Blocks;
 using Mycraft.Graphics;
 using Mycraft.World;
-using OpenGL;
-using System;
-using System.Collections.Generic;
 
 namespace Mycraft.Physics
 {

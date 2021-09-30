@@ -1,16 +1,17 @@
-﻿using Mycraft.WorldUI;
-using Mycraft.Utils;
-using Mycraft.World;
-using OpenGL;
-using System;
+﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
-using Mycraft.GUI;
-using Mycraft.Physics;
-using System.Diagnostics;
+using OpenGL;
+
 using Mycraft.Blocks;
-using Mycraft.World.Generation;
+using Mycraft.GUI;
 using Mycraft.Graphics;
+using Mycraft.Physics;
+using Mycraft.Utils;
+using Mycraft.World;
+using Mycraft.World.Generation;
+using Mycraft.WorldUI;
 
 // TODO make good in-water physics
 // TODO make pretty methods for creating planes for mesh generation

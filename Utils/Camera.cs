@@ -1,5 +1,5 @@
-﻿using OpenGL;
-using System;
+﻿using System;
+using OpenGL;
 
 namespace Mycraft.Utils
 {

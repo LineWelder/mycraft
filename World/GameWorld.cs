@@ -1,9 +1,10 @@
-﻿using Mycraft.Blocks;
-using Mycraft.World.Generation;
-using OpenGL;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using OpenGL;
+
+using Mycraft.Blocks;
+using Mycraft.World.Generation;
 
 namespace Mycraft.World
 {

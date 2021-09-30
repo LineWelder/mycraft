@@ -1,7 +1,8 @@
-﻿using Mycraft.Graphics;
-using Mycraft.Utils;
+﻿using System;
 using OpenGL;
-using System;
+
+using Mycraft.Graphics;
+using Mycraft.Utils;
 
 namespace Mycraft.WorldUI
 {

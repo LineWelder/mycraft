@@ -1,6 +1,6 @@
-﻿using Mycraft.Blocks;
+﻿using OpenGL;
+using Mycraft.Blocks;
 using Mycraft.Graphics;
-using OpenGL;
 
 namespace Mycraft.GUI
 {

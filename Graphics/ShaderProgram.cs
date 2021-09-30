@@ -1,6 +1,6 @@
-﻿using OpenGL;
-using System;
+﻿using System;
 using System.Text;
+using OpenGL;
 
 namespace Mycraft.Graphics
 {

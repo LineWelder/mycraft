@@ -1,6 +1,6 @@
-﻿using Mycraft.Graphics;
+﻿using OpenGL;
+using Mycraft.Graphics;
 using Mycraft.Utils;
-using OpenGL;
 
 namespace Mycraft.WorldUI
 {
