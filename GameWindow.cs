@@ -169,6 +169,8 @@ namespace Mycraft
         {
             if (!Resources.AreLoaded) return;
 
+            // Set the viewport and the projection
+
             Gl.Viewport(0, 0, ClientSize.Width, ClientSize.Height);
             projection = Matrix4x4f.Perspective(
                 70, (float)ClientSize.Width / ClientSize.Height,
@@ -177,6 +179,8 @@ namespace Mycraft
 
             Gl.UseProgram(Resources.GUIShader.glId);
             Resources.GUIShader.Projection = Matrix4x4f.Ortho2D(0f, ClientSize.Width - 1, ClientSize.Height - 1, 0f);
+
+            // Update the GUI
 
             int pixelSize = ClientSize.Height / 200;
 
@@ -211,19 +215,25 @@ namespace Mycraft
         {
             Resources.LoadAll();
 
+            // Configure the graphics
+
+            Gl.LineWidth(2f);
+            Gl.Enable(EnableCap.Multisample);
+            Gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
             Gl.UseProgram(Resources.GameWorldShader.glId);
             Resources.GameWorldShader.Alpha = .6f;
+
+            // Screen stuff
 
             OnResized(null, null);
             Cursor.Hide();
             GrabCursor();
 
+            // Create the game objects
+
             origin = new Origin();
             selection = new Selection();
-
-            Gl.LineWidth(2f);
-            Gl.Enable(EnableCap.Multisample);
-            Gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
             world = new GameWorld(new SimpleWorldGenerator());
             world.GenerateSpawnArea();
@@ -247,6 +257,8 @@ namespace Mycraft
 
             Text = $"Mycraft - UPS: {(int)Math.Floor(1d / deltaTime)}";
 
+            // Player movement
+
             int forwardInput    = FuncUtils.GetInput1d(Keys.W, Keys.S);
             int horizontalInput = FuncUtils.GetInput1d(Keys.D, Keys.A);
 
@@ -269,6 +281,8 @@ namespace Mycraft
                 playerBox.Velocity = velocity;
             }
 
+            // Jump off the void
+
             if (playerBox.Position.y < -64f)
             {
                 Vertex3f velocity = playerBox.Velocity;
@@ -283,22 +297,27 @@ namespace Mycraft
             // );
             // camera.Translate(0f, FuncUtils.GetInput1d(Keys.Space, Keys.LShiftKey) * speed, 0f);
             
+            // Update the game objects
+
             camera.Position = playerBox.Position + new Vertex3f(.375f, 1.5f, .375f);
             camera.UpdateTransformMatrix();
 
             world.Update(camera.Position);
+            particles.Update(deltaTime);
 
-            if (RayCasting.Raycast(world, camera.Position, camera.Forward, out Hit hit))
-                selection.Select(hit.blockCoords, hit.side);
-            else
-                selection.Deselect();
+            // Update the graphics
 
             if (camera.Position.y < 0)
                 Gl.ClearColor(.05f, .05f, .05f, 1f);
             else
                 Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
 
-            particles.Update(deltaTime);
+            // Block selection
+
+            if (RayCasting.Raycast(world, camera.Position, camera.Forward, out Hit hit))
+                selection.Select(hit.blockCoords, hit.side);
+            else
+                selection.Deselect();
         }
 
         private void Render(object sender, GlControlEventArgs e)
@@ -307,6 +326,7 @@ namespace Mycraft
             Matrix4x4f vp = projection * camera.TransformMatrix;
 
             // Draw the world
+
             Gl.UseProgram(Resources.GameWorldShader.glId);
             Gl.Enable(EnableCap.DepthTest);
 
@@ -314,6 +334,7 @@ namespace Mycraft
             world.Draw();
 
             // Draw particles
+
             Gl.UseProgram(Resources.ParticleShader.glId);
             Resources.ParticleShader.View = camera.TransformMatrix;
             Resources.ParticleShader.Projection = projection;
@@ -321,6 +342,7 @@ namespace Mycraft
             particles.Draw();
 
             // Draw UI stuff
+
             Gl.UseProgram(Resources.WorldUIShader.glId);
             Resources.WorldUIShader.VP = vp;
             selection.Draw();
@@ -329,6 +351,7 @@ namespace Mycraft
             origin.Draw();
 
             // Draw vignette
+
             Gl.Disable(EnableCap.DepthTest);
             Gl.Disable(EnableCap.CullFace);
 
@@ -359,6 +382,7 @@ namespace Mycraft
             }
 
             // Draw GUI
+
             Gl.UseProgram(Resources.GUIShader.glId);
             Gl.Disable(EnableCap.Blend);
 
