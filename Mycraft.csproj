@@ -118,6 +118,7 @@
     <Compile Include="World\Generation\SimpleWorldGenerator.cs" />
     <Compile Include="World\Quad.cs" />
     <None Include="packages.config" />
+    <None Include="readme.md" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
