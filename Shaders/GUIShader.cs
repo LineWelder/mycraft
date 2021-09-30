@@ -1,7 +1,7 @@
-﻿using OpenGL;
-using System;
+﻿using Mycraft.Graphics;
+using OpenGL;
 
-namespace Mycraft.Graphics
+namespace Mycraft.Shaders
 {
     public class GUIShader : ShaderProgram
     {
@@ -12,11 +12,11 @@ layout(location = 0) in vec2 position;
 layout(location = 1) in vec2 textureCoords;
 
 uniform mat4 projection;
-out vec2 texCoords;
+out vec2 _textureCoords;
 
 void main()
 {
-    texCoords = textureCoords;
+    _textureCoords = textureCoords;
     gl_Position = projection * vec4(position, 0.0, 1.0);
 }";
 
@@ -24,11 +24,11 @@ void main()
 @"#version 330 core
 
 uniform sampler2D tex;
-in vec2 texCoords;
+in vec2 _textureCoords;
 
 void main()
 {
-    vec4 col = texture(tex, texCoords);
+    vec4 col = texture(tex, _textureCoords);
     if (col.a == 0.0) discard;
     gl_FragColor = col;
 }";

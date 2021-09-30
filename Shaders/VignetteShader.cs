@@ -1,6 +1,7 @@
-﻿using OpenGL;
+﻿using Mycraft.Graphics;
+using OpenGL;
 
-namespace Mycraft.Graphics
+namespace Mycraft.Shaders
 {
     public class VignetteShader : ShaderProgram
     {

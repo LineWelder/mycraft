@@ -1,7 +1,7 @@
-﻿using OpenGL;
-using System;
+﻿using Mycraft.Graphics;
+using OpenGL;
 
-namespace Mycraft.Graphics
+namespace Mycraft.Shaders
 {
     public class WorldUIShader : ShaderProgram
     {

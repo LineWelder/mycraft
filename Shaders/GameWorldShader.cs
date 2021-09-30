@@ -1,7 +1,7 @@
-﻿using OpenGL;
-using System;
+﻿using Mycraft.Graphics;
+using OpenGL;
 
-namespace Mycraft.Graphics
+namespace Mycraft.Shaders
 {
     public class GameWorldShader : ShaderProgram
     {
@@ -11,6 +11,7 @@ namespace Mycraft.Graphics
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec2 textureCoords;
 layout(location = 2) in float light;
+
 uniform mat4 mvp;
 out vec2 _textureCoords;
 out float _light;

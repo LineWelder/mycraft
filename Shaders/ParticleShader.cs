@@ -1,7 +1,7 @@
-﻿using OpenGL;
-using System;
+﻿using Mycraft.Graphics;
+using OpenGL;
 
-namespace Mycraft.Graphics
+namespace Mycraft.Shaders
 {
     public class ParticleShader : ShaderProgram
     {
@@ -14,11 +14,11 @@ layout(location = 2) in vec2 textureCoords;
 
 uniform mat4 view;
 uniform mat4 projection;
-out vec2 texCoords;
+out vec2 _textureCoords;
 
 void main()
 {
-    texCoords = textureCoords;
+    _textureCoords = textureCoords;
     vec4 position = view * vec4(particlePosition, 1.0);
     gl_Position = projection * (position + vec4(offset, 0.0, 0.0));
 }";
@@ -27,11 +27,11 @@ void main()
 @"#version 330 core
 
 uniform sampler2D tex;
-in vec2 texCoords;
+in vec2 _textureCoords;
 
 void main()
 {
-    gl_FragColor = texture(tex, texCoords);
+    gl_FragColor = texture(tex, _textureCoords);
 }";
 
         public Matrix4x4f View
