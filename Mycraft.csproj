@@ -99,6 +99,7 @@
     <Compile Include="Physics\ParticleSystem.cs" />
     <Compile Include="Utils\FastNoise.cs" />
     <Compile Include="Utils\Player.cs" />
+    <Compile Include="Utils\SmoothChangingVertex2f.cs" />
     <Compile Include="WorldUI\Box.cs" />
     <Compile Include="WorldUI\Origin.cs" />
     <Compile Include="Shaders\WorldUIShader.cs" />

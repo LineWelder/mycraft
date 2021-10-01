@@ -20,20 +20,21 @@ namespace Mycraft
 {
     public class GameWindow : Form
     {
+        private const float MOVEMENT_ACCELERATION = 20f, MOVEMENT_SPEED = 3.7f;
+        private const float MOUSE_SENSIVITY = .003f;
+
         private readonly GlControl glControl;
         private readonly Stopwatch stopwatch;
+        private Matrix4x4f projection;
 
         private Origin origin;
         private GameWorld world;
         private GUIRectangle cross;
-
-        private Player player;
-        private Hotbar hotbar;
-
         private ParticleSystem particles;
 
-        private const float MOVEMENT_SPEED = 3.7f, MOUSE_SENSIVITY = .003f;
-        private Matrix4x4f projection;
+        private SmoothChangingVertex2f playerMovement;
+        private Player player;
+        private Hotbar hotbar;
 
         public GameWindow()
         {
@@ -232,6 +233,7 @@ namespace Mycraft
             world = new GameWorld(new SimpleWorldGenerator());
             world.GenerateSpawnArea();
 
+            playerMovement = new SmoothChangingVertex2f(new Vertex2f(), MOVEMENT_ACCELERATION);
             player = new Player(world, new Vertex3f(.5f, world.GetGroundLevel(0, 0) + 1f, .5f));
             world.Update(player.camera.Position, true);
 
@@ -250,10 +252,17 @@ namespace Mycraft
             int forwardInput    = FuncUtils.GetInput1d(Keys.W, Keys.S);
             int horizontalInput = FuncUtils.GetInput1d(Keys.D, Keys.A);
 
-            float movementAmount = (float)(deltaTime * MOVEMENT_SPEED);
+            if (forwardInput != 0 || horizontalInput != 0)
+                playerMovement.Value = new Vertex2f(
+                    forwardInput, horizontalInput
+                ).Normalized * MOVEMENT_SPEED;
+            else
+                playerMovement.Value = new Vertex2f();
+                
+            playerMovement.Update(deltaTime);
             player.MoveRelativeToYaw(
-                forwardInput * movementAmount,
-                horizontalInput * movementAmount
+                (float)(playerMovement.Value.x * deltaTime),
+                (float)(playerMovement.Value.y * deltaTime)
             );
 
             Vertex3f velocity = player.Velocity;
