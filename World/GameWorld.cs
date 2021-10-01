@@ -58,7 +58,7 @@ namespace Mycraft.World
             var (chunkX, blockX) = ToChunkCoord(x);
             var (chunkZ, blockZ) = ToChunkCoord(z);
 
-            if (y >= Chunk.HEIGHT && y < 0)
+            if (y >= Chunk.HEIGHT || y < 0)
                 return;
 
             if (chunks.TryGetValue((chunkX, chunkZ), out Chunk chunk))
