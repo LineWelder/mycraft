@@ -338,13 +338,13 @@ namespace Mycraft
 
             if (block is LiquidBlock)
             {
-                Gl.UseProgram(Resources.VignetteShader.glId);
+                Gl.UseProgram(Resources.OverlayShader.glId);
 
                 Gl.Enable(EnableCap.Blend);
 
                 Resources.BlocksTexture.Bind();
                 Vertex4f texture = Block.GetTextureCoords(block.GetTexture(BlockSide.Top));
-                using (VertexArray vignette = new VertexArray(
+                using (VertexArray overlay = new VertexArray(
                     PrimitiveType.Quads, new int[] { 2, 2 },
                     new float[]
                     {
@@ -353,7 +353,7 @@ namespace Mycraft
                         -1f, -1f,  texture.x, texture.w,
                         -1f,  1f,  texture.x, texture.y
                     }
-                )) vignette.Draw();
+                )) overlay.Draw();
             }
 
             // Draw GUI

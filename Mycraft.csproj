@@ -91,7 +91,7 @@
     <Compile Include="Physics\AABB.cs" />
     <Compile Include="Shaders\ParticleShader.cs" />
     <Compile Include="Shaders\GUIShader.cs" />
-    <Compile Include="Shaders\VignetteShader.cs" />
+    <Compile Include="Shaders\OverlayShader.cs" />
     <Compile Include="GUI\BlockView.cs" />
     <Compile Include="GUI\GUIRectangle.cs" />
     <Compile Include="GUI\Hotbar.cs" />

@@ -3,7 +3,7 @@ using Mycraft.Graphics;
 
 namespace Mycraft.Shaders
 {
-    public class VignetteShader : ShaderProgram
+    public class OverlayShader : ShaderProgram
     {
         private const string VERTEX_SOURCE =
 @"#version 330 core
@@ -40,7 +40,7 @@ void main()
 
         private readonly int textureLocation;
 
-        public VignetteShader()
+        public OverlayShader()
             : base(VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
             textureLocation = FindVariable("tex");
