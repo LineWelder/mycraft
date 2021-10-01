@@ -101,7 +101,7 @@ namespace Mycraft.Physics
 
             position.x += delta.x;
             return others.Where((other) =>
-                OverlapsX(other) && OverlapsZ(other)
+                OverlapsY(other) && OverlapsZ(other)
              && HandleCollision(
                     delta.x,
                     ref position.x, Size.x,
@@ -133,7 +133,7 @@ namespace Mycraft.Physics
 
             position.z += delta.z;
             return others.Where((other) =>
-                OverlapsX(other) && OverlapsZ(other)
+                OverlapsX(other) && OverlapsY(other)
              && HandleCollision(
                     delta.z,
                     ref position.z, Size.z,
