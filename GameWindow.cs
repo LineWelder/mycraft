@@ -15,6 +15,7 @@ using Mycraft.WorldUI;
 
 // TODO make good in-water physics
 // TODO make pretty methods for creating planes for mesh generation
+// TODO make seasons
 
 namespace Mycraft
 {
