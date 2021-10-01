@@ -88,16 +88,17 @@
     <Compile Include="GameWindow.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Physics\AABB.cs" />
     <Compile Include="Shaders\ParticleShader.cs" />
     <Compile Include="Shaders\GUIShader.cs" />
     <Compile Include="Shaders\VignetteShader.cs" />
     <Compile Include="GUI\BlockView.cs" />
     <Compile Include="GUI\GUIRectangle.cs" />
     <Compile Include="GUI\Hotbar.cs" />
-    <Compile Include="Physics\AABB.cs" />
     <Compile Include="Physics\FallingBox.cs" />
     <Compile Include="Physics\ParticleSystem.cs" />
     <Compile Include="Utils\FastNoise.cs" />
+    <Compile Include="Utils\Player.cs" />
     <Compile Include="WorldUI\Box.cs" />
     <Compile Include="WorldUI\Origin.cs" />
     <Compile Include="Shaders\WorldUIShader.cs" />

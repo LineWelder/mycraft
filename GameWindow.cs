@@ -25,16 +25,14 @@ namespace Mycraft
 
         private Origin origin;
         private GameWorld world;
-        private Selection selection;
         private GUIRectangle cross;
 
+        private Player player;
         private Hotbar hotbar;
 
-        private FallingBox playerBox;
         private ParticleSystem particles;
 
         private const float MOVEMENT_SPEED = 3.7f, MOUSE_SENSIVITY = .003f;
-        private Camera camera;
         private Matrix4x4f projection;
 
         public GameWindow()
@@ -104,24 +102,17 @@ namespace Mycraft
 
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
-            const float HALF_PI = .5f * (float)Math.PI;
-
             var (dx, dy) = GrabCursor();
-
-            Vertex2f rotation = camera.Rotation;
-            rotation.x = FuncUtils.FixRotation(rotation.x + MOUSE_SENSIVITY * dx);
-            rotation.y = FuncUtils.Clamp(-HALF_PI, rotation.y - MOUSE_SENSIVITY * dy, HALF_PI);
-
-            camera.Rotation = rotation;
+            player.RotateCamera(MOUSE_SENSIVITY * dx, -MOUSE_SENSIVITY * dy);
         }
 
         private void OnMouseDown(object sender, MouseEventArgs e)
         {
-            if (selection.IsSelected)
+            if (player.Selection.IsSelected)
             {
                 if (e.Button == MouseButtons.Left)
                 {
-                    Vertex3i position = selection.Position;
+                    Vertex3i position = player.Selection.Position;
                     Block block = world.GetBlock(
                         position.x,
                         position.y,
@@ -145,10 +136,13 @@ namespace Mycraft
                 {
                     if (!(hotbar.SelectedBlock is null))
                     {
-                        Vertex3i placeBlockCoords = Block.GetNeighbour(selection.Position, selection.Side);
+                        Vertex3i placeBlockCoords = Block.GetNeighbour(
+                            player.Selection.Position,
+                            player.Selection.Side
+                        );
                         
                         if (!hotbar.SelectedBlock.HasCollider ||
-                            !playerBox.Intersects(
+                            !player.Intersects(
                                 new AABB(
                                     (Vertex3f)placeBlockCoords,
                                     new Vertex3f(1f, 1f, 1f)
@@ -234,19 +228,12 @@ namespace Mycraft
             // Create the game objects
 
             origin = new Origin();
-            selection = new Selection();
 
             world = new GameWorld(new SimpleWorldGenerator());
             world.GenerateSpawnArea();
 
-            playerBox = new FallingBox(
-                world,
-                new Vertex3f(.25f, world.GetGroundLevel(0, 0) + 1f, .25f),
-                new Vertex3f(.75f, 1.7f, .75f)
-            );
-            camera = new Camera(new Vertex3f(.5f, 20.5f, 1.5f), new Vertex2f(0f, 0f));
-
-            world.Update(camera.Position, true);
+            player = new Player(world, new Vertex3f(.5f, world.GetGroundLevel(0, 0) + 1f, .5f));
+            world.Update(player.camera.Position, true);
 
             particles = new ParticleSystem(world, .2f, .5d);
         }
@@ -263,29 +250,29 @@ namespace Mycraft
             int forwardInput    = FuncUtils.GetInput1d(Keys.W, Keys.S);
             int horizontalInput = FuncUtils.GetInput1d(Keys.D, Keys.A);
 
-            playerBox.Move(camera.RelativeToYaw(
-                forwardInput,
-                horizontalInput
-            ) * (deltaTime * MOVEMENT_SPEED));
-            playerBox.Update(deltaTime);
+            float movementAmount = (float)(deltaTime * MOVEMENT_SPEED);
+            player.MoveRelativeToYaw(
+                forwardInput * movementAmount,
+                horizontalInput * movementAmount
+            );
 
-            Vertex3f velocity = playerBox.Velocity;
+            Vertex3f velocity = player.Velocity;
 
             if (FuncUtils.IsKeyPressed(Keys.Space))
             {
-                if (playerBox.IsGrounded)
+                if (player.IsGrounded)
                     velocity.y = 6f;
 
-                if (playerBox.IsInWater)
+                if (player.IsInWater)
                     velocity.y += (float)(20f * deltaTime);
             }
 
             // Jump off the void
 
-            if (playerBox.Position.y < -64f && velocity.y < 0f)
+            if (player.Position.y < -64f && velocity.y < 0f)
                 velocity.y *= -1f;
 
-            playerBox.Velocity = velocity;
+            player.Velocity = velocity;
 
             // float speed = (float)(deltaTime * MOVEMENT_SPEED);
             // camera.MoveRelativeToYaw(
@@ -296,31 +283,22 @@ namespace Mycraft
 
             // Update the game objects
 
-            camera.Position = playerBox.Position + new Vertex3f(.375f, 1.5f, .375f);
-            camera.UpdateTransformMatrix();
-
-            world.Update(camera.Position);
+            player.Update(deltaTime);
+            world.Update(player.camera.Position);
             particles.Update(deltaTime);
 
             // Update the graphics
 
-            if (camera.Position.y < 0)
+            if (player.camera.Position.y < 0)
                 Gl.ClearColor(.05f, .05f, .05f, 1f);
             else
                 Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
-
-            // Block selection
-
-            if (RayCasting.Raycast(world, camera.Position, camera.Forward, out Hit hit))
-                selection.Select(hit.blockCoords, hit.side);
-            else
-                selection.Deselect();
         }
 
         private void Render(object sender, GlControlEventArgs e)
         {
             Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            Matrix4x4f vp = projection * camera.TransformMatrix;
+            Matrix4x4f vp = projection * player.camera.TransformMatrix;
 
             // Draw the world
 
@@ -333,7 +311,7 @@ namespace Mycraft
             // Draw particles
 
             Gl.UseProgram(Resources.ParticleShader.glId);
-            Resources.ParticleShader.View = camera.TransformMatrix;
+            Resources.ParticleShader.View = player.camera.TransformMatrix;
             Resources.ParticleShader.Projection = projection;
             Resources.BlocksTexture.Bind();
             particles.Draw();
@@ -342,7 +320,7 @@ namespace Mycraft
 
             Gl.UseProgram(Resources.WorldUIShader.glId);
             Resources.WorldUIShader.VP = vp;
-            selection.Draw();
+            player.Selection.Draw();
 
             Resources.WorldUIShader.Model = Matrix4x4f.Identity;
             origin.Draw();
@@ -353,9 +331,9 @@ namespace Mycraft
             Gl.Disable(EnableCap.CullFace);
 
             Block block = world.GetBlock(
-                (int)Math.Floor(camera.Position.x),
-                (int)Math.Floor(camera.Position.y),
-                (int)Math.Floor(camera.Position.z)
+                (int)Math.Floor(player.camera.Position.x),
+                (int)Math.Floor(player.camera.Position.y),
+                (int)Math.Floor(player.camera.Position.z)
             );
 
             if (block is LiquidBlock)
@@ -394,7 +372,7 @@ namespace Mycraft
             Resources.DisposeAll();
             world.Dispose();
             origin.Dispose();
-            selection.Dispose();
+            player.Dispose();
             hotbar.Dispose();
         }
     }

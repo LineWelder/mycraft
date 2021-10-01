@@ -17,7 +17,7 @@ namespace Mycraft.Physics
         public bool IsGrounded { get; private set; }
         public bool IsInWater { get; private set; }
 
-        private GameWorld world;
+        protected GameWorld world;
         private Vertex3f velocity;
 
         public FallingBox(GameWorld world, Vertex3f position, Vertex3f size)
