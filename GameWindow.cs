@@ -269,35 +269,31 @@ namespace Mycraft
             ) * (deltaTime * MOVEMENT_SPEED));
             playerBox.Update(deltaTime);
 
+            Vertex3f velocity = playerBox.Velocity;
+
             if (FuncUtils.IsKeyPressed(Keys.Space))
             {
-                Vertex3f velocity = playerBox.Velocity;
-
                 if (playerBox.IsGrounded)
                     velocity.y = 6f;
 
                 if (playerBox.IsInWater)
                     velocity.y += (float)(20f * deltaTime);
-
-                playerBox.Velocity = velocity;
             }
 
             // Jump off the void
 
-            if (playerBox.Position.y < -64f)
-            {
-                Vertex3f velocity = playerBox.Velocity;
+            if (playerBox.Position.y < -64f && velocity.y < 0f)
                 velocity.y *= -1f;
-                playerBox.Velocity = velocity;
-            }
-            
+
+            playerBox.Velocity = velocity;
+
             // float speed = (float)(deltaTime * MOVEMENT_SPEED);
             // camera.MoveRelativeToYaw(
             //     speed * forwardInput,
             //     speed * horizontalInput
             // );
             // camera.Translate(0f, FuncUtils.GetInput1d(Keys.Space, Keys.LShiftKey) * speed, 0f);
-            
+
             // Update the game objects
 
             camera.Position = playerBox.Position + new Vertex3f(.375f, 1.5f, .375f);
