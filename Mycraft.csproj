@@ -117,6 +117,7 @@
     <Compile Include="World\GameWorld.cs" />
     <Compile Include="WorldUI\Selection.cs" />
     <Compile Include="World\Generation\IWorldGenerator.cs" />
+    <Compile Include="World\Generation\FlatWorldGenerator.cs" />
     <Compile Include="World\Generation\SimpleWorldGenerator.cs" />
     <Compile Include="World\Quad.cs" />
     <None Include="packages.config" />
