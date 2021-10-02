@@ -240,8 +240,6 @@ namespace Mycraft
             Gl.UseProgram(Resources.WorldUIShader.glId);
             Resources.WorldUIShader.VP = vp;
             player.Selection.Draw();
-
-            Resources.WorldUIShader.Model = Matrix4x4f.Identity;
             origin.Draw();
 
             // Draw vignette
