@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+
 using Mycraft.Graphics;
 using Mycraft.Shaders;
 
@@ -40,16 +42,15 @@ namespace Mycraft.Utils
 
         public static void DisposeAll()
         {
-            WorldUIShader.Dispose();
-            GUIShader.Dispose();
-            GameWorldShader.Dispose();
-            ParticleShader.Dispose();
-            OverlayShader.Dispose();
+            AreLoaded = false;
 
-            BlocksTexture.Dispose();
-            CrossTexture.Dispose();
-            HotbarTexture.Dispose();
-            HotbarSelectorTexture.Dispose();
+            var disposableResources =
+                from property in typeof(Resources).GetProperties()
+                where property.PropertyType.IsSubclassOf(typeof(IDisposable))
+                select (IDisposable)property.GetValue(null);
+
+            foreach (IDisposable resource in disposableResources)
+                resource.Dispose();
         }
     }
 }
