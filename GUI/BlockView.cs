@@ -1,13 +1,14 @@
 ﻿using OpenGL;
 using Mycraft.Blocks;
 using Mycraft.Graphics;
+using Mycraft.Utils;
 
 namespace Mycraft.GUI
 {
     public class BlockView : VertexArray
     {
         public BlockView(Vertex2i position, Vertex2i size, Block block)
-            : base(PrimitiveType.Quads, new int[] { 2, 2 })
+            : base(PrimitiveType.Quads, Resources.GUIShader)
         {
             Vertex4f topTexture = Block.GetTextureCoords(block.GetTexture(BlockSide.Top));
             Vertex4f frontTexture = Block.GetTextureCoords(block.GetTexture(BlockSide.Front));

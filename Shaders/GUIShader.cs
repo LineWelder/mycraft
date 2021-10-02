@@ -47,7 +47,7 @@ void main()
         private readonly int textureLocation;
 
         public GUIShader()
-            : base(VERTEX_SOURCE, FRAGMENT_SOURCE)
+            : base(new int[] { 2, 2 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
             textureLocation = FindVariable("tex");
             projectionLocation = FindVariable("projection");

@@ -44,7 +44,7 @@ void main()
         private readonly int colorLocation, modelLocation, vpLocation;
 
         public WorldUIShader()
-            : base(VERTEX_SOURCE, FRAGMENT_SOURCE)
+            : base(new int[] { 3 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
             colorLocation = FindVariable("color");
             modelLocation = FindVariable("model");

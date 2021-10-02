@@ -264,7 +264,7 @@ namespace Mycraft
                 Resources.BlocksTexture.Bind();
                 Vertex4f texture = Block.GetTextureCoords(block.GetTexture(BlockSide.Top));
                 using (VertexArray overlay = new VertexArray(
-                    PrimitiveType.Quads, new int[] { 2, 2 },
+                    PrimitiveType.Quads, Resources.OverlayShader,
                     new float[]
                     {
                          1f,  1f,  texture.z, texture.y,

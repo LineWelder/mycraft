@@ -1,12 +1,13 @@
 ﻿using OpenGL;
 using Mycraft.Graphics;
+using Mycraft.Utils;
 
 namespace Mycraft.GUI
 {
     public class GUIRectangle : VertexArray
     {
         public GUIRectangle(Vertex2i position, Vertex2i size)
-            : base(PrimitiveType.Quads, new int[] { 2, 2 })
+            : base(PrimitiveType.Quads, Resources.GUIShader)
         {
             Data = new float[]
             {

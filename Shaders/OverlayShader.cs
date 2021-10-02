@@ -41,7 +41,7 @@ void main()
         private readonly int textureLocation;
 
         public OverlayShader()
-            : base(VERTEX_SOURCE, FRAGMENT_SOURCE)
+            : base(new int[] { 2, 2 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
             textureLocation = FindVariable("tex");
         }

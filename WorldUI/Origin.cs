@@ -30,9 +30,9 @@ namespace Mycraft.WorldUI
 
         public Origin()
         {
-            xAxis = new VertexArray(PrimitiveType.Lines, new int[] { 3 }, xAxisVertices);
-            yAxis = new VertexArray(PrimitiveType.Lines, new int[] { 3 }, yAxisVertices);
-            zAxis = new VertexArray(PrimitiveType.Lines, new int[] { 3 }, zAxisVertices);
+            xAxis = new VertexArray(PrimitiveType.Lines, Resources.WorldUIShader, xAxisVertices);
+            yAxis = new VertexArray(PrimitiveType.Lines, Resources.WorldUIShader, yAxisVertices);
+            zAxis = new VertexArray(PrimitiveType.Lines, Resources.WorldUIShader, zAxisVertices);
         }
 
         public void Draw()

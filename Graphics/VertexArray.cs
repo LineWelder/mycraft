@@ -45,10 +45,10 @@ namespace Mycraft.Graphics
         private int verticesCount;
 
         /// <param name="vertexFormat">The index is the variable location and the value is the variable size</param>
-        public VertexArray(PrimitiveType primitiveType, int[] vertexFormat)
+        public VertexArray(PrimitiveType primitiveType, ShaderProgram shader)
         {
             this.primitiveType = primitiveType;
-            this.vertexFormat = vertexFormat;
+            this.vertexFormat = shader.vertexFormat;
             vertexSize = vertexFormat.Sum();
 
             glId = Gl.GenVertexArray();
@@ -57,8 +57,8 @@ namespace Mycraft.Graphics
             vbo = Gl.GenBuffer();
         }
 
-        public VertexArray(PrimitiveType primitiveType, int[] vertexFormat, float[] data)
-            : this(primitiveType, vertexFormat)
+        public VertexArray(PrimitiveType primitiveType, ShaderProgram shader, float[] data)
+            : this(primitiveType, shader)
         {
             Data = data;
         }

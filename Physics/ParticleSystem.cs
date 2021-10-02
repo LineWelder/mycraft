@@ -5,6 +5,7 @@ using OpenGL;
 using Mycraft.Blocks;
 using Mycraft.Graphics;
 using Mycraft.World;
+using Mycraft.Utils;
 
 namespace Mycraft.Physics
 {
@@ -33,7 +34,7 @@ namespace Mycraft.Physics
             => (float)(rand.NextDouble() * (end - start) + start);
 
         public ParticleSystem(GameWorld world, float size, double lifeSpan)
-            : base(PrimitiveType.Quads, new int[] { 3, 2, 2 })
+            : base(PrimitiveType.Quads, Resources.ParticleShader)
         {
             particles = new List<Particle>();
             this.world = world;

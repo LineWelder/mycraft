@@ -9,7 +9,7 @@ namespace Mycraft.WorldUI
         public Vertex3f Color { get; set; }
 
         public Box(Vertex3f start, Vertex3f end, Vertex3f color)
-            : base(PrimitiveType.Lines, new int[] { 3 })
+            : base(PrimitiveType.Lines, Resources.WorldUIShader)
         {
             Color = color;
             Data = new float[]

@@ -6,10 +6,12 @@ namespace Mycraft.Graphics
 {
     public class ShaderProgram : IDisposable
     {
+        public readonly int[] vertexFormat;
         public readonly uint glId;
 
-        public ShaderProgram(string vertexSource, string fragmentSource)
+        public ShaderProgram(int[] vertexFormat, string vertexSource, string fragmentSource)
         {
+            this.vertexFormat = vertexFormat;
             glId = Gl.CreateProgram();
 
             uint vertex = CreateShader(ShaderType.VertexShader, vertexSource);

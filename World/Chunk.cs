@@ -15,7 +15,7 @@ namespace Mycraft.World
             public new float[] Data { set => base.Data = value; }
 
             public WorldGeometry()
-                : base(PrimitiveType.Quads, new int[] { 3, 2, 1 }) { }
+                : base(PrimitiveType.Quads, Resources.GameWorldShader) { }
         }
 
         public const int SIZE = 16;

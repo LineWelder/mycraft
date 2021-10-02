@@ -54,7 +54,7 @@ void main()
         private readonly int textureLocation;
 
         public ParticleShader()
-            : base(VERTEX_SOURCE, FRAGMENT_SOURCE)
+            : base(new int[] { 3, 2, 2 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
             textureLocation = FindVariable("tex");
             viewLocation = FindVariable("view");

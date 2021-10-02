@@ -60,7 +60,7 @@ void main()
         private readonly int alphaLocation;
 
         public GameWorldShader()
-            : base(VERTEX_SOURCE, FRAGMENT_SOURCE)
+            : base(new int[] { 3, 2, 1 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
             textureLocation = FindVariable("tex");
             mvpLocation = FindVariable("mvp");
