@@ -46,69 +46,57 @@ namespace Mycraft.Blocks
 
             // Bottom
             if (HasFace(GetChunkBlock(chunk, x, y - 1, z)))
-                mesh.Add(new Quad(
-                    new Vertex3f(wx,      wy,      wz + 1f),
-                    new Vertex3f(wx,      wy,      wz),
-                    new Vertex3f(wx + 1f, wy,      wz),
-                    new Vertex3f(wx + 1f, wy,      wz + 1f),
+                mesh.Add(QuadGenerator.Bottom(
+                    new Vertex3f(wx + 1f, wy, wz + 1f),
+                    new Vertex2f(1f, 1f),
                     GetTextureCoords(GetTexture(BlockSide.Bottom)),
                     .7f
                 ));
 
             // Top
             if (HasFace(GetChunkBlock(chunk, x, y + 1, z)))
-                mesh.Add(new Quad(
+                mesh.Add(QuadGenerator.Top(
                     new Vertex3f(wx + 1f, wy + 1f, wz + 1f),
-                    new Vertex3f(wx + 1f, wy + 1f, wz),
-                    new Vertex3f(wx,      wy + 1f, wz),
-                    new Vertex3f(wx,      wy + 1f, wz + 1f),
+                    new Vertex2f(1f, 1f),
                     GetTextureCoords(GetTexture(BlockSide.Top)),
                     1f
                 ));
 
             // Left
             if (HasFace(GetChunkBlock(chunk, x - 1, y, z)))
-                mesh.Add(new Quad(
-                    new Vertex3f(wx,      wy,      wz + 1f),
-                    new Vertex3f(wx,      wy + 1f, wz + 1f),
-                    new Vertex3f(wx,      wy + 1f, wz),
-                    new Vertex3f(wx,      wy,      wz),
+                mesh.Add(QuadGenerator.Left(
+                    new Vertex3f(wx, wy, wz + 1f),
+                    new Vertex2f(1f, 1f),
                     GetTextureCoords(GetTexture(BlockSide.Left)),
                     .8f
                 ));
 
             // Right
             if (HasFace(GetChunkBlock(chunk, x + 1, y, z)))
-                mesh.Add(new Quad(
-                    new Vertex3f(wx + 1f, wy,      wz),    
-                    new Vertex3f(wx + 1f, wy + 1f, wz),    
-                    new Vertex3f(wx + 1f, wy + 1f, wz + 1f),
-                    new Vertex3f(wx + 1f, wy,      wz + 1f),
+                mesh.Add(QuadGenerator.Right(
+                    new Vertex3f(wx + 1f, wy, wz + 1f),
+                    new Vertex2f(1f, 1f),
                     GetTextureCoords(GetTexture(BlockSide.Right)),
                     .8f
                 ));
 
             // Back
             if (HasFace(GetChunkBlock(chunk, x, y, z - 1)))
-                mesh.Add(new Quad(
-                    new Vertex3f(wx,      wy,      wz),
-                    new Vertex3f(wx,      wy + 1f, wz),
-                    new Vertex3f(wx + 1f, wy + 1f, wz),
-                    new Vertex3f(wx + 1f, wy,      wz),
+                mesh.Add(QuadGenerator.Back(
+                    new Vertex3f(wx + 1f, wy, wz),
+                    new Vertex2f(1f, 1f),
                     GetTextureCoords(GetTexture(BlockSide.Back)),
                     .7f
                 ));
 
             // Front
             if (HasFace(GetChunkBlock(chunk, x, y, z + 1)))
-                mesh.Add(new Quad(
-                    new Vertex3f(wx + 1f, wy,      wz + 1f),
-                    new Vertex3f(wx + 1f, wy + 1f, wz + 1f),
-                    new Vertex3f(wx,      wy + 1f, wz + 1f),
-                    new Vertex3f(wx,      wy,      wz + 1f),
-                    GetTextureCoords(GetTexture(BlockSide.Front)),
-                    .9f
-                ));
+                mesh.Add(QuadGenerator.Front(
+                     new Vertex3f(wx, wy, wz + 1f),
+                     new Vertex2f(1f, 1f),
+                     GetTextureCoords(GetTexture(BlockSide.Front)),
+                     .9f
+                 ));
         }
 
         protected Block GetChunkBlock(Chunk chunk, int x, int y, int z)
