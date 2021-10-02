@@ -128,7 +128,7 @@ namespace Mycraft.World
 
                 for (int x = cameraChunkX - LOAD_DISTANCE; x <= cameraChunkX + LOAD_DISTANCE; x++)
                     for (int z = cameraChunkZ - LOAD_DISTANCE; z <= cameraChunkZ + LOAD_DISTANCE; z++)
-                        if (!chunks.ContainsKey((x, z)))
+                        if ( !chunks.ContainsKey((x, z)) && !chunksToLoad.Contains((x, z)) )
                             chunksToLoad.Enqueue((x, z));
 
                 // Unload all the chunks outside the area
