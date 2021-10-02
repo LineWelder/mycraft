@@ -21,6 +21,7 @@ namespace Mycraft.World
 
         private readonly Dictionary<(int x, int z), Chunk> chunks;
         private readonly List<(int distance, Chunk chunk)> renderQueue;
+        private readonly Queue<(int x, int z)> chunksToLoad;
 
         private readonly Dictionary<(int chunkX, int chunkZ), List<BlockToBeSet>> toBeSet;
         private readonly IWorldGenerator generator;
@@ -31,6 +32,7 @@ namespace Mycraft.World
         {
             chunks = new Dictionary<(int x, int z), Chunk>();
             renderQueue = new List<(int distance, Chunk chunk)>();
+            chunksToLoad = new Queue<(int x, int z)>();
 
             toBeSet = new Dictionary<(int chunkX, int chunkZ), List<BlockToBeSet>>();
             this.generator = generator;
@@ -107,7 +109,7 @@ namespace Mycraft.World
         {
             for (int x = -LOAD_DISTANCE; x <= LOAD_DISTANCE; x++)
                 for (int z = -LOAD_DISTANCE; z <= LOAD_DISTANCE; z++)
-                    LoadChunk(x, z);
+                    LoadChunk((x, z));
         }
 
         public void Update(Vertex3f cameraPosition, bool firstUpdate = false)
@@ -115,14 +117,21 @@ namespace Mycraft.World
             int cameraChunkX = ToChunkCoord((int)Math.Floor(cameraPosition.x)).chunk;
             int cameraChunkZ = ToChunkCoord((int)Math.Floor(cameraPosition.z)).chunk;
 
+            // Chunk loading
+
             if (firstUpdate || lastCameraChunkX != cameraChunkX || lastCameraChunkZ != cameraChunkZ)
             {
                 lastCameraChunkX = cameraChunkX;
                 lastCameraChunkZ = cameraChunkZ;
 
+                // Ensure all chunks in the area are loaded
+
                 for (int x = cameraChunkX - LOAD_DISTANCE; x <= cameraChunkX + LOAD_DISTANCE; x++)
                     for (int z = cameraChunkZ - LOAD_DISTANCE; z <= cameraChunkZ + LOAD_DISTANCE; z++)
-                        LoadChunk(x, z);
+                        if (!chunks.ContainsKey((x, z)))
+                            chunksToLoad.Enqueue((x, z));
+
+                // Unload all the chunks outside the area
 
                 List<(int x, int z)> chunksToUnload = new List<(int x, int z)>();
                 foreach (var coords in chunks.Keys)
@@ -132,6 +141,8 @@ namespace Mycraft.World
 
                 foreach (var coords in chunksToUnload)
                     UnloadChunk(coords.x, coords.z);
+
+                // Add all the loaded chunks to the render queue
 
                 renderQueue.Clear();
                 foreach (var pair in chunks)
@@ -148,6 +159,13 @@ namespace Mycraft.World
                         => b.distance.CompareTo(a.distance)
                 );
             }
+
+            // Load an enqueued chunk
+
+            if (chunksToLoad.Count > 0)
+                LoadChunk(chunksToLoad.Dequeue());
+
+            // Update chunk meshes
 
             Parallel.ForEach(renderQueue, (pair) =>
                 pair.chunk.GenerateMesh(cameraPosition)
@@ -166,21 +184,18 @@ namespace Mycraft.World
             if (chunks.TryGetValue((x, z + 1), out chunk)) chunk.needsUpdate = true;
         }
 
-        private void LoadChunk(int x, int z)
+        private void LoadChunk((int x, int z) coords)
         {
-            if (chunks.ContainsKey((x, z)))
-                return;
-
-            Chunk newChunk = new Chunk(this, x, z);
-            chunks.Add((x, z), newChunk);
+            Chunk newChunk = new Chunk(this, coords.x, coords.z);
+            chunks.Add(coords, newChunk);
 
             generator.GenerateChunk(newChunk);
-            if (toBeSet.TryGetValue((x, z), out List<BlockToBeSet> blocks))
+            if (toBeSet.TryGetValue(coords, out List<BlockToBeSet> blocks))
                 foreach (BlockToBeSet block in blocks)
                     newChunk.blocks[block.x, block.y, block.z] = block.block;
 
             newChunk.needsUpdate = true;
-            OnChunkUpdate(x, z);
+            OnChunkUpdate(coords.x, coords.z);
         }
 
         private void UnloadChunk(int x, int z)
