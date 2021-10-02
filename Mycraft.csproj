@@ -85,6 +85,7 @@
     <Compile Include="Blocks\BlockRegistry.cs" />
     <Compile Include="Blocks\LiquidBlock.cs" />
     <Compile Include="Blocks\MultiTexturedBlock.cs" />
+    <Compile Include="Game.cs" />
     <Compile Include="GameWindow.cs">
       <SubType>Form</SubType>
     </Compile>
