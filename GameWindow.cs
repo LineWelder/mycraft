@@ -3,19 +3,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 using OpenGL;
-
-using Mycraft.Blocks;
-using Mycraft.GUI;
-using Mycraft.Graphics;
-using Mycraft.Physics;
 using Mycraft.Utils;
-using Mycraft.World;
-using Mycraft.World.Generation;
-using Mycraft.WorldUI;
-
-// TODO make good in-water physics
-// TODO make pretty methods for creating planes for mesh generation
-// TODO make seasons
 
 namespace Mycraft
 {

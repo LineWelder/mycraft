@@ -11,6 +11,9 @@ using Mycraft.World.Generation;
 using System.Windows.Forms;
 using Mycraft.Graphics;
 
+// TODO make good in-water physics
+// TODO make seasons
+
 namespace Mycraft
 {
     public class Game : IDisposable
