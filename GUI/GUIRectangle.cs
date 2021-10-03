@@ -9,6 +9,11 @@ namespace Mycraft.GUI
         public GUIRectangle(Vertex2i position, Vertex2i size)
             : base(PrimitiveType.Quads, Resources.GUIShader)
         {
+            Resize(position, size);
+        }
+
+        public void Resize(Vertex2i position, Vertex2i size)
+        {
             Data = new float[]
             {
                 position.x + size.x, position.y + size.y,  1f, 1f,

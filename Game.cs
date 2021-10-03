@@ -42,6 +42,27 @@ namespace Mycraft
             Gl.UseProgram(Resources.GameWorldShader.glId);
             Resources.GameWorldShader.Alpha = .6f;
 
+            // Create the GUI
+
+            cross = new GUIRectangle(
+                new Vertex2i(),
+                new Vertex2i()
+            );
+
+            hotbar = new Hotbar(
+                new Vertex2i(), 0,
+                0, new Block[]
+                {
+                    BlockRegistry.Stone,
+                    BlockRegistry.Grass,
+                    BlockRegistry.Dirt,
+                    BlockRegistry.Log,
+                    BlockRegistry.Leaves,
+                    BlockRegistry.Water,
+                    null, null, null, null
+                }
+            );
+
             // Create the game objects
 
             origin = new Origin();
@@ -139,7 +160,7 @@ namespace Mycraft
 
             int pixelSize = height / 200;
 
-            cross = new GUIRectangle(
+            cross.Resize(
                 new Vertex2i(
                     width / 2 - 6 * pixelSize,
                     height / 2 - 6 * pixelSize
@@ -147,22 +168,12 @@ namespace Mycraft
                 new Vertex2i(12 * pixelSize, 12 * pixelSize)
             );
 
-            hotbar = new Hotbar(
+            hotbar.Resize(
                 new Vertex2i(
                     width / 2 - 91 * pixelSize,
                     height - 21 * pixelSize
                 ),
-                pixelSize,
-                0, new Block[]
-                {
-                    BlockRegistry.Stone,
-                    BlockRegistry.Grass,
-                    BlockRegistry.Dirt,
-                    BlockRegistry.Log,
-                    BlockRegistry.Leaves,
-                    BlockRegistry.Water,
-                    null, null, null, null
-                }
+                pixelSize
             );
         }
 

@@ -7,8 +7,16 @@ namespace Mycraft.GUI
 {
     public class BlockView : VertexArray
     {
+        private Block block;
+
         public BlockView(Vertex2i position, Vertex2i size, Block block)
             : base(PrimitiveType.Quads, Resources.GUIShader)
+        {
+            this.block = block;
+            Resize(position, size);
+        }
+
+        public void Resize(Vertex2i position, Vertex2i size)
         {
             Vertex4f topTexture = Block.GetTextureCoords(block.GetTexture(BlockSide.Top));
             Vertex4f frontTexture = Block.GetTextureCoords(block.GetTexture(BlockSide.Front));

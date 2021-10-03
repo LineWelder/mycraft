@@ -14,7 +14,7 @@ namespace Mycraft.GUI
             set
             {
                 selected = value;
-                hotbarSelector = new GUIRectangle(
+                hotbarSelector.Resize(
                     position + new Vertex2i((18 * value - 1) * scale, -scale),
                     new Vertex2i(22 * scale, 22 * scale)
                 );
@@ -34,13 +34,16 @@ namespace Mycraft.GUI
 
         public Hotbar(Vertex2i position, int scale, int selected, Block[] blocks)
         {
-            this.position = position;
-            this.scale = scale;
-            Selected = selected;
+            this.selected = selected;
 
             hotbar = new GUIRectangle(
-                position,
-                new Vertex2i(182 * scale, 20 * scale)
+                new Vertex2i(),
+                new Vertex2i()
+            );
+
+            hotbarSelector = new GUIRectangle(
+                new Vertex2i(),
+                new Vertex2i()
             );
 
             this.blocks = blocks;
@@ -48,10 +51,35 @@ namespace Mycraft.GUI
             for (int i = 0; i < CAPACITY; i++)
                 if (!(blocks[i] is null))
                     blockViews[i] = new BlockView(
-                        position + new Vertex2i((int)((3.5 + 18 * i) * scale), 3 * scale),
-                        new Vertex2i(13 * scale, 14 * scale),
+                        new Vertex2i(),
+                        new Vertex2i(),
                         blocks[i]
                     );
+
+            Resize(position, scale);
+        }
+
+        public void Resize(Vertex2i position, int scale)
+        {
+            this.position = position;
+            this.scale = scale;
+
+            hotbar.Resize(
+                position,
+                new Vertex2i(182 * scale, 20 * scale)
+            );
+
+            for (int i = 0; i < CAPACITY; i++)
+                if (!(blocks[i] is null))
+                    blockViews[i].Resize(
+                        position + new Vertex2i((int)((3.5 + 18 * i) * scale), 3 * scale),
+                        new Vertex2i(13 * scale, 14 * scale)
+                    );
+
+            hotbarSelector.Resize(
+                position + new Vertex2i((18 * Selected - 1) * scale, -scale),
+                new Vertex2i(22 * scale, 22 * scale)
+            );
         }
 
         public void Draw()

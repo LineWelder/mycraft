@@ -113,8 +113,8 @@ namespace Mycraft
             GrabCursor();
 
             Resources.LoadAll();
-            game.Resize(ClientSize.Width, ClientSize.Height);
             game.Init();
+            game.Resize(ClientSize.Width, ClientSize.Height);
         }
 
         private void OnContextUpdate(object sender, GlControlEventArgs e)
