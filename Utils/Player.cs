@@ -25,7 +25,7 @@ namespace Mycraft.Utils
               )
         {
             Selection = new Selection();
-            camera = new Camera(new Vertex3f(position.x, EYE_HEIGHT, position.y), new Vertex2f(0f, 0f));
+            camera = new Camera(new Vertex3f(position.x, position.y + EYE_HEIGHT, position.z), new Vertex2f(0f, 0f));
         }
 
         public void RotateCamera(float dyaw, float dpitch)
