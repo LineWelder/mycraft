@@ -11,7 +11,6 @@ using Mycraft.World.Generation;
 using System.Windows.Forms;
 using Mycraft.Graphics;
 
-// TODO make good in-water physics
 // TODO make seasons
 
 namespace Mycraft
@@ -19,6 +18,7 @@ namespace Mycraft
     public class Game : IDisposable
     {
         private const float MOVEMENT_ACCELERATION = 20f, MOVEMENT_SPEED = 3.7f;
+        private const float MAX_ACCENDING_SPEED = 2f, ACCENDING_ACCELERATION = 4f;
 
         private Matrix4x4f projection;
 
@@ -204,8 +204,8 @@ namespace Mycraft
                 if (player.IsGrounded)
                     velocity.y = 6f;
 
-                if (player.IsInWater)
-                    velocity.y += (float)(20f * deltaTime);
+                if (player.IsInWater && velocity.y < MAX_ACCENDING_SPEED)
+                    velocity.y += (float)(ACCENDING_ACCELERATION * deltaTime);
             }
 
             // Jump off the void

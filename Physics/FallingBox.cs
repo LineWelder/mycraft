@@ -10,7 +10,12 @@ namespace Mycraft.Physics
     public class FallingBox : AABB
     {
         private const float GRAVITY = 15f;
-        private const float WATER_FRICTION = 0.5f;
+        private const float MAX_FALL_SPEED = 50f;
+        private const float WATER_GRAVITY = 1.5f;
+
+        // If the box's speed is heigher than the max one
+        private const float WATER_MAX_SPEED = 1.5f;
+        private const float WATER_VELOCITY_FIX = 60f;
 
         public Vertex3f Velocity { get => velocity; set => velocity = value; }
 
@@ -35,8 +40,31 @@ namespace Mycraft.Physics
 
         public void Update(double deltaTime)
         {
-            Move(velocity * deltaTime * (IsInWater ? WATER_FRICTION : 1f));
-            velocity.y -= (float)(GRAVITY * deltaTime * (IsInWater ? WATER_FRICTION : 1f));
+            Move(velocity * deltaTime);
+
+            if (IsInWater)
+            {
+                float velocityModule = velocity.Module();
+                Vertex3f velocityDirection = velocity.Normalized;
+                float velocityFix = (float)(WATER_VELOCITY_FIX * deltaTime);
+
+                if (velocityModule >= WATER_MAX_SPEED + velocityFix)
+                    velocity -= velocityDirection * velocityFix;
+                else if (velocityModule > WATER_MAX_SPEED)
+                    velocity = velocityDirection * WATER_MAX_SPEED;
+                else
+                    velocity.y -= (float)(WATER_GRAVITY * deltaTime);
+            }
+            else
+            {
+                float velocityDelta = (float)(GRAVITY * deltaTime);
+                if (velocity.y > -MAX_FALL_SPEED + velocityDelta)
+                    velocity.y -= (float)(GRAVITY * deltaTime);
+                else if (velocity.y > -MAX_FALL_SPEED)
+                    velocity.y = -MAX_FALL_SPEED;
+
+            }
+
             IsGrounded = false;
             IsInWater = false;
 
