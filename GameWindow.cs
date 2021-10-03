@@ -117,12 +117,24 @@ namespace Mycraft
             game.Resize(ClientSize.Width, ClientSize.Height);
         }
 
+        private const int FPS_UPDATE_RATE = 30;
+        private double frameTimeSum;
+        private int numFrames;
+
         private void OnContextUpdate(object sender, GlControlEventArgs e)
         {
             double deltaTime = stopwatch.Elapsed.TotalSeconds;
             stopwatch.Restart();
 
-            Text = $"Mycraft - UPS: {(int)Math.Floor(1d / deltaTime)}";
+            frameTimeSum += deltaTime;
+            numFrames++;
+            if (numFrames >= FPS_UPDATE_RATE)
+            {
+                Text = $"Mycraft - FPS: {(int)Math.Floor(numFrames / frameTimeSum)}";
+                frameTimeSum = 0d;
+                numFrames = 0;
+            }
+            
             game.Update(deltaTime);
         }
 
