@@ -113,7 +113,7 @@ namespace Mycraft
             particles.Spawn(
                 (Vertex3f)position,
                 (Vertex3f)position + new Vertex3f(1f, 1f, 1f),
-                20, block
+                30, block
             );
         }
 
