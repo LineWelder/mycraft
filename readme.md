@@ -21,3 +21,4 @@
 - Revised all the game's code
 - Made player movement smooth
 - Made swimming physics better
+- Added fog
