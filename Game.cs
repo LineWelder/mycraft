@@ -21,6 +21,7 @@ namespace Mycraft
         private const float MAX_ACCENDING_SPEED = 2f, ACCENDING_ACCELERATION = 4f;
 
         private Matrix4x4f projection;
+        private Vertex3f skyColor;
 
         private Origin origin;
         private GameWorld world;
@@ -41,6 +42,8 @@ namespace Mycraft
 
             Gl.UseProgram(Resources.GameWorldShader.glId);
             Resources.GameWorldShader.Alpha = .6f;
+            Resources.GameWorldShader.FogDistance = GameWorld.LOAD_DISTANCE * 16f - 24f;
+            Resources.GameWorldShader.FogDensity = 16f;
 
             // Create the GUI
 
@@ -177,6 +180,18 @@ namespace Mycraft
             );
         }
 
+        private void ChangeSkyColor(Vertex3f color)
+        {
+            if (color == skyColor)
+                return;
+
+            skyColor = color;
+
+            Gl.ClearColor(color.x, color.y, color.z, 1f);
+            Gl.UseProgram(Resources.GameWorldShader.glId);
+            Resources.GameWorldShader.FogColor = color;
+        }
+
         public void Update(double deltaTime)
         {
             // Player movement
@@ -224,9 +239,9 @@ namespace Mycraft
             // Update the graphics
 
             if (player.camera.Position.y < 0)
-                Gl.ClearColor(.05f, .05f, .05f, 1f);
+                ChangeSkyColor(new Vertex3f(.05f, .05f, .05f));
             else
-                Gl.ClearColor(0.53f, 0.81f, 0.98f, 1f);
+                ChangeSkyColor(new Vertex3f(0.53f, 0.81f, 0.98f));
         }
 
         public void Draw()
@@ -238,7 +253,8 @@ namespace Mycraft
             Gl.UseProgram(Resources.GameWorldShader.glId);
             Gl.Enable(EnableCap.DepthTest);
 
-            Resources.GameWorldShader.MVP = vp;
+            Resources.GameWorldShader.View = player.camera.TransformMatrix;
+            Resources.GameWorldShader.Projection = projection;
             world.Draw();
 
             // Draw particles

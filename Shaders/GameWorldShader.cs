@@ -12,7 +12,10 @@ layout(location = 0) in vec3 position;
 layout(location = 1) in vec2 textureCoords;
 layout(location = 2) in float light;
 
-uniform mat4 mvp;
+uniform mat4 view;
+uniform mat4 projection;
+
+out float _distance;
 out vec2 _textureCoords;
 out float _light;
 
@@ -20,7 +23,11 @@ void main()
 {
     _textureCoords = textureCoords;
     _light = light;
-    gl_Position = mvp * vec4(position, 1.0);
+
+    vec4 viewPosition = view * vec4(position, 1.0);
+    _distance = length(viewPosition);
+
+    gl_Position = projection * viewPosition;
 }";
 
         private const string FRAGMENT_SOURCE =
@@ -29,20 +36,36 @@ void main()
 uniform sampler2D tex;
 uniform float alpha;
 
+uniform vec3 fogColor;
+uniform float fogDistance;
+uniform float fogDensity;
+
+in float _distance;
 in vec2 _textureCoords;
 in float _light;
 
 void main()
 {
+    vec3 color = texture(tex, _textureCoords).xyz * _light;
+
     gl_FragColor = vec4(
-        texture(tex, _textureCoords).xyz * _light,
+        mix(
+            color,
+            fogColor,
+            smoothstep(fogDistance, fogDistance + fogDensity, _distance)
+        ),
         alpha
     );
 }";
 
-        public Matrix4x4f MVP
+        public Matrix4x4f View
         {
-            set => Gl.UniformMatrix4f(mvpLocation, 1, false, value);
+            set => Gl.UniformMatrix4f(viewLocation, 1, false, value);
+        }
+
+        public Matrix4x4f Projection
+        {
+            set => Gl.UniformMatrix4f(projectionLocation, 1, false, value);
         }
 
         public int Texture
@@ -55,16 +78,39 @@ void main()
             set => Gl.Uniform1f(alphaLocation, 1, value);
         }
 
-        private readonly int mvpLocation;
+        public Vertex3f FogColor
+        {
+            set => Gl.Uniform3f(fogColorLocation, 1, value);
+        }
+
+        public float FogDistance
+        {
+            set => Gl.Uniform1f(fogDistanceLocation, 1, value);
+        }
+
+        public float FogDensity
+        {
+            set => Gl.Uniform1f(fogDensityLocation, 1, value);
+        }
+
+        private readonly int viewLocation, projectionLocation;
         private readonly int textureLocation;
         private readonly int alphaLocation;
+        private readonly int fogColorLocation;
+        private readonly int fogDistanceLocation;
+        private readonly int fogDensityLocation;
 
         public GameWorldShader()
             : base(new int[] { 3, 2, 1 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
+            viewLocation = FindVariable("view");
+            projectionLocation = FindVariable("projection");
             textureLocation = FindVariable("tex");
-            mvpLocation = FindVariable("mvp");
             alphaLocation = FindVariable("alpha");
+            fogColorLocation = FindVariable("fogColor");
+            fogDistanceLocation = FindVariable("fogDistance");
+            fogDensityLocation = FindVariable("fogDensity");
+
         }
     }
 }
