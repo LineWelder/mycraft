@@ -5,6 +5,7 @@ using OpenGL;
 
 using Mycraft.Blocks;
 using Mycraft.World.Generation;
+using Mycraft.Utils;
 
 namespace Mycraft.World
 {
@@ -206,8 +207,11 @@ namespace Mycraft.World
 
         public void Draw()
         {
-            foreach (var pair in renderQueue)
-                pair.chunk.Draw();
+            foreach (var (_, chunk) in renderQueue)
+            {
+                Resources.GameWorldShader.ChunkStart = new Vertex3f(chunk.xOffset, 0f, chunk.zOffset);
+                chunk.Draw();
+            }
         }
 
         public void Dispose()

@@ -12,6 +12,7 @@ layout(location = 0) in vec3 position;
 layout(location = 1) in vec2 textureCoords;
 layout(location = 2) in float light;
 
+uniform vec3 chunkStart;
 uniform mat4 view;
 uniform mat4 projection;
 
@@ -24,7 +25,7 @@ void main()
     _textureCoords = textureCoords;
     _light = light;
 
-    vec4 viewPosition = view * vec4(position, 1.0);
+    vec4 viewPosition = view * vec4(chunkStart + position, 1.0);
     _distance = length(viewPosition);
 
     gl_Position = projection * viewPosition;
@@ -57,6 +58,11 @@ void main()
         alpha
     );
 }";
+
+        public Vertex3f ChunkStart
+        {
+            set => Gl.Uniform3f(chunkStartLocation, 1, value);
+        }
 
         public Matrix4x4f View
         {
@@ -93,6 +99,7 @@ void main()
             set => Gl.Uniform1f(fogDensityLocation, 1, value);
         }
 
+        private readonly int chunkStartLocation;
         private readonly int viewLocation, projectionLocation;
         private readonly int textureLocation;
         private readonly int alphaLocation;
@@ -103,6 +110,7 @@ void main()
         public GameWorldShader()
             : base(new int[] { 3, 2, 1 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
+            chunkStartLocation = FindVariable("chunkStart");
             viewLocation = FindVariable("view");
             projectionLocation = FindVariable("projection");
             textureLocation = FindVariable("tex");

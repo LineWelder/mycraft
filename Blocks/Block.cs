@@ -40,14 +40,10 @@ namespace Mycraft.Blocks
             if (!IsVisible)
                 return;
 
-            float wx = chunk.xOffset + x;
-            float wz = chunk.zOffset + z;
-            float wy = y;
-
             // Bottom
             if (HasFace(GetChunkBlock(chunk, x, y - 1, z)))
                 mesh.Add(QuadGenerator.Bottom(
-                    new Vertex3f(wx + 1f, wy, wz + 1f),
+                    new Vertex3f(x + 1f, y, z + 1f),
                     new Vertex2f(1f, 1f),
                     GetTextureCoords(GetTexture(BlockSide.Bottom)),
                     .7f
@@ -56,7 +52,7 @@ namespace Mycraft.Blocks
             // Top
             if (HasFace(GetChunkBlock(chunk, x, y + 1, z)))
                 mesh.Add(QuadGenerator.Top(
-                    new Vertex3f(wx + 1f, wy + 1f, wz + 1f),
+                    new Vertex3f(x + 1f, y + 1f, z + 1f),
                     new Vertex2f(1f, 1f),
                     GetTextureCoords(GetTexture(BlockSide.Top)),
                     1f
@@ -65,7 +61,7 @@ namespace Mycraft.Blocks
             // Left
             if (HasFace(GetChunkBlock(chunk, x - 1, y, z)))
                 mesh.Add(QuadGenerator.Left(
-                    new Vertex3f(wx, wy, wz + 1f),
+                    new Vertex3f(x, y, z + 1f),
                     new Vertex2f(1f, 1f),
                     GetTextureCoords(GetTexture(BlockSide.Left)),
                     .8f
@@ -74,7 +70,7 @@ namespace Mycraft.Blocks
             // Right
             if (HasFace(GetChunkBlock(chunk, x + 1, y, z)))
                 mesh.Add(QuadGenerator.Right(
-                    new Vertex3f(wx + 1f, wy, wz + 1f),
+                    new Vertex3f(x + 1f, y, z + 1f),
                     new Vertex2f(1f, 1f),
                     GetTextureCoords(GetTexture(BlockSide.Right)),
                     .8f
@@ -83,7 +79,7 @@ namespace Mycraft.Blocks
             // Back
             if (HasFace(GetChunkBlock(chunk, x, y, z - 1)))
                 mesh.Add(QuadGenerator.Back(
-                    new Vertex3f(wx + 1f, wy, wz),
+                    new Vertex3f(x + 1f, y, z),
                     new Vertex2f(1f, 1f),
                     GetTextureCoords(GetTexture(BlockSide.Back)),
                     .7f
@@ -92,7 +88,7 @@ namespace Mycraft.Blocks
             // Front
             if (HasFace(GetChunkBlock(chunk, x, y, z + 1)))
                 mesh.Add(QuadGenerator.Front(
-                     new Vertex3f(wx, wy, wz + 1f),
+                     new Vertex3f(x, y, z + 1f),
                      new Vertex2f(1f, 1f),
                      GetTextureCoords(GetTexture(BlockSide.Front)),
                      .9f
