@@ -17,11 +17,19 @@ namespace Mycraft
 {
     public class Game : IDisposable
     {
+        private enum SkyState
+        {
+            Normal,
+            UnderWater,
+            Void
+        }
+
         private const float MOVEMENT_ACCELERATION = 20f, MOVEMENT_SPEED = 3.7f;
         private const float MAX_ACCENDING_SPEED = 2f, ACCENDING_ACCELERATION = 4f;
 
         private Matrix4x4f projection;
-        private Vertex3f skyColor;
+        private SkyState skyState = (SkyState)(-1);
+        private Block blockIn;
 
         private Origin origin;
         private GameWorld world;
@@ -42,7 +50,6 @@ namespace Mycraft
 
             Gl.UseProgram(Resources.GameWorldShader.glId);
             Resources.GameWorldShader.Alpha = .6f;
-            Resources.GameWorldShader.FogDistance = GameWorld.LOAD_DISTANCE * 16f - 24f;
             Resources.GameWorldShader.FogDensity = 16f;
 
             // Create the GUI
@@ -180,18 +187,6 @@ namespace Mycraft
             );
         }
 
-        private void ChangeSkyColor(Vertex3f color)
-        {
-            if (color == skyColor)
-                return;
-
-            skyColor = color;
-
-            Gl.ClearColor(color.x, color.y, color.z, 1f);
-            Gl.UseProgram(Resources.GameWorldShader.glId);
-            Resources.GameWorldShader.FogColor = color;
-        }
-
         public void Update(double deltaTime)
         {
             // Player movement
@@ -236,12 +231,58 @@ namespace Mycraft
             world.Update(player.camera.Position);
             particles.Update(deltaTime);
 
-            // Update the graphics
+            // Update the sky state
 
+            blockIn = world.GetBlock(
+                (int)Math.Floor(player.camera.Position.x),
+                (int)Math.Floor(player.camera.Position.y),
+                (int)Math.Floor(player.camera.Position.z)
+            );
+
+            SkyState newSkyState;
             if (player.camera.Position.y < 0)
-                ChangeSkyColor(new Vertex3f(.05f, .05f, .05f));
+                newSkyState = SkyState.Void;
+            else if (blockIn is LiquidBlock)
+                newSkyState = SkyState.UnderWater;
             else
-                ChangeSkyColor(new Vertex3f(0.53f, 0.81f, 0.98f));
+                newSkyState = SkyState.Normal;
+
+            if (newSkyState == skyState)
+                return;
+            skyState = newSkyState;
+
+            // Update the fog
+
+            Gl.UseProgram(Resources.GameWorldShader.glId);
+
+            if (skyState is SkyState.UnderWater)
+                Resources.GameWorldShader.FogDistance = 16f;
+            else
+                Resources.GameWorldShader.FogDistance = GameWorld.LOAD_DISTANCE * 16f - 24f;
+
+            // Update the sky color
+
+            Vertex3f skyColor;
+            switch (newSkyState)
+            {
+                case SkyState.Normal:
+                    skyColor = new Vertex3f(0.53f, 0.81f, 0.98f);
+                    break;
+
+                case SkyState.UnderWater:
+                    skyColor = new Vertex3f(0.53f, 0.81f, 0.98f);
+                    break;
+
+                case SkyState.Void:
+                    skyColor = new Vertex3f(.05f, .05f, .05f);
+                    break;
+
+                default:
+                    return;
+            }
+
+            Gl.ClearColor(skyColor.x, skyColor.y, skyColor.z, 1f);
+            Resources.GameWorldShader.FogColor = skyColor;
         }
 
         public void Draw()
@@ -277,20 +318,13 @@ namespace Mycraft
             Gl.Disable(EnableCap.DepthTest);
             Gl.Disable(EnableCap.CullFace);
 
-            Block block = world.GetBlock(
-                (int)Math.Floor(player.camera.Position.x),
-                (int)Math.Floor(player.camera.Position.y),
-                (int)Math.Floor(player.camera.Position.z)
-            );
-
-            if (block is LiquidBlock)
+            if (blockIn is LiquidBlock)
             {
                 Gl.UseProgram(Resources.OverlayShader.glId);
-
                 Gl.Enable(EnableCap.Blend);
 
                 Resources.BlocksTexture.Bind();
-                Vertex4f texture = Block.GetTextureCoords(block.GetTexture(BlockSide.Top));
+                Vertex4f texture = Block.GetTextureCoords(blockIn.GetTexture(BlockSide.Top));
                 using (VertexArray overlay = new VertexArray(
                     PrimitiveType.Quads, Resources.OverlayShader,
                     new float[]
