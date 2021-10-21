@@ -16,12 +16,14 @@ uniform vec3 chunkStart;
 uniform mat4 view;
 uniform mat4 projection;
 
+out vec3 _position;
 out float _distance;
 out vec2 _textureCoords;
 out float _light;
 
 void main()
 {
+    _position = position;
     _textureCoords = textureCoords;
     _light = light;
 
@@ -41,6 +43,10 @@ uniform vec3 fogColor;
 uniform float fogDistance;
 uniform float fogDensity;
 
+uniform vec3 lightMapScale;
+uniform sampler3D lightMap;
+
+in vec3 _position;
 in float _distance;
 in vec2 _textureCoords;
 in float _light;
@@ -56,6 +62,13 @@ void main()
             smoothstep(fogDistance, fogDistance + fogDensity, _distance)
         ),
         alpha
+    );
+
+    vec3 lightMapCoords = (_position + vec3(.5)) / lightMapScale;
+
+    gl_FragColor = vec4(
+        vec3(texture(lightMap, lightMapCoords)),
+        1.0
     );
 }";
 
@@ -99,13 +112,27 @@ void main()
             set => Gl.Uniform1f(fogDensityLocation, 1, value);
         }
 
+        public Vertex3f LightMapScale
+        {
+            set => Gl.Uniform3f(lightMapScaleLocation, 1, value);
+        }
+
+        public int LightMap
+        {
+            set => Gl.Uniform1i(lightMapLocation, 1, value);
+        }
+
         private readonly int chunkStartLocation;
         private readonly int viewLocation, projectionLocation;
         private readonly int textureLocation;
         private readonly int alphaLocation;
+
         private readonly int fogColorLocation;
         private readonly int fogDistanceLocation;
         private readonly int fogDensityLocation;
+
+        private readonly int lightMapScaleLocation;
+        private readonly int lightMapLocation;
 
         public GameWorldShader()
             : base(new int[] { 3, 2, 1 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
@@ -115,10 +142,13 @@ void main()
             projectionLocation = FindVariable("projection");
             textureLocation = FindVariable("tex");
             alphaLocation = FindVariable("alpha");
+
             fogColorLocation = FindVariable("fogColor");
             fogDistanceLocation = FindVariable("fogDistance");
             fogDensityLocation = FindVariable("fogDensity");
 
+            lightMapScaleLocation = FindVariable("lightMapScale");
+            lightMapLocation = FindVariable("lightMap");
         }
     }
 }

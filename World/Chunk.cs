@@ -32,6 +32,8 @@ namespace Mycraft.World
         private float[] solidVertices, waterVertices;
         private readonly WorldGeometry solidMesh, waterMesh;
 
+        private readonly LightMap lightMap;
+
         public Chunk(GameWorld world, int x, int z)
         {
             blocks = new Block[SIZE, HEIGHT, SIZE];
@@ -44,10 +46,17 @@ namespace Mycraft.World
             waterQuads = new List<Quad>();
             solidMesh = new WorldGeometry();
             waterMesh = new WorldGeometry();
+
+            lightMap = new LightMap();
+            RecalculateLight();
         }
 
         public void Draw()
         {
+            Gl.ActiveTexture(TextureUnit.Texture1);
+            lightMap.Bind();
+
+            Gl.ActiveTexture(TextureUnit.Texture0);
             Resources.BlocksTexture.Bind();
 
             Gl.Enable(EnableCap.CullFace);
@@ -85,6 +94,23 @@ namespace Mycraft.World
             }
 
             return array;
+        }
+
+        private void RecalculateLight()
+        {
+            float[,,] lightMapData = new float[SIZE + 1, HEIGHT + 1, SIZE + 1];
+
+            for (int x = 0; x <= SIZE; x++)
+                for (int y = 0; y <= HEIGHT; y++)
+                    for (int z = 0; z <= SIZE; z++)
+                        lightMapData[z, y, x] = .5f;
+
+            for (int x = 1; x < SIZE; x++)
+                for (int y = 0; y < HEIGHT; y++)
+                    for (int z = 1; z < SIZE; z++)
+                        lightMapData[z, y, x] = 1f;
+
+            lightMap.Data = lightMapData;
         }
 
         public void GenerateMesh(Vertex3f cameraPosition)

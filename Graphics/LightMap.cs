@@ -7,6 +7,9 @@ namespace Mycraft.Graphics
     {
         public readonly uint glId;
 
+        /// <reamarks>
+        /// The coords in the given array should be shuffled: (z, y, x)
+        /// </remarks>
         public unsafe float[,,] Data
         {
             set
@@ -16,8 +19,8 @@ namespace Mycraft.Graphics
                     Gl.TexImage3D(
                         TextureTarget.Texture3d, 0,
                         InternalFormat.Luminance8,
-                        value.GetLength(0), value.GetLength(1), value.GetLength(2), 0,
-                        OpenGL.PixelFormat.Luminance, PixelType.Float,
+                        value.GetLength(2), value.GetLength(1), value.GetLength(0), 0,
+                        PixelFormat.Luminance, PixelType.Float,
                         new IntPtr(valuePtr)
                     );
                 }

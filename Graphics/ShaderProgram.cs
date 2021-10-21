@@ -61,8 +61,8 @@ namespace Mycraft.Graphics
         protected int FindVariable(string name)
         {
             int location = Gl.GetUniformLocation(glId, name);
-            if (location < 0)
-                throw new InvalidOperationException($"{name} variable not found");
+            if (location < 0) ;
+                // throw new InvalidOperationException($"{name} variable not found");
 
             return location;
         }
