@@ -98,24 +98,19 @@ namespace Mycraft.World
 
         private void RecalculateLight()
         {
-            lightMapData = new float[SIZE + 1, HEIGHT + 1, SIZE + 1];
+            lightMapData = new float[SIZE, HEIGHT, SIZE];
 
-            for (int x = 0; x <= SIZE; x++)
-                for (int y = 0; y <= HEIGHT; y++)
-                    for (int z = 0; z <= SIZE; z++)
+            for (int x = 0; x < SIZE; x++)
+                for (int y = 0; y < HEIGHT; y++)
+                    for (int z = 0; z < SIZE; z++)
                         lightMapData[z, y, x] = 1f;
 
-            for (int y = HEIGHT - 1; y >= 0; y--)
+            for (int y = HEIGHT - 1; y > 0; y--)
                 for (int x = 0; x < SIZE; x++)
                     for (int z = 0; z < SIZE; z++)
                         if (!blocks[x, y, z].IsTransparent)
-                            for (int y_ = y; y_ >= 0; y_--)
-                            {
-                                lightMapData[z,     y_, x]     = .5f;
-                                lightMapData[z,     y_, x + 1] = .5f;
-                                lightMapData[z + 1, y_, x]     = .5f;
-                                lightMapData[z + 1, y_, x + 1] = .5f;
-                            }
+                            for (int y_ = y - 1; y_ >= 0; y_--)
+                                lightMapData[z, y_, x] = .5f;
         }
 
         public void GenerateMesh(Vertex3f cameraPosition)

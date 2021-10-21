@@ -53,7 +53,10 @@ in float _light;
 
 void main()
 {
-    vec3 color = texture(tex, _textureCoords).xyz * _light;
+    vec3 lightMapCoords = _position / lightMapScale;
+    float lightMapSample = texture(lightMap, lightMapCoords).x;
+
+    vec3 color = texture(tex, _textureCoords).xyz * _light * lightMapSample;
 
     gl_FragColor = vec4(
         mix(
@@ -62,13 +65,6 @@ void main()
             smoothstep(fogDistance, fogDistance + fogDensity, _distance)
         ),
         alpha
-    );
-
-    vec3 lightMapCoords = (_position + vec3(.5)) / lightMapScale;
-
-    gl_FragColor = vec4(
-        vec3(texture(lightMap, lightMapCoords)),
-        1.0
     );
 }";
 
