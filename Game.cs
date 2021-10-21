@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using Mycraft.Graphics;
 
 // TODO make seasons
+// TODO make neighbour caching in getblock and getlight in chunk mesh generation
 
 namespace Mycraft
 {
