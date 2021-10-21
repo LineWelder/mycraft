@@ -110,7 +110,7 @@ namespace Mycraft.World
                     for (int z = 0; z < SIZE; z++)
                         if (!blocks[x, y, z].IsTransparent)
                             for (int y_ = y - 1; y_ >= 0; y_--)
-                                lightMapData[z, y_, x] = .5f;
+                                lightMapData[z, y_, x] = .7f;
         }
 
         public void GenerateMesh(Vertex3f cameraPosition)
