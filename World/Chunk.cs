@@ -32,7 +32,8 @@ namespace Mycraft.World
         private float[] solidVertices, waterVertices;
         private readonly WorldGeometry solidMesh, waterMesh;
 
-        private readonly LightMap lightMap;
+        private float[,,] lightMapData;
+        private LightMap lightMap;
 
         public Chunk(GameWorld world, int x, int z)
         {
@@ -48,7 +49,6 @@ namespace Mycraft.World
             waterMesh = new WorldGeometry();
 
             lightMap = new LightMap();
-            RecalculateLight();
         }
 
         public void Draw()
@@ -98,19 +98,24 @@ namespace Mycraft.World
 
         private void RecalculateLight()
         {
-            float[,,] lightMapData = new float[SIZE + 1, HEIGHT + 1, SIZE + 1];
+            lightMapData = new float[SIZE + 1, HEIGHT + 1, SIZE + 1];
 
             for (int x = 0; x <= SIZE; x++)
                 for (int y = 0; y <= HEIGHT; y++)
                     for (int z = 0; z <= SIZE; z++)
-                        lightMapData[z, y, x] = .5f;
-
-            for (int x = 1; x < SIZE; x++)
-                for (int y = 0; y < HEIGHT; y++)
-                    for (int z = 1; z < SIZE; z++)
                         lightMapData[z, y, x] = 1f;
 
-            lightMap.Data = lightMapData;
+            for (int y = HEIGHT - 1; y >= 0; y--)
+                for (int x = 0; x < SIZE; x++)
+                    for (int z = 0; z < SIZE; z++)
+                        if (!blocks[x, y, z].IsTransparent)
+                            for (int y_ = y; y_ >= 0; y_--)
+                            {
+                                lightMapData[z,     y_, x]     = .5f;
+                                lightMapData[z,     y_, x + 1] = .5f;
+                                lightMapData[z + 1, y_, x]     = .5f;
+                                lightMapData[z + 1, y_, x + 1] = .5f;
+                            }
         }
 
         public void GenerateMesh(Vertex3f cameraPosition)
@@ -118,6 +123,8 @@ namespace Mycraft.World
             if (needsUpdate)
             {
                 needsUpdate = false;
+
+                RecalculateLight();
 
                 List<Quad> solidQuads = new List<Quad>();
                 waterQuads.Clear();
@@ -151,6 +158,9 @@ namespace Mycraft.World
             {
                 solidMesh.Data = solidVertices;
                 solidVertices = null;
+
+                lightMap.Data = lightMapData;
+                lightMapData = null;
             }
 
             if (!(waterVertices is null))
@@ -164,6 +174,7 @@ namespace Mycraft.World
         {
             solidMesh.Dispose();
             waterMesh.Dispose();
+            lightMap.Dispose();
         }
     }
 }

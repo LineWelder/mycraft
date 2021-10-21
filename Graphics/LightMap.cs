@@ -14,8 +14,9 @@ namespace Mycraft.Graphics
         {
             set
             {
-                fixed (float* valuePtr = &value[0, 0, 0])
+                fixed (float* valuePtr = value)
                 {
+                    Gl.BindTexture(TextureTarget.Texture3d, glId);
                     Gl.TexImage3D(
                         TextureTarget.Texture3d, 0,
                         InternalFormat.Luminance8,

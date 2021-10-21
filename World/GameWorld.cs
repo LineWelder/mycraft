@@ -172,8 +172,8 @@ namespace Mycraft.World
                 pair.chunk.GenerateMesh(cameraPosition)
             );
 
-            foreach (var pair in renderQueue)
-                pair.chunk.RefreshVertexData();
+            foreach (var (_, chunk) in renderQueue)
+                chunk.RefreshVertexData();
         }
 
         private void OnChunkUpdate(int x, int z)
