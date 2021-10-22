@@ -269,9 +269,10 @@ namespace Mycraft.World
                 solidVertices = ToFloatArray(solidQuads);
             }
 
+            Vertex3f offset = new Vertex3f(xOffset, 0f, zOffset) - cameraPosition;
             waterQuads.Sort(
-                (Quad a, Quad b) => (b.Center - cameraPosition).ModuleSquared()
-                         .CompareTo((a.Center - cameraPosition).ModuleSquared())
+                (Quad a, Quad b) => (b.Center + offset).ModuleSquared()
+                         .CompareTo((a.Center + offset).ModuleSquared())
             );
 
             waterVertices = ToFloatArray(waterQuads);
