@@ -34,7 +34,7 @@ namespace Mycraft.World
 
         public bool lightMapNeedsUpdate;
         public float[,,] lightMapData;
-        private LightMap lightMap;
+        private readonly LightMap lightMap;
 
         public Chunk(GameWorld world, int x, int z)
         {
@@ -115,6 +115,8 @@ namespace Mycraft.World
                         if (!blocks[x, y, z].IsTransparent)
                             for (int y_ = y - 1; y_ >= 0; y_--)
                                 lightMapData[z + 1, y_, x + 1] = .7f;
+
+            // Update the neighbouring chunks
 
             Chunk frontChunk = world.GetChunk(xOffset / SIZE, zOffset / SIZE + 1);
             if (!(frontChunk is null))
