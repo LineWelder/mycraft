@@ -53,7 +53,7 @@ namespace Mycraft
             Resources.GameWorldShader.Alpha = .6f;
             Resources.GameWorldShader.FogDensity = 16f;
             Resources.GameWorldShader.LightMapScale = new Vertex3f(
-                Chunk.SIZE, Chunk.HEIGHT, Chunk.SIZE
+                Chunk.SIZE + 2, Chunk.HEIGHT, Chunk.SIZE + 2
             );
             Resources.GameWorldShader.LightMap = 1;
 

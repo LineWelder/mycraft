@@ -106,6 +106,26 @@ namespace Mycraft.World
             return chunk.groundLevel[blockX, blockZ];
         }
 
+        public float GetLightLevel(int x, int y, int z)
+        {
+            var (chunkX, blockX) = ToChunkCoord(x);
+            var (chunkZ, blockZ) = ToChunkCoord(z);
+
+            if (!chunks.TryGetValue((chunkX, chunkZ), out Chunk chunk)
+             || chunk.lightMapData is null)
+                return 0f;
+
+            return chunk.lightMapData[blockX + 1, y, blockZ + 1];
+        }
+
+        public Chunk GetChunk(int x, int z)
+        {
+            if (chunks.TryGetValue((x, z), out Chunk chunk))
+                return chunk;
+            else
+                return null;
+        }
+
         public void GenerateSpawnArea()
         {
             for (int x = -LOAD_DISTANCE; x <= LOAD_DISTANCE; x++)

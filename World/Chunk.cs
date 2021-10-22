@@ -32,7 +32,8 @@ namespace Mycraft.World
         private float[] solidVertices, waterVertices;
         private readonly WorldGeometry solidMesh, waterMesh;
 
-        private float[,,] lightMapData;
+        public bool lightMapNeedsUpdate;
+        public float[,,] lightMapData;
         private LightMap lightMap;
 
         public Chunk(GameWorld world, int x, int z)
@@ -49,6 +50,7 @@ namespace Mycraft.World
             waterMesh = new WorldGeometry();
 
             lightMap = new LightMap();
+            lightMapData = new float[SIZE + 2, HEIGHT, SIZE + 2];
         }
 
         public void Draw()
@@ -98,19 +100,147 @@ namespace Mycraft.World
 
         private void RecalculateLight()
         {
-            lightMapData = new float[SIZE, HEIGHT, SIZE];
+            // Reset the light map
 
             for (int x = 0; x < SIZE; x++)
                 for (int y = 0; y < HEIGHT; y++)
                     for (int z = 0; z < SIZE; z++)
-                        lightMapData[z, y, x] = 1f;
+                        lightMapData[z + 1, y, x + 1] = 1f;
+
+            // Apply the shades
 
             for (int y = HEIGHT - 1; y > 0; y--)
                 for (int x = 0; x < SIZE; x++)
                     for (int z = 0; z < SIZE; z++)
                         if (!blocks[x, y, z].IsTransparent)
                             for (int y_ = y - 1; y_ >= 0; y_--)
-                                lightMapData[z, y_, x] = .7f;
+                                lightMapData[z + 1, y_, x + 1] = .7f;
+
+            Chunk frontChunk = world.GetChunk(xOffset / SIZE, zOffset / SIZE + 1);
+            if (!(frontChunk is null))
+            {
+                for (int y = 0; y < HEIGHT; y++)
+                    for (int x = 0; x < SIZE; x++)
+                    {
+                        frontChunk.lightMapData[0, y, x + 1]
+                            = lightMapData[16, y, x + 1];
+
+                        lightMapData[17, y, x + 1]
+                            = frontChunk.lightMapData[1, y, x + 1];
+
+                        frontChunk.lightMapNeedsUpdate = true;
+                    }
+            }
+
+            Chunk backChunk = world.GetChunk(xOffset / SIZE, zOffset / SIZE - 1);
+            if (!(backChunk is null))
+            {
+                for (int y = 0; y < HEIGHT; y++)
+                    for (int x = 0; x < SIZE; x++)
+                    {
+                        backChunk.lightMapData[17, y, x + 1]
+                            = lightMapData[1, y, x + 1];
+
+                        lightMapData[0, y, x + 1]
+                            = backChunk.lightMapData[16, y, x + 1];
+
+                        backChunk.lightMapNeedsUpdate = true;
+                    }
+            }
+
+            Chunk rightChunk = world.GetChunk(xOffset / SIZE + 1, zOffset / SIZE);
+            if (!(rightChunk is null))
+            {
+                for (int y = 0; y < HEIGHT; y++)
+                    for (int z = 0; z < SIZE; z++)
+                    {
+                        rightChunk.lightMapData[z + 1, y, 0]
+                            = lightMapData[z + 1, y, 16];
+
+                        lightMapData[z + 1, y, 17]
+                            = rightChunk.lightMapData[z + 1, y, 1];
+
+                        rightChunk.lightMapNeedsUpdate = true;
+                    }
+            }
+
+            Chunk leftChunk = world.GetChunk(xOffset / SIZE - 1, zOffset / SIZE);
+            if (!(leftChunk is null))
+            {
+                for (int y = 0; y < HEIGHT; y++)
+                    for (int z = 0; z < SIZE; z++)
+                    {
+                        leftChunk.lightMapData[z + 1, y, 17]
+                            = lightMapData[z + 1, y, 1];
+
+                        lightMapData[z + 1, y, 0]
+                            = leftChunk.lightMapData[z + 1, y, 16];
+
+                        leftChunk.lightMapNeedsUpdate = true;
+                    }
+            }
+
+            Chunk frontRightChunk = world.GetChunk(xOffset / SIZE + 1, zOffset / SIZE + 1);
+            if (!(frontRightChunk is null))
+            {
+                for (int y = 0; y < HEIGHT; y++)
+                {
+                    frontRightChunk.lightMapData[0, y, 0]
+                        = lightMapData[16, y, 16];
+
+                    lightMapData[17, y, 17]
+                        = frontRightChunk.lightMapData[1, y, 1];
+
+                    frontRightChunk.lightMapNeedsUpdate = true;
+                }
+            }
+
+            Chunk backRightChunk = world.GetChunk(xOffset / SIZE + 1, zOffset / SIZE - 1);
+            if (!(backRightChunk is null))
+            {
+                for (int y = 0; y < HEIGHT; y++)
+                {
+                    backRightChunk.lightMapData[17, y, 0]
+                        = lightMapData[1, y, 16];
+
+                    lightMapData[0, y, 17]
+                        = backRightChunk.lightMapData[16, y, 1];
+
+                    backRightChunk.lightMapNeedsUpdate = true;
+                }
+            }
+
+            Chunk frontLeftChunk = world.GetChunk(xOffset / SIZE - 1, zOffset / SIZE + 1);
+            if (!(frontLeftChunk is null))
+            {
+                for (int y = 0; y < HEIGHT; y++)
+                {
+                    frontLeftChunk.lightMapData[0, y, 17]
+                        = lightMapData[16, y, 1];
+
+                    lightMapData[17, y, 0]
+                        = frontLeftChunk.lightMapData[1, y, 16];
+
+                    frontLeftChunk.lightMapNeedsUpdate = true;
+                }
+            }
+
+            Chunk backLeftChunk = world.GetChunk(xOffset / SIZE - 1, zOffset / SIZE - 1);
+            if (!(backLeftChunk is null))
+            {
+                for (int y = 0; y < HEIGHT; y++)
+                {
+                    backLeftChunk.lightMapData[17, y, 17]
+                        = lightMapData[1, y, 1];
+
+                    lightMapData[0, y, 0]
+                        = backLeftChunk.lightMapData[16, y, 16];
+
+                    backLeftChunk.lightMapNeedsUpdate = true;
+                }
+            }
+
+            lightMapNeedsUpdate = true;
         }
 
         public void GenerateMesh(Vertex3f cameraPosition)
@@ -149,13 +279,16 @@ namespace Mycraft.World
 
         public void RefreshVertexData()
         {
+            if (lightMapNeedsUpdate)
+            {
+                lightMap.Data = lightMapData;
+                lightMapNeedsUpdate = false;
+            }
+
             if (!(solidVertices is null))
             {
                 solidMesh.Data = solidVertices;
                 solidVertices = null;
-
-                lightMap.Data = lightMapData;
-                lightMapData = null;
             }
 
             if (!(waterVertices is null))
