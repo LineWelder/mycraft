@@ -90,6 +90,7 @@ namespace Mycraft.GUI
             Resources.HotbarSelectorTexture.Bind();
             hotbarSelector.Draw();
 
+            Gl.UseProgram(Resources.BlockViewShader.glId);
             Resources.BlocksTexture.Bind();
             foreach (BlockView block in blockViews)
                 if (!(block is null))

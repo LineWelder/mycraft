@@ -12,6 +12,7 @@ namespace Mycraft.Utils
 
         public static WorldUIShader WorldUIShader { get; private set; }
         public static GUIShader GUIShader { get; private set; }
+        public static BlockViewShader BlockViewShader { get; private set; }
         public static GameWorldShader GameWorldShader { get; private set; }
         public static ParticleShader ParticleShader { get; private set; }
         public static OverlayShader OverlayShader { get; private set; }
@@ -28,6 +29,7 @@ namespace Mycraft.Utils
 
             WorldUIShader = new WorldUIShader();
             GUIShader = new GUIShader();
+            BlockViewShader = new BlockViewShader();
             GameWorldShader = new GameWorldShader();
             ParticleShader = new ParticleShader();
             OverlayShader = new OverlayShader();

@@ -168,8 +168,11 @@ namespace Mycraft
                 .01f, GameWorld.UNLOAD_DISTANCE * Chunk.SIZE * 2f
             );
 
+            Matrix4x4f guiProjection = Matrix4x4f.Ortho2D(0f, width - 1, height - 1, 0f);
             Gl.UseProgram(Resources.GUIShader.glId);
-            Resources.GUIShader.Projection = Matrix4x4f.Ortho2D(0f, width - 1, height - 1, 0f);
+            Resources.GUIShader.Projection = guiProjection;
+            Gl.UseProgram(Resources.BlockViewShader.glId);
+            Resources.BlockViewShader.Projection = guiProjection;
 
             // Update the GUI
 

@@ -94,6 +94,7 @@
     <Compile Include="Graphics\LightMap.cs" />
     <Compile Include="Graphics\TextureArray.cs" />
     <Compile Include="Physics\AABB.cs" />
+    <Compile Include="Shaders\BlockViewShader.cs" />
     <Compile Include="Shaders\ParticleShader.cs" />
     <Compile Include="Shaders\GUIShader.cs" />
     <Compile Include="Shaders\OverlayShader.cs" />

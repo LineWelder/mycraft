@@ -23,3 +23,5 @@
 - Made swimming physics better
 - Added fog
 - Added lighting
+- Removed block textures bleeding
+- Added shades in the hotbar

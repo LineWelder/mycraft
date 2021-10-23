@@ -10,7 +10,7 @@ namespace Mycraft.GUI
         private Block block;
 
         public BlockView(Vertex2i position, Vertex2i size, Block block)
-            : base(PrimitiveType.Quads, Resources.GUIShader)
+            : base(PrimitiveType.Quads, Resources.BlockViewShader)
         {
             this.block = block;
             Resize(position, size);
@@ -26,22 +26,22 @@ namespace Mycraft.GUI
 
             Data = new float[] {
                 // Top
-                position.x + size.x,       position.y + tilt,            1f, 0f,
-                position.x + size.x * .5f, position.y,                   0f, 0f,
-                position.x,                position.y + tilt,            0f, 1f,
-                position.x + size.x * .5f, position.y + tilt * 2f,       1f, 1f,
-
-                // Front
-                position.x,                position.y + tilt,            0f, 0f,
-                position.x,                position.y + size.y - tilt,   0f, 1f,
-                position.x + size.x * .5f, position.y + size.y,          1f, 1f,
-                position.x + size.x * .5f, position.y + tilt * 2f,       1f, 0f,
-
-                // Right
-                position.x + size.x * .5f, position.y + tilt * 2f,       0f, 0f,
-                position.x + size.x * .5f, position.y + size.y,          0f, 1f,
-                position.x + size.x,       position.y + size.y - tilt,   1f, 1f,
-                position.x + size.x,       position.y + tilt,            1f, 0f
+                position.x + size.x,       position.y + tilt,            1f, 0f, topTexture,    1f,
+                position.x + size.x * .5f, position.y,                   0f, 0f, topTexture,    1f,
+                position.x,                position.y + tilt,            0f, 1f, topTexture,    1f,
+                position.x + size.x * .5f, position.y + tilt * 2f,       1f, 1f, topTexture,    1f,
+                                                                                               
+                // Front                                                                       
+                position.x,                position.y + tilt,            0f, 0f, frontTexture,  .9f,
+                position.x,                position.y + size.y - tilt,   0f, 1f, frontTexture,  .9f,
+                position.x + size.x * .5f, position.y + size.y,          1f, 1f, frontTexture,  .9f,
+                position.x + size.x * .5f, position.y + tilt * 2f,       1f, 0f, frontTexture,  .9f,
+                                                                                               
+                // Right                                                                       
+                position.x + size.x * .5f, position.y + tilt * 2f,       0f, 0f, rightTexture,  .8f,
+                position.x + size.x * .5f, position.y + size.y,          0f, 1f, rightTexture,  .8f,
+                position.x + size.x,       position.y + size.y - tilt,   1f, 1f, rightTexture,  .8f,
+                position.x + size.x,       position.y + tilt,            1f, 0f, rightTexture,  .8f
             };
         }
     }
