@@ -22,3 +22,4 @@
 - Made player movement smooth
 - Made swimming physics better
 - Added fog
+- Added lighting
