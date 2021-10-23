@@ -36,7 +36,7 @@ void main()
         private const string FRAGMENT_SOURCE =
 @"#version 330 core
 
-uniform sampler2D tex;
+uniform sampler2DArray tex;
 uniform float alpha;
 
 uniform vec3 fogColor;
@@ -56,7 +56,7 @@ void main()
     vec3 lightMapCoords = (_position + vec3(1.0, 0.0, 1.0)) / lightMapScale;
     float lightMapSample = texture(lightMap, lightMapCoords).x;
 
-    vec3 color = texture(tex, _textureCoords).xyz * _light * lightMapSample;
+    vec3 color = texture(tex, vec3(_textureCoords, 0.0)).xyz * _light * lightMapSample;
 
     gl_FragColor = vec4(
         mix(

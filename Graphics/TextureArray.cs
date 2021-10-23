@@ -33,26 +33,26 @@ namespace Mycraft.Graphics
             }
 
             glId = Gl.GenTexture();
-            Gl.BindTexture(TextureTarget.Texture2d, glId);
+            Gl.BindTexture(TextureTarget.Texture2dArray, glId);
 
-            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapS, TextureWrapMode.ClampToEdge);
-            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapT, TextureWrapMode.ClampToEdge);
-            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, TextureMinFilter.Nearest);
-            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, TextureMagFilter.Nearest);
+            Gl.TexParameteri(TextureTarget.Texture2dArray, TextureParameterName.TextureWrapS, TextureWrapMode.ClampToEdge);
+            Gl.TexParameteri(TextureTarget.Texture2dArray, TextureParameterName.TextureWrapT, TextureWrapMode.ClampToEdge);
+            Gl.TexParameteri(TextureTarget.Texture2dArray, TextureParameterName.TextureMinFilter, TextureMinFilter.Nearest);
+            Gl.TexParameteri(TextureTarget.Texture2dArray, TextureParameterName.TextureMagFilter, TextureMagFilter.Nearest);
 
             int textureWidth = image.Width / numTexturesX;
             int textureHeight = image.Height / numTexturesY;
 
             unsafe
             {
-                float[,] black = new float[textureHeight, textureWidth];
+                float[,,] black = new float[1, textureHeight, textureWidth];
 
                 fixed (float* blackPtr = black)
                 {
-                    Gl.TexImage2D(
-                        TextureTarget.Texture2d, 0,
+                    Gl.TexImage3D(
+                        TextureTarget.Texture2dArray, 0,
                         InternalFormat.Rgba,
-                        textureWidth, textureHeight, 0,
+                        textureWidth, textureHeight, 1, 0,
                         OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte,
                         new IntPtr(blackPtr)
                     );
@@ -65,10 +65,10 @@ namespace Mycraft.Graphics
                 System.Drawing.Imaging.PixelFormat.Format32bppArgb
             );
 
-            Gl.TexSubImage2D(
-                TextureTarget.Texture2d, 0,
-                0, 0,
-                textureWidth, textureHeight,
+            Gl.TexSubImage3D(
+                TextureTarget.Texture2dArray, 0,
+                0, 0, 0,
+                textureWidth, textureHeight, 1,
                 OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte,
                 grass.Scan0
             );
@@ -79,7 +79,7 @@ namespace Mycraft.Graphics
         public TextureArray(string path, int numTexturesX, int numTexturesY)
             : this(path, numTexturesX, numTexturesY, 2, 2) { }
 
-        public void Bind() => Gl.BindTexture(TextureTarget.Texture2d, glId);
+        public void Bind() => Gl.BindTexture(TextureTarget.Texture2dArray, glId);
         public void Dispose() => Gl.DeleteTextures(glId);
     }
 }
