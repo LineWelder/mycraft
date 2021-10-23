@@ -12,6 +12,7 @@ namespace Mycraft.World
     public struct Quad
     {
         public Vertex a, b, c, d;
+        public int textureId;
 
         public Vertex3f Center => (a.position + b.position + c.position + d.position) / 4f;
 
@@ -21,6 +22,8 @@ namespace Mycraft.World
             int textureId, float light
         )
         {
+            this.textureId = textureId;
+
             a = new Vertex
             {
                 position = pa,

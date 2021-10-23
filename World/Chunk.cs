@@ -72,27 +72,29 @@ namespace Mycraft.World
 
         private float[] ToFloatArray(List<Quad> quads)
         {
-            const int QUAD_SIZE = 6 * 4;
+            const int VERTEX_SIZE = 7;
+            const int QUAD_SIZE = VERTEX_SIZE * 4;
 
             float[] array = new float[quads.Count * QUAD_SIZE];
-            void SaveVertex(int i, Vertex vertex)
-            {
-                array[i]     = vertex.position.x;
-                array[i + 1] = vertex.position.y;
-                array[i + 2] = vertex.position.z;
-                array[i + 3] = vertex.texture.x;
-                array[i + 4] = vertex.texture.y;
-                array[i + 5] = vertex.light;
-            }
 
             for (int i = 0; i < quads.Count; i++)
             {
                 Quad quad = quads[i];
+                void SaveVertex(int index, Vertex vertex)
+                {
+                    array[index]     = vertex.position.x;
+                    array[index + 1] = vertex.position.y;
+                    array[index + 2] = vertex.position.z;
+                    array[index + 3] = vertex.texture.x;
+                    array[index + 4] = vertex.texture.y;
+                    array[index + 5] = quad.textureId;
+                    array[index + 6] = vertex.light;
+                }
 
-                SaveVertex(i * QUAD_SIZE,      quad.a);
-                SaveVertex(i * QUAD_SIZE + 6,  quad.b);
-                SaveVertex(i * QUAD_SIZE + 12, quad.c);
-                SaveVertex(i * QUAD_SIZE + 18, quad.d);
+                SaveVertex(i * QUAD_SIZE,                   quad.a);
+                SaveVertex(i * QUAD_SIZE + VERTEX_SIZE,     quad.b);
+                SaveVertex(i * QUAD_SIZE + VERTEX_SIZE * 2, quad.c);
+                SaveVertex(i * QUAD_SIZE + VERTEX_SIZE * 3, quad.d);
             }
 
             return array;

@@ -9,7 +9,7 @@ namespace Mycraft.Shaders
 @"#version 330 core
 
 layout(location = 0) in vec3 position;
-layout(location = 1) in vec2 textureCoords;
+layout(location = 1) in vec3 textureCoords;
 layout(location = 2) in float light;
 
 uniform vec3 chunkStart;
@@ -18,7 +18,7 @@ uniform mat4 projection;
 
 out vec3 _position;
 out float _distance;
-out vec2 _textureCoords;
+out vec3 _textureCoords;
 out float _light;
 
 void main()
@@ -48,7 +48,7 @@ uniform sampler3D lightMap;
 
 in vec3 _position;
 in float _distance;
-in vec2 _textureCoords;
+in vec3 _textureCoords;
 in float _light;
 
 void main()
@@ -56,7 +56,7 @@ void main()
     vec3 lightMapCoords = (_position + vec3(1.0, 0.0, 1.0)) / lightMapScale;
     float lightMapSample = texture(lightMap, lightMapCoords).x;
 
-    vec3 color = texture(tex, vec3(_textureCoords, 0.0)).xyz * _light * lightMapSample;
+    vec3 color = texture(tex, _textureCoords).xyz * _light * lightMapSample;
 
     gl_FragColor = vec4(
         mix(
@@ -131,7 +131,7 @@ void main()
         private readonly int lightMapLocation;
 
         public GameWorldShader()
-            : base(new int[] { 3, 2, 1 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
+            : base(new int[] { 3, 3, 1 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
             chunkStartLocation = FindVariable("chunkStart");
             viewLocation = FindVariable("view");
