@@ -45,35 +45,44 @@ namespace Mycraft.Graphics
 
             unsafe
             {
-                float[,,] black = new float[1, textureHeight, textureWidth];
+                float[,,] black = new float[numTexturesX * numTexturesY, textureHeight, textureWidth];
 
                 fixed (float* blackPtr = black)
                 {
                     Gl.TexImage3D(
                         TextureTarget.Texture2dArray, 0,
                         InternalFormat.Rgba,
-                        textureWidth, textureHeight, 1, 0,
+                        textureWidth, textureHeight, numTexturesX * numTexturesY, 0,
                         OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte,
                         new IntPtr(blackPtr)
                     );
                 }
             }
 
-            BitmapData grass = image.LockBits(
-                new Rectangle(textureWidth, 0, textureWidth, textureHeight),
-                ImageLockMode.ReadOnly,
-                System.Drawing.Imaging.PixelFormat.Format32bppArgb
-            );
+            for (int x = 0; x < numTexturesX; x++)
+                for (int y = 0; y < numTexturesX; y++)
+                {
+                    BitmapData texture = image.LockBits(
+                        new Rectangle(
+                            textureWidth * x,
+                            textureHeight * y,
+                            textureWidth,
+                            textureHeight
+                        ),
+                        ImageLockMode.ReadOnly,
+                        System.Drawing.Imaging.PixelFormat.Format32bppArgb
+                    );
 
-            Gl.TexSubImage3D(
-                TextureTarget.Texture2dArray, 0,
-                0, 0, 0,
-                textureWidth, textureHeight, 1,
-                OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte,
-                grass.Scan0
-            );
+                    Gl.TexSubImage3D(
+                        TextureTarget.Texture2dArray, 0,
+                        0, 0, x + y * numTexturesX,
+                        textureWidth, textureHeight, 1,
+                        OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte,
+                        texture.Scan0
+                    );
 
-            image.UnlockBits(grass);
+                    image.UnlockBits(texture);
+                }
         }
 
         public TextureArray(string path, int numTexturesX, int numTexturesY)
