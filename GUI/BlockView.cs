@@ -18,30 +18,30 @@ namespace Mycraft.GUI
 
         public void Resize(Vertex2i position, Vertex2i size)
         {
-            Vertex4f topTexture = Block.GetTextureCoords(block.GetTexture(BlockSide.Top));
-            Vertex4f frontTexture = Block.GetTextureCoords(block.GetTexture(BlockSide.Front));
-            Vertex4f rightTexture = Block.GetTextureCoords(block.GetTexture(BlockSide.Right));
+            float topTexture   = block.GetTexture(BlockSide.Top);
+            float frontTexture = block.GetTexture(BlockSide.Front);
+            float rightTexture = block.GetTexture(BlockSide.Right);
 
             float tilt = size.y / 4f;
 
             Data = new float[] {
                 // Top
-                position.x + size.x,       position.y + tilt,            topTexture.z,   topTexture.y,
-                position.x + size.x * .5f, position.y,                   topTexture.x,   topTexture.y,
-                position.x,                position.y + tilt,            topTexture.x,   topTexture.w,
-                position.x + size.x * .5f, position.y + tilt * 2f,       topTexture.z,   topTexture.w,
+                position.x + size.x,       position.y + tilt,            1f, 0f,
+                position.x + size.x * .5f, position.y,                   0f, 0f,
+                position.x,                position.y + tilt,            0f, 1f,
+                position.x + size.x * .5f, position.y + tilt * 2f,       1f, 1f,
 
                 // Front
-                position.x,                position.y + tilt,            frontTexture.x, frontTexture.y,
-                position.x,                position.y + size.y - tilt,   frontTexture.x, frontTexture.w,
-                position.x + size.x * .5f, position.y + size.y,          frontTexture.z, frontTexture.w,
-                position.x + size.x * .5f, position.y + tilt * 2f,       frontTexture.z, frontTexture.y,
+                position.x,                position.y + tilt,            0f, 0f,
+                position.x,                position.y + size.y - tilt,   0f, 1f,
+                position.x + size.x * .5f, position.y + size.y,          1f, 1f,
+                position.x + size.x * .5f, position.y + tilt * 2f,       1f, 0f,
 
                 // Right
-                position.x + size.x * .5f, position.y + tilt * 2f,       rightTexture.x, rightTexture.y,
-                position.x + size.x * .5f, position.y + size.y,          rightTexture.x, rightTexture.w,
-                position.x + size.x,       position.y + size.y - tilt,   rightTexture.z, rightTexture.w,
-                position.x + size.x,       position.y + tilt,            rightTexture.z, rightTexture.y
+                position.x + size.x * .5f, position.y + tilt * 2f,       0f, 0f,
+                position.x + size.x * .5f, position.y + size.y,          0f, 1f,
+                position.x + size.x,       position.y + size.y - tilt,   1f, 1f,
+                position.x + size.x,       position.y + tilt,            1f, 0f
             };
         }
     }

@@ -18,34 +18,34 @@ namespace Mycraft.World
         public Quad(
             Vertex3f pa, Vertex3f pb,
             Vertex3f pc, Vertex3f pd,
-            Vertex4f textureCoords, float light
+            int textureId, float light
         )
         {
             a = new Vertex
             {
                 position = pa,
-                texture = new Vertex2f(textureCoords.z, textureCoords.w),
+                texture = new Vertex2f(1f, 1f),
                 light = light
             };
 
             b = new Vertex
             {
                 position = pb,
-                texture = new Vertex2f(textureCoords.z, textureCoords.y),
+                texture = new Vertex2f(1f, 0f),
                 light = light
             };
 
             c = new Vertex
             {
                 position = pc,
-                texture = new Vertex2f(textureCoords.x, textureCoords.y),
+                texture = new Vertex2f(0f, 0f),
                 light = light
             };
 
             d = new Vertex
             {
                 position = pd,
-                texture = new Vertex2f(textureCoords.x, textureCoords.w),
+                texture = new Vertex2f(0f, 1f),
                 light = light
             };
         }

@@ -329,15 +329,15 @@ namespace Mycraft
                 Gl.Enable(EnableCap.Blend);
 
                 Resources.BlocksTexture.Bind();
-                Vertex4f texture = Block.GetTextureCoords(blockIn.GetTexture(BlockSide.Top));
+                Resources.OverlayShader.TextureId = blockIn.GetTexture(BlockSide.Top);
                 using (VertexArray overlay = new VertexArray(
                     PrimitiveType.Quads, Resources.OverlayShader,
                     new float[]
                     {
-                         1f,  1f,  texture.z, texture.y,
-                         1f, -1f,  texture.z, texture.w,
-                        -1f, -1f,  texture.x, texture.w,
-                        -1f,  1f,  texture.x, texture.y
+                         1f,  1f,  1f, 0f,
+                         1f, -1f,  1f, 1f,
+                        -1f, -1f,  0f, 1f,
+                        -1f,  1f,  0f, 0f
                     }
                 )) overlay.Draw();
             }

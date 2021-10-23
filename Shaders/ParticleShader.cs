@@ -26,12 +26,12 @@ void main()
         private const string FRAGMENT_SOURCE =
 @"#version 330 core
 
-uniform sampler2D tex;
+uniform sampler2DArray tex;
 in vec2 _textureCoords;
 
 void main()
 {
-    gl_FragColor = texture(tex, _textureCoords);
+    gl_FragColor = texture(tex, vec3(_textureCoords, 0.0));
 }";
 
         public Matrix4x4f View

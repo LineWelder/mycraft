@@ -22,13 +22,15 @@ void main()
         private const string FRAGMENT_SOURCE =
 @"#version 330 core
 
-uniform sampler2D tex;
+uniform sampler2DArray tex;
+uniform float textureId;
+
 in vec2 _textureCoords;
 
 void main()
 {
     gl_FragColor = vec4(
-        texture(tex, _textureCoords).xyz,
+        texture(tex, vec3(_textureCoords, textureId)).xyz,
         distance(vec2(0.5), _textureCoords) * 0.5 + 0.25
     );
 }";
@@ -38,12 +40,19 @@ void main()
             set => Gl.Uniform1i(textureLocation, 1, value);
         }
 
+        public float TextureId
+        {
+            set => Gl.Uniform1f(textureIdLocation, 1, value);
+        }
+
         private readonly int textureLocation;
+        private readonly int textureIdLocation;
 
         public OverlayShader()
             : base(new int[] { 2, 2 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
             textureLocation = FindVariable("tex");
+            textureIdLocation = FindVariable("textureId");
         }
     }
 }

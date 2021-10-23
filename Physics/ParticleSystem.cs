@@ -91,15 +91,15 @@ namespace Mycraft.Physics
 
             foreach (Particle particle in particles)
             {
-                Vertex4f texCoords = Block.GetTextureCoords(particle.block.GetTexture(BlockSide.Top));
+                int textureId = particle.block.GetTexture(BlockSide.Top);
                 Vertex3f pos = particle.Position;
                 float offset = size / 2f;
 
                 mesh.AddRange(new float[] {
-                    pos.x, pos.y, pos.z,   offset, -offset,  texCoords.z, texCoords.w,
-                    pos.x, pos.y, pos.z,   offset,  offset,  texCoords.z, texCoords.y,
-                    pos.x, pos.y, pos.z,  -offset,  offset,  texCoords.x, texCoords.y,
-                    pos.x, pos.y, pos.z,  -offset, -offset,  texCoords.x, texCoords.w
+                    pos.x, pos.y, pos.z,   offset, -offset,  1f, 1f,
+                    pos.x, pos.y, pos.z,   offset,  offset,  1f, 0f,
+                    pos.x, pos.y, pos.z,  -offset,  offset,  0f, 0f,
+                    pos.x, pos.y, pos.z,  -offset, -offset,  0f, 1f
                 });
             }
 

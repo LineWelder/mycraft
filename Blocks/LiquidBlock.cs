@@ -29,7 +29,7 @@ namespace Mycraft.Blocks
                 mesh.Add(QuadGenerator.Top(
                     new Vertex3f(x + 1f, y + HEIGHT, z + 1f),
                     new Vertex2f(1f, 1f),
-                    GetTextureCoords(GetTexture(BlockSide.Top)),
+                    GetTexture(BlockSide.Top),
                     1f
                 ));
             }
@@ -39,7 +39,7 @@ namespace Mycraft.Blocks
                 mesh.Add(QuadGenerator.Bottom(
                     new Vertex3f(x + 1f, y, z + 1f),
                     new Vertex2f(1f, 1f),
-                    GetTextureCoords(GetTexture(BlockSide.Bottom)),
+                    GetTexture(BlockSide.Bottom),
                     .7f
                 ));
 
@@ -48,7 +48,7 @@ namespace Mycraft.Blocks
                 mesh.Add(QuadGenerator.Left(
                     new Vertex3f(x, y, z + 1f),
                     new Vertex2f(1f, HEIGHT),
-                    GetTextureCoords(GetTexture(BlockSide.Left)),
+                    GetTexture(BlockSide.Left),
                     .8f
                 ));
 
@@ -57,7 +57,7 @@ namespace Mycraft.Blocks
                 mesh.Add(QuadGenerator.Right(
                     new Vertex3f(x + 1f, y, z + 1f),
                     new Vertex2f(1f, HEIGHT),
-                    GetTextureCoords(GetTexture(BlockSide.Right)),
+                    GetTexture(BlockSide.Right),
                     .8f
                 ));
 
@@ -66,7 +66,7 @@ namespace Mycraft.Blocks
                 mesh.Add(QuadGenerator.Back(
                     new Vertex3f(x + 1f, y, z),
                     new Vertex2f(1f, HEIGHT),
-                    GetTextureCoords(GetTexture(BlockSide.Back)),
+                    GetTexture(BlockSide.Back),
                     .7f
                 ));
 
@@ -75,7 +75,7 @@ namespace Mycraft.Blocks
                 mesh.Add(QuadGenerator.Front(
                      new Vertex3f(x, y, z + 1f),
                      new Vertex2f(1f, HEIGHT),
-                     GetTextureCoords(GetTexture(BlockSide.Front)),
+                     GetTexture(BlockSide.Front),
                      .9f
                  ));
         }
