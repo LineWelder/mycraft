@@ -92,6 +92,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Graphics\LightMap.cs" />
+    <Compile Include="Graphics\TextureArray.cs" />
     <Compile Include="Physics\AABB.cs" />
     <Compile Include="Shaders\ParticleShader.cs" />
     <Compile Include="Shaders\GUIShader.cs" />

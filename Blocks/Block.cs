@@ -134,10 +134,10 @@ namespace Mycraft.Blocks
 
         public static Vertex4f GetTextureCoords(int textureId)
             => new Vertex4f(
-                (textureId % 4) * .25f,
-                (textureId / 4) * .25f,
-                (textureId % 4 + 1f) * .25f,
-                (textureId / 4 + 1f) * .25f
+                0f,
+                0f,
+                1f,
+                1f
             );
     }
 }

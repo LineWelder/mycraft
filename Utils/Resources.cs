@@ -16,7 +16,7 @@ namespace Mycraft.Utils
         public static ParticleShader ParticleShader { get; private set; }
         public static OverlayShader OverlayShader { get; private set; }
 
-        public static Texture BlocksTexture { get; private set; }
+        public static TextureArray BlocksTexture { get; private set; }
         public static Texture CrossTexture { get; private set; }
         public static Texture HotbarTexture { get; private set; }
         public static Texture HotbarSelectorTexture { get; private set; }
@@ -32,7 +32,7 @@ namespace Mycraft.Utils
             ParticleShader = new ParticleShader();
             OverlayShader = new OverlayShader();
 
-            BlocksTexture = new Texture(@"resources\textures\blocks.png", 8, 8);
+            BlocksTexture = new TextureArray(@"resources\textures\blocks.png", 4, 4);
             CrossTexture = new Texture(@"resources\textures\cross.png");
             HotbarTexture = new Texture(@"resources\textures\hotbar.png", 20, 2);
             HotbarSelectorTexture = new Texture(@"resources\textures\hotbar_selector.png");
