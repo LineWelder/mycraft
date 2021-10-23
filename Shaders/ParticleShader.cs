@@ -10,11 +10,11 @@ namespace Mycraft.Shaders
 
 layout(location = 0) in vec3 particlePosition;
 layout(location = 1) in vec2 offset;
-layout(location = 2) in vec2 textureCoords;
+layout(location = 2) in vec3 textureCoords;
 
 uniform mat4 view;
 uniform mat4 projection;
-out vec2 _textureCoords;
+out vec3 _textureCoords;
 
 void main()
 {
@@ -27,11 +27,11 @@ void main()
 @"#version 330 core
 
 uniform sampler2DArray tex;
-in vec2 _textureCoords;
+in vec3 _textureCoords;
 
 void main()
 {
-    gl_FragColor = texture(tex, vec3(_textureCoords, 0.0));
+    gl_FragColor = texture(tex, _textureCoords);
 }";
 
         public Matrix4x4f View
@@ -54,7 +54,7 @@ void main()
         private readonly int textureLocation;
 
         public ParticleShader()
-            : base(new int[] { 3, 2, 2 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
+            : base(new int[] { 3, 2, 3 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
             textureLocation = FindVariable("tex");
             viewLocation = FindVariable("view");

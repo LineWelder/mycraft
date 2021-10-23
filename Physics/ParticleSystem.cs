@@ -96,10 +96,10 @@ namespace Mycraft.Physics
                 float offset = size / 2f;
 
                 mesh.AddRange(new float[] {
-                    pos.x, pos.y, pos.z,   offset, -offset,  1f, 1f,
-                    pos.x, pos.y, pos.z,   offset,  offset,  1f, 0f,
-                    pos.x, pos.y, pos.z,  -offset,  offset,  0f, 0f,
-                    pos.x, pos.y, pos.z,  -offset, -offset,  0f, 1f
+                    pos.x, pos.y, pos.z,   offset, -offset,  1f, 1f, textureId,
+                    pos.x, pos.y, pos.z,   offset,  offset,  1f, 0f, textureId,
+                    pos.x, pos.y, pos.z,  -offset,  offset,  0f, 0f, textureId,
+                    pos.x, pos.y, pos.z,  -offset, -offset,  0f, 1f, textureId
                 });
             }
 
