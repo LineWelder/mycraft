@@ -56,7 +56,9 @@ void main()
     vec3 lightMapCoords = (_position + vec3(1.0, 0.0, 1.0)) / lightMapScale;
     float lightMapSample = texture(lightMap, lightMapCoords).x;
 
-    vec3 color = texture(tex, _textureCoords).xyz * _light * lightMapSample;
+    vec4 textureSample = texture(tex, _textureCoords);
+    if (textureSample.a == 0.0) discard;
+    vec3 color = textureSample.rgb * _light * lightMapSample;
 
     gl_FragColor = vec4(
         mix(
