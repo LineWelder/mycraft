@@ -76,7 +76,8 @@ namespace Mycraft
                     BlockRegistry.Water,
                     BlockRegistry.Sand,
                     BlockRegistry.Planks,
-                    null, null
+                    BlockRegistry.RedFlower,
+                    BlockRegistry.YellowFlower
                 }
             );
 
