@@ -70,7 +70,7 @@ namespace Mycraft.Graphics
                             textureHeight
                         ),
                         ImageLockMode.ReadOnly,
-                        System.Drawing.Imaging.PixelFormat.Format32bppArgb
+                        System.Drawing.Imaging.PixelFormat.Format32bppRgb
                     );
 
                     Gl.TexSubImage3D(

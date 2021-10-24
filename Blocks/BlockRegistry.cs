@@ -10,5 +10,7 @@
         public static readonly Block Log = new MultiTexturedBlock(4, 5, 4);
         public static readonly Block Leaves = new Block(6);
         public static readonly Block Water = new LiquidBlock(7);
+        public static readonly Block Sand = new Block(8);
+        public static readonly Block Planks = new Block(9);
     }
 }

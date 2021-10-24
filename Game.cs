@@ -74,7 +74,9 @@ namespace Mycraft
                     BlockRegistry.Log,
                     BlockRegistry.Leaves,
                     BlockRegistry.Water,
-                    null, null, null, null
+                    BlockRegistry.Sand,
+                    BlockRegistry.Planks,
+                    null, null
                 }
             );
 

@@ -59,9 +59,8 @@ namespace Mycraft.World.Generation
                             (z + chunk.zOffset) * scale
                         ) * amplitude;
 
-                    int height = (int)Math.Round(
-                        19f + NoiseLayer(1f, 8f) + NoiseLayer(4f, 2f)
-                    );
+                    float realHeight = 19f + NoiseLayer(1f, 8f) + NoiseLayer(4f, 2f);
+                    int height = (int)Math.Round(realHeight);
 
                     for (int y = 0; y < Chunk.HEIGHT; y++)
                         if (y < height - 3)
@@ -69,8 +68,8 @@ namespace Mycraft.World.Generation
                         else if (height - 3 <= y && y < height)
                             chunk.blocks[x, y, z] = BlockRegistry.Dirt;
                         else if (y == height)
-                            if (height < WATER_LEVEL)
-                                chunk.blocks[x, y, z] = BlockRegistry.Dirt;
+                            if (realHeight < WATER_LEVEL + .2f)
+                                chunk.blocks[x, y, z] = BlockRegistry.Sand;
                             else
                                 chunk.blocks[x, y, z] = BlockRegistry.Grass;
                         else if (y <= WATER_LEVEL)
