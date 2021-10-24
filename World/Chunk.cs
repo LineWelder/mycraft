@@ -29,8 +29,8 @@ namespace Mycraft.World
         public readonly int xOffset, zOffset;
 
         private readonly List<Quad> waterQuads;
-        private float[] solidVertices, waterVertices;
-        private readonly WorldGeometry solidMesh, waterMesh;
+        private float[] solidVertices, doubleSidedVertices, waterVertices;
+        private readonly WorldGeometry solidMesh, doubleSidedMesh, waterMesh;
 
         public bool lightMapNeedsUpdate;
         public float[,,] lightMapData;
@@ -47,6 +47,7 @@ namespace Mycraft.World
 
             waterQuads = new List<Quad>();
             solidMesh = new WorldGeometry();
+            doubleSidedMesh = new WorldGeometry();
             waterMesh = new WorldGeometry();
 
             lightMap = new LightMap();
@@ -63,7 +64,9 @@ namespace Mycraft.World
 
             Gl.Enable(EnableCap.CullFace);
             solidMesh.Draw();
+
             Gl.Disable(EnableCap.CullFace);
+            doubleSidedMesh.Draw();
 
             Gl.Enable(EnableCap.Blend);
             waterMesh.Draw();
@@ -256,6 +259,7 @@ namespace Mycraft.World
                 RecalculateLight();
 
                 List<Quad> solidQuads = new List<Quad>();
+                List<Quad> doubleSidedQuads = new List<Quad>();
                 waterQuads.Clear();
 
                 for (int cx = 0; cx < SIZE; cx++)
@@ -266,11 +270,14 @@ namespace Mycraft.World
 
                             if (block is LiquidBlock)
                                 block.EmitMesh(waterQuads, this, cx, cy, cz);
+                            else if (block is PlantBlock)
+                                block.EmitMesh(doubleSidedQuads, this, cx, cy, cz);
                             else
                                 block.EmitMesh(solidQuads, this, cx, cy, cz);
                         }
 
                 solidVertices = ToFloatArray(solidQuads);
+                doubleSidedVertices = ToFloatArray(doubleSidedQuads);
             }
 
             Vertex3f offset = new Vertex3f(xOffset, 0f, zOffset) - cameraPosition;
@@ -296,6 +303,12 @@ namespace Mycraft.World
                 solidVertices = null;
             }
 
+            if (!(doubleSidedVertices is null))
+            {
+                doubleSidedMesh.Data = doubleSidedVertices;
+                doubleSidedVertices = null;
+            }
+
             if (!(waterVertices is null))
             {
                 waterMesh.Data = waterVertices;
@@ -306,6 +319,7 @@ namespace Mycraft.World
         public void Dispose()
         {
             solidMesh.Dispose();
+            doubleSidedMesh.Dispose();
             waterMesh.Dispose();
             lightMap.Dispose();
         }
