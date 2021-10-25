@@ -72,13 +72,13 @@ namespace Mycraft.GUI
             for (int i = 0; i < CAPACITY; i++)
                 if (!(blocks[i] is null))
                     blockViews[i].Resize(
-                        position + new Vertex2i((int)((3.5 + 18 * i) * scale), 3 * scale),
-                        new Vertex2i(13 * scale, 14 * scale)
+                        position + new Vertex2i((3 + 18 * i) * scale, 3 * scale),
+                        new Vertex2i(14 * scale)
                     );
 
             hotbarSelector.Resize(
                 position + new Vertex2i((18 * Selected - 1) * scale, -scale),
-                new Vertex2i(22 * scale, 22 * scale)
+                new Vertex2i(22 * scale)
             );
         }
 

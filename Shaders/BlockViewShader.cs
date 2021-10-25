@@ -32,8 +32,10 @@ in float _light;
 
 void main()
 {
-    vec4 col = texture(tex, _textureCoords) * _light;
-    gl_FragColor = col;
+    vec4 textureSample = texture(tex, _textureCoords);
+    if (textureSample.a == 0) discard;
+
+    gl_FragColor = vec4(textureSample.rgb * _light, 1.0);
 }";
 
         public Matrix4x4f Projection

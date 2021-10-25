@@ -18,31 +18,46 @@ namespace Mycraft.GUI
 
         public void Resize(Vertex2i position, Vertex2i size)
         {
-            float topTexture   = block.GetTexture(BlockSide.Top);
-            float frontTexture = block.GetTexture(BlockSide.Front);
-            float rightTexture = block.GetTexture(BlockSide.Right);
+            if (block is PlantBlock)
+            {
+                float texture = block.GetTexture(BlockSide.Top);
 
-            float tilt = size.y / 4f;
+                Data = new float[] {
+                    position.x + size.x, position.y,           1f, 0f, texture,  1f,
+                    position.x,          position.y,           0f, 0f, texture,  1f,
+                    position.x,          position.y + size.y,  0f, 1f, texture,  1f,
+                    position.x + size.x, position.y + size.y,  1f, 1f, texture,  1f,
+                };
+            }
+            else
+            {
+                float topTexture   = block.GetTexture(BlockSide.Top);
+                float frontTexture = block.GetTexture(BlockSide.Front);
+                float rightTexture = block.GetTexture(BlockSide.Right);
 
-            Data = new float[] {
-                // Top
-                position.x + size.x,       position.y + tilt,            1f, 0f, topTexture,    1f,
-                position.x + size.x * .5f, position.y,                   0f, 0f, topTexture,    1f,
-                position.x,                position.y + tilt,            0f, 1f, topTexture,    1f,
-                position.x + size.x * .5f, position.y + tilt * 2f,       1f, 1f, topTexture,    1f,
+                float tilt = size.y / 4f;
+                float padding = size.y / 32f;
+
+                Data = new float[] {
+                    // Top
+                    position.x + size.x - padding, position.y + tilt,            1f, 0f, topTexture,    1f,
+                    position.x + size.x * .5f,     position.y,                   0f, 0f, topTexture,    1f,
+                    position.x + padding,          position.y + tilt,            0f, 1f, topTexture,    1f,
+                    position.x + size.x * .5f,     position.y + tilt * 2f,       1f, 1f, topTexture,    1f,
                                                                                                
-                // Front                                                                       
-                position.x,                position.y + tilt,            0f, 0f, frontTexture,  .9f,
-                position.x,                position.y + size.y - tilt,   0f, 1f, frontTexture,  .9f,
-                position.x + size.x * .5f, position.y + size.y,          1f, 1f, frontTexture,  .9f,
-                position.x + size.x * .5f, position.y + tilt * 2f,       1f, 0f, frontTexture,  .9f,
+                    // Front                                                                       
+                    position.x + padding,          position.y + tilt,            0f, 0f, frontTexture,  .9f,
+                    position.x + padding,          position.y + size.y - tilt,   0f, 1f, frontTexture,  .9f,
+                    position.x + size.x * .5f,     position.y + size.y,          1f, 1f, frontTexture,  .9f,
+                    position.x + size.x * .5f,     position.y + tilt * 2f,       1f, 0f, frontTexture,  .9f,
                                                                                                
-                // Right                                                                       
-                position.x + size.x * .5f, position.y + tilt * 2f,       0f, 0f, rightTexture,  .8f,
-                position.x + size.x * .5f, position.y + size.y,          0f, 1f, rightTexture,  .8f,
-                position.x + size.x,       position.y + size.y - tilt,   1f, 1f, rightTexture,  .8f,
-                position.x + size.x,       position.y + tilt,            1f, 0f, rightTexture,  .8f
-            };
+                    // Right                                                                       
+                    position.x + size.x * .5f,     position.y + tilt * 2f,       0f, 0f, rightTexture,  .8f,
+                    position.x + size.x * .5f,     position.y + size.y,          0f, 1f, rightTexture,  .8f,
+                    position.x + size.x - padding, position.y + size.y - tilt,   1f, 1f, rightTexture,  .8f,
+                    position.x + size.x - padding, position.y + tilt,            1f, 0f, rightTexture,  .8f
+                };
+            }
         }
     }
 }
