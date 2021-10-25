@@ -300,14 +300,14 @@ namespace Mycraft
         {
             Matrix4x4f vp = projection * player.camera.TransformMatrix;
 
-            // Draw the world
+            // Draw UI stuff
 
-            Gl.UseProgram(Resources.GameWorldShader.glId);
             Gl.Enable(EnableCap.DepthTest);
 
-            Resources.GameWorldShader.View = player.camera.TransformMatrix;
-            Resources.GameWorldShader.Projection = projection;
-            world.Draw();
+            Gl.UseProgram(Resources.WorldUIShader.glId);
+            Resources.WorldUIShader.VP = vp;
+            player.Selection.Draw();
+            origin.Draw();
 
             // Draw particles
 
@@ -317,12 +317,12 @@ namespace Mycraft
             Resources.BlocksTexture.Bind();
             particles.Draw();
 
-            // Draw UI stuff
+            // Draw the world
 
-            Gl.UseProgram(Resources.WorldUIShader.glId);
-            Resources.WorldUIShader.VP = vp;
-            player.Selection.Draw();
-            origin.Draw();
+            Gl.UseProgram(Resources.GameWorldShader.glId);
+            Resources.GameWorldShader.View = player.camera.TransformMatrix;
+            Resources.GameWorldShader.Projection = projection;
+            world.Draw();
 
             // Draw vignette
 
