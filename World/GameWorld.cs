@@ -117,16 +117,17 @@ namespace Mycraft.World
                     chunkLoaders.Add(LoadChunkAsync((x, z)));
 
             while (!Task.WhenAll(chunkLoaders).IsCompleted) ;
+            renderQueueNeedsUpdate = true;
         }
 
-        public void Update(Vertex3f cameraPosition, bool firstUpdate = false)
+        public void Update(Vertex3f cameraPosition)
         {
             int cameraChunkX = ToChunkCoord((int)Math.Floor(cameraPosition.x)).chunk;
             int cameraChunkZ = ToChunkCoord((int)Math.Floor(cameraPosition.z)).chunk;
 
             // Chunk loading
 
-            if (firstUpdate || lastCameraChunkX != cameraChunkX || lastCameraChunkZ != cameraChunkZ)
+            if (lastCameraChunkX != cameraChunkX || lastCameraChunkZ != cameraChunkZ)
             {
                 lastCameraChunkX = cameraChunkX;
                 lastCameraChunkZ = cameraChunkZ;

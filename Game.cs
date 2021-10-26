@@ -90,7 +90,7 @@ namespace Mycraft
 
             playerMovement = new SmoothChangingVertex2f(new Vertex2f(), MOVEMENT_ACCELERATION);
             player = new Player(world, new Vertex3f(.5f, world.GetGroundLevel(0, 0) + 1f, .5f));
-            world.Update(player.camera.Position, true);
+            world.Update(player.camera.Position);
 
             particles = new ParticleSystem(world, .2f, .5d);
         }
