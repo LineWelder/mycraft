@@ -9,7 +9,6 @@ namespace Mycraft.World.Generation
         private const int WATER_LEVEL = 18;
 
         private readonly FastNoiseLite noise;
-        private Chunk chunk;
 
         public SimpleWorldGenerator(int seed)
         {
@@ -17,17 +16,7 @@ namespace Mycraft.World.Generation
             noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
         }
 
-        private void SetBlock(int x, int y, int z, Block block)
-        {
-            if (y < 0 || y >= Chunk.HEIGHT
-             || x < 0 || x >= Chunk.SIZE
-             || z < 0 || z >= Chunk.SIZE)
-                return;
-
-            chunk.blocks[x, y, z] = block;
-        }
-
-        private float GetHeight(int x, int z)
+        private float GetHeight(Chunk chunk, int x, int z)
         {
             float NoiseLayer(float scale, float amplitude)
                 => noise.GetNoise(
@@ -38,8 +27,18 @@ namespace Mycraft.World.Generation
             return 19f + NoiseLayer(1f, 8f) + NoiseLayer(4f, 2f);
         }
 
-        private void GenerateTree(int x, int y, int z)
+        private void GenerateTree(Chunk chunk, int x, int y, int z)
         {
+            void SetBlock(int bx, int by, int bz, Block block)
+            {
+                if (by < 0 || by >= Chunk.HEIGHT
+                 || bx < 0 || bx >= Chunk.SIZE
+                 || bz < 0 || bz >= Chunk.SIZE)
+                    return;
+
+                chunk.blocks[bx, by, bz] = block;
+            }
+
             SetBlock(x, y, z, BlockRegistry.Dirt);
 
             for (int dy = 1; dy <= 5; dy++)
@@ -59,12 +58,10 @@ namespace Mycraft.World.Generation
 
         public void GenerateChunk(Chunk chunk)
         {
-            this.chunk = chunk;
-
             for (int x = 0; x < Chunk.SIZE; x++)
                 for (int z = 0; z < Chunk.SIZE; z++)
                 {
-                    float realHeight = GetHeight(x, z);
+                    float realHeight = GetHeight(chunk, x, z);
                     int height = (int)Math.Round(realHeight);
 
                     for (int y = 0; y < Chunk.HEIGHT; y++)
@@ -88,7 +85,7 @@ namespace Mycraft.World.Generation
             for (int x = -2; x < Chunk.SIZE + 2; x++)
                 for (int z = -2; z < Chunk.SIZE + 2; z++)
                 {
-                    float height = GetHeight(x, z);
+                    float height = GetHeight(chunk, x, z);
                     int y = (int)Math.Round(height);
                     if (height < WATER_LEVEL + .2f)
                         continue;
@@ -98,7 +95,7 @@ namespace Mycraft.World.Generation
 
                     if (bx % 8 == 0 && bz % 8 == 0)
                     {
-                        GenerateTree(x, y, z);
+                        GenerateTree(chunk, x, y, z);
                     }
                     else if (x >= 0 && x < Chunk.SIZE
                           && z >= 0 && z < Chunk.SIZE)

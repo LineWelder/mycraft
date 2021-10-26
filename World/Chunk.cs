@@ -21,6 +21,7 @@ namespace Mycraft.World
         public const int SIZE = 16;
         public const int HEIGHT = 256;
 
+        public bool isLoaded;
         public bool needsUpdate;
         public readonly Block[,,] blocks;
         public readonly int[,] groundLevel;
