@@ -8,58 +8,63 @@ namespace Mycraft.World.Generation
     {
         private const int WATER_LEVEL = 18;
 
+        private readonly FastNoiseLite noise;
         private Chunk chunk;
 
-        private void SetBlockExtended(int x, int y, int z, Block block)
+        public SimpleWorldGenerator(int seed)
         {
-            if (y < 0 || y >= Chunk.HEIGHT)
-                return;
-
-            if (x >= 0 && x < Chunk.SIZE
-             && z >= 0 && z < Chunk.SIZE)
-                chunk.blocks[x, y, z] = block;
-            else
-                chunk.world.SetBlock(chunk.xOffset + x, y, chunk.zOffset + z, block);
+            noise = new FastNoiseLite(seed);
+            noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
         }
 
-        private void GenerateTree(int x, int z)
+        private void SetBlock(int x, int y, int z, Block block)
         {
-            int y = chunk.groundLevel[x, z];
+            if (y < 0 || y >= Chunk.HEIGHT
+             || x < 0 || x >= Chunk.SIZE
+             || z < 0 || z >= Chunk.SIZE)
+                return;
 
-            chunk.blocks[x, y, z] = BlockRegistry.Dirt;
+            chunk.blocks[x, y, z] = block;
+        }
+
+        private float GetHeight(int x, int z)
+        {
+            float NoiseLayer(float scale, float amplitude)
+                => noise.GetNoise(
+                    (x + chunk.xOffset) * scale,
+                    (z + chunk.zOffset) * scale
+                ) * amplitude;
+
+            return 19f + NoiseLayer(1f, 8f) + NoiseLayer(4f, 2f);
+        }
+
+        private void GenerateTree(int x, int y, int z)
+        {
+            SetBlock(x, y, z, BlockRegistry.Dirt);
 
             for (int dy = 1; dy <= 5; dy++)
-                chunk.blocks[x, y + dy, z] = BlockRegistry.Log;
+                SetBlock(x, y + dy, z, BlockRegistry.Log);
 
             for (int dx = -2; dx <= 2; dx++)
                 for (int dz = -2; dz <= 2; dz++)
                     for (int dy = 4; dy <= 5; dy++)
                         if (dx != 0 || dz != 0)
-                            SetBlockExtended(x + dx, y + dy, z + dz, BlockRegistry.Leaves);
+                            SetBlock(x + dx, y + dy, z + dz, BlockRegistry.Leaves);
 
             for (int dx = -1; dx <= 1; dx++)
                 for (int dz = -1; dz <= 1; dz++)
                     for (int dy = 6; dy <= 7; dy++)
-                        SetBlockExtended(x + dx, y + dy, z + dz, BlockRegistry.Leaves);
+                        SetBlock(x + dx, y + dy, z + dz, BlockRegistry.Leaves);
         }
 
         public void GenerateChunk(Chunk chunk)
         {
             this.chunk = chunk;
 
-            FastNoiseLite noise = new FastNoiseLite();
-            noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
-
             for (int x = 0; x < Chunk.SIZE; x++)
                 for (int z = 0; z < Chunk.SIZE; z++)
                 {
-                    float NoiseLayer(float scale, float amplitude)
-                        => noise.GetNoise(
-                            (x + chunk.xOffset) * scale,
-                            (z + chunk.zOffset) * scale
-                        ) * amplitude;
-
-                    float realHeight = 19f + NoiseLayer(1f, 8f) + NoiseLayer(4f, 2f);
+                    float realHeight = GetHeight(x, z);
                     int height = (int)Math.Round(realHeight);
 
                     for (int y = 0; y < Chunk.HEIGHT; y++)
@@ -80,11 +85,34 @@ namespace Mycraft.World.Generation
                     chunk.groundLevel[x, z] = height;
                 }
 
-            Random random = new Random(((short)chunk.zOffset << 16) + chunk.xOffset);
-            for (int x = 0; x < Chunk.SIZE; x++)
-                for (int z = 0; z < Chunk.SIZE; z++)
-                    if (chunk.groundLevel[x, z] >= WATER_LEVEL && random.Next(100) < 1)
-                        GenerateTree(x, z);
+            for (int x = -2; x < Chunk.SIZE + 2; x++)
+                for (int z = -2; z < Chunk.SIZE + 2; z++)
+                {
+                    float height = GetHeight(x, z);
+                    int y = (int)Math.Round(height);
+                    if (height < WATER_LEVEL + .2f)
+                        continue;
+
+                    int bx = chunk.xOffset + x;
+                    int bz = chunk.zOffset + z;
+
+                    if (bx % 8 == 0 && bz % 8 == 0)
+                    {
+                        GenerateTree(x, y, z);
+                    }
+                    else if (x >= 0 && x < Chunk.SIZE
+                          && z >= 0 && z < Chunk.SIZE)
+                    {
+                        bx += 1;
+                        bz += 1;
+
+                        if (bx % 4 == 0 && bz % 4 == 0
+                         && (bx / 4 + bz / 4) % 2 == 0)
+                            chunk.blocks[x, y + 1, z] = BlockRegistry.RedFlower;
+                        else if (bx % 4 == 0 && bz % 4 == 0)
+                            chunk.blocks[x, y + 1, z] = BlockRegistry.YellowFlower;
+                    }
+                }
         }
     }
 }

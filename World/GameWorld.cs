@@ -11,12 +11,6 @@ namespace Mycraft.World
 {
     public class GameWorld : IDisposable
     {
-        private struct BlockToBeSet
-        {
-            public int x, y, z;
-            public Block block;
-        }
-
         public const int LOAD_DISTANCE = 7;
         public const int UNLOAD_DISTANCE = 9;
 
@@ -24,7 +18,6 @@ namespace Mycraft.World
         private readonly List<(int distance, Chunk chunk)> renderQueue;
         private readonly Queue<(int x, int z)> chunksToLoad;
 
-        private readonly Dictionary<(int chunkX, int chunkZ), List<BlockToBeSet>> toBeSet;
         private readonly IWorldGenerator generator;
 
         private int lastCameraChunkX, lastCameraChunkZ;
@@ -35,7 +28,6 @@ namespace Mycraft.World
             renderQueue = new List<(int distance, Chunk chunk)>();
             chunksToLoad = new Queue<(int x, int z)>();
 
-            toBeSet = new Dictionary<(int chunkX, int chunkZ), List<BlockToBeSet>>();
             this.generator = generator;
         }
 
@@ -79,19 +71,6 @@ namespace Mycraft.World
                     neighbour.needsUpdate = true;
                 else if (blockZ == Chunk.SIZE - 1 && chunks.TryGetValue((chunkX, chunkZ + 1), out neighbour))
                     neighbour.needsUpdate = true;
-            }
-            else
-            {
-                if (!toBeSet.ContainsKey( (chunkX, chunkZ) ))
-                    toBeSet[(chunkX, chunkZ)] = new List<BlockToBeSet>();
-
-                toBeSet[(chunkX, chunkZ)].Add(new BlockToBeSet
-                {
-                    x = blockX,
-                    y = y,
-                    z = blockZ,
-                    block = block
-                });
             }
         }
 
@@ -211,9 +190,6 @@ namespace Mycraft.World
             chunks.Add(coords, newChunk);
 
             generator.GenerateChunk(newChunk);
-            if (toBeSet.TryGetValue(coords, out List<BlockToBeSet> blocks))
-                foreach (BlockToBeSet block in blocks)
-                    newChunk.blocks[block.x, block.y, block.z] = block.block;
 
             newChunk.needsUpdate = true;
             OnChunkUpdate(coords.x, coords.z);

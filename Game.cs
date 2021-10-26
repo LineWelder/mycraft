@@ -85,7 +85,7 @@ namespace Mycraft
 
             origin = new Origin();
 
-            world = new GameWorld(new SimpleWorldGenerator());
+            world = new GameWorld(new SimpleWorldGenerator(1337));
             world.GenerateSpawnArea();
 
             playerMovement = new SmoothChangingVertex2f(new Vertex2f(), MOVEMENT_ACCELERATION);
@@ -298,14 +298,12 @@ namespace Mycraft
 
         public void Draw()
         {
-            Matrix4x4f vp = projection * player.camera.TransformMatrix;
-
             // Draw UI stuff
 
             Gl.Enable(EnableCap.DepthTest);
 
             Gl.UseProgram(Resources.WorldUIShader.glId);
-            Resources.WorldUIShader.VP = vp;
+            Resources.WorldUIShader.VP = projection * player.camera.TransformMatrix;
             player.Selection.Draw();
             origin.Draw();
 
