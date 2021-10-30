@@ -11,8 +11,8 @@ namespace Mycraft.World
 {
     public class GameWorld : IDisposable
     {
-        public const int LOAD_DISTANCE = 7;
-        public const int UNLOAD_DISTANCE = 9;
+        public const int LOAD_DISTANCE = 16;
+        public const int UNLOAD_DISTANCE = LOAD_DISTANCE + 2;
 
         private readonly Dictionary<(int x, int z), Chunk> chunks;
         private readonly List<(int distance, Chunk chunk)> renderQueue;
@@ -20,6 +20,7 @@ namespace Mycraft.World
         private readonly IWorldGenerator generator;
 
         private int lastCameraChunkX, lastCameraChunkZ;
+        private int lastCameraX, lastCameraZ;
         private bool renderQueueNeedsUpdate;
 
         public GameWorld(IWorldGenerator generator)
@@ -122,9 +123,12 @@ namespace Mycraft.World
 
         public void Update(Vertex3f cameraPosition)
         {
-            int cameraChunkX = ToChunkCoord((int)Math.Floor(cameraPosition.x)).chunk;
-            int cameraChunkZ = ToChunkCoord((int)Math.Floor(cameraPosition.z)).chunk;
+            int cameraX = (int)Math.Floor(cameraPosition.x);
+            int cameraZ = (int)Math.Floor(cameraPosition.z);
 
+            int cameraChunkX = ToChunkCoord(cameraX).chunk;
+            int cameraChunkZ = ToChunkCoord(cameraZ).chunk;
+            
             // Chunk loading
 
             if (lastCameraChunkX != cameraChunkX || lastCameraChunkZ != cameraChunkZ)
@@ -181,8 +185,21 @@ namespace Mycraft.World
             // Update chunk meshes
 
             Parallel.ForEach(renderQueue, (pair) =>
-                pair.chunk.GenerateMesh(cameraPosition)
+                pair.chunk.UpdateMesh()
             );
+
+            if (cameraX != lastCameraX || cameraZ != lastCameraZ)
+            {
+                lastCameraX = cameraX;
+                lastCameraZ = cameraZ;
+
+                Task.Run(() =>
+                {
+                    Parallel.ForEach(renderQueue, (pair) => 
+                        pair.chunk.SortTransparentGeometry(cameraPosition)
+                    );
+                });
+            }
 
             foreach (var (_, chunk) in renderQueue)
                 chunk.RefreshVertexData();

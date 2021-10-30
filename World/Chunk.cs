@@ -251,36 +251,39 @@ namespace Mycraft.World
             lightMapNeedsUpdate = true;
         }
 
-        public void GenerateMesh(Vertex3f cameraPosition)
+        public void UpdateMesh()
         {
-            if (needsUpdate)
-            {
-                needsUpdate = false;
+            if (!needsUpdate)
+                return;
 
-                RecalculateLight();
+            needsUpdate = false;
 
-                List<Quad> solidQuads = new List<Quad>();
-                List<Quad> doubleSidedQuads = new List<Quad>();
-                waterQuads.Clear();
+            RecalculateLight();
 
-                for (int cx = 0; cx < SIZE; cx++)
-                    for (int cz = 0; cz < SIZE; cz++)
-                        for (int cy = 0; cy < HEIGHT; cy++)
-                        {
-                            Block block = blocks[cx, cy, cz];
+            List<Quad> solidQuads = new List<Quad>();
+            List<Quad> doubleSidedQuads = new List<Quad>();
+            waterQuads.Clear();
 
-                            if (block is LiquidBlock)
-                                block.EmitMesh(waterQuads, this, cx, cy, cz);
-                            else if (block is PlantBlock)
-                                block.EmitMesh(doubleSidedQuads, this, cx, cy, cz);
-                            else
-                                block.EmitMesh(solidQuads, this, cx, cy, cz);
-                        }
+            for (int cx = 0; cx < SIZE; cx++)
+                for (int cz = 0; cz < SIZE; cz++)
+                    for (int cy = 0; cy < HEIGHT; cy++)
+                    {
+                        Block block = blocks[cx, cy, cz];
 
-                solidVertices = ToFloatArray(solidQuads);
-                doubleSidedVertices = ToFloatArray(doubleSidedQuads);
-            }
+                        if (block is LiquidBlock)
+                            block.EmitMesh(waterQuads, this, cx, cy, cz);
+                        else if (block is PlantBlock)
+                            block.EmitMesh(doubleSidedQuads, this, cx, cy, cz);
+                        else
+                            block.EmitMesh(solidQuads, this, cx, cy, cz);
+                    }
 
+            solidVertices = ToFloatArray(solidQuads);
+            doubleSidedVertices = ToFloatArray(doubleSidedQuads);
+        }
+
+        public void SortTransparentGeometry(Vertex3f cameraPosition)
+        {
             Vertex3f offset = new Vertex3f(xOffset, 0f, zOffset) - cameraPosition;
             waterQuads.Sort(
                 (Quad a, Quad b) => (b.Center + offset).ModuleSquared()
