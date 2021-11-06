@@ -1,15 +1,15 @@
 ﻿using System;
+using System.Windows.Forms;
 using OpenGL;
 
+using Mycraft.Blocks;
+using Mycraft.Graphics;
 using Mycraft.GUI;
 using Mycraft.Physics;
 using Mycraft.Utils;
 using Mycraft.World;
-using Mycraft.WorldUI;
-using Mycraft.Blocks;
 using Mycraft.World.Generation;
-using System.Windows.Forms;
-using Mycraft.Graphics;
+using Mycraft.WorldUI;
 
 // TODO make seasons
 // TODO make neighbour caching in getblock and getlight in chunk mesh generation
@@ -33,6 +33,7 @@ namespace Mycraft
         private Block blockIn;
 
         private Origin origin;
+        private ChunkBorders chunkBorders;
         private GameWorld world;
         private GUIRectangle cross;
         private ParticleSystem particles;
@@ -84,6 +85,7 @@ namespace Mycraft
             // Create the game objects
 
             origin = new Origin();
+            chunkBorders = new ChunkBorders();
 
             world = new GameWorld(new SimpleWorldGenerator(1337));
             world.GenerateSpawnArea();
@@ -241,6 +243,7 @@ namespace Mycraft
             player.Update(deltaTime);
             world.Update(player.camera.Position);
             particles.Update(deltaTime);
+            chunkBorders.Update(player.camera.Position);
 
             // Update the sky state
 
@@ -306,6 +309,7 @@ namespace Mycraft
             Resources.WorldUIShader.VP = projection * player.camera.TransformMatrix;
             player.Selection.Draw();
             origin.Draw();
+            chunkBorders.Draw();
 
             // Draw particles
 
@@ -361,6 +365,7 @@ namespace Mycraft
         {
             world.Dispose();
             origin.Dispose();
+            chunkBorders.Dispose();
             player.Dispose();
             hotbar.Dispose();
         }
