@@ -14,13 +14,15 @@ namespace Mycraft.World
         public const int LOAD_DISTANCE = 16;
         public const int UNLOAD_DISTANCE = LOAD_DISTANCE + 2;
 
+        public Camera ObservingCamera { get; set; }
+
         private readonly Dictionary<(int x, int z), Chunk> chunks;
         private readonly List<(int distance, Chunk chunk)> renderQueue;
 
         private readonly IWorldGenerator generator;
-
+        
         private int lastCameraChunkX, lastCameraChunkZ;
-        private int lastCameraX, lastCameraZ;
+        private int lastCameraX, lastCameraY, lastCameraZ;
         private bool renderQueueNeedsUpdate;
 
         public GameWorld(IWorldGenerator generator)
@@ -31,7 +33,7 @@ namespace Mycraft.World
             this.generator = generator;
         }
 
-        private (int chunk, int block) ToChunkCoord(int v)
+        public static (int chunk, int block) ToChunkCoord(int v)
             => v >= 0
             ? (v / Chunk.SIZE, v % Chunk.SIZE)
             : ((v + 1) / Chunk.SIZE - 1, (v + 1) % Chunk.SIZE + Chunk.SIZE - 1);
@@ -121,10 +123,26 @@ namespace Mycraft.World
             renderQueueNeedsUpdate = true;
         }
 
-        public void Update(Vertex3f cameraPosition)
+        private readonly Profiler profiler = new Profiler();
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        private void ThrottleUpdates(Func<Chunk, bool> updateFunc, int updates)
         {
-            int cameraX = (int)Math.Floor(cameraPosition.x);
-            int cameraZ = (int)Math.Floor(cameraPosition.z);
+            for (int i = renderQueue.Count - 1; i >= 0; i--)
+            {
+                if (updateFunc(renderQueue[i].chunk))
+                    updates--;
+
+                if (updates <= 0)
+                    return;
+            }
+        }
+
+        public void Update()
+        {
+            int cameraX = (int)Math.Floor(ObservingCamera.Position.x);
+            int cameraY = (int)Math.Floor(ObservingCamera.Position.y);
+            int cameraZ = (int)Math.Floor(ObservingCamera.Position.z);
 
             int cameraChunkX = ToChunkCoord(cameraX).chunk;
             int cameraChunkZ = ToChunkCoord(cameraZ).chunk;
@@ -158,6 +176,7 @@ namespace Mycraft.World
             }
 
             // Update the render queue if needed
+            bool printInfo = renderQueueNeedsUpdate;
 
             if (renderQueueNeedsUpdate)
             {
@@ -174,6 +193,7 @@ namespace Mycraft.World
                     int distance = dx * dx + dz * dz;
 
                     renderQueue.Add((distance, pair.Value));
+                    pair.Value.needsTransparentGeometrySort = true;
                 }
 
                 renderQueue.Sort(
@@ -182,27 +202,36 @@ namespace Mycraft.World
                 );
             }
 
-            // Update chunk meshes
+            // If the player changes the block they are in
 
-            Parallel.ForEach(renderQueue, (pair) =>
-                pair.chunk.UpdateMesh()
-            );
-
-            if (cameraX != lastCameraX || cameraZ != lastCameraZ)
+            if (cameraX != lastCameraX || cameraY != lastCameraY || cameraZ != lastCameraZ)
             {
                 lastCameraX = cameraX;
+                lastCameraY = cameraY;
                 lastCameraZ = cameraZ;
 
-                Task.Run(() =>
-                {
-                    Parallel.ForEach(renderQueue, (pair) => 
-                        pair.chunk.SortTransparentGeometry(cameraPosition)
-                    );
-                });
+                chunks[(cameraChunkX, cameraChunkZ)].needsTransparentGeometrySort = true;
             }
 
-            foreach (var (_, chunk) in renderQueue)
-                chunk.RefreshVertexData();
+            // Update chunk meshes
+
+            profiler.NewFrame();
+
+            ThrottleUpdates(chunk => !chunk.UpdateMeshAsync().IsCompleted, 3);
+
+            profiler.EndFragment("Mesh updates");
+
+            ThrottleUpdates(chunk => !chunk.EnsureTransparentGeometrySortedAsync().IsCompleted, 3);
+
+            profiler.EndFragment("Transparent geometry sorting");
+
+            ThrottleUpdates(chunk => chunk.RefreshVertexData(), 3);
+
+            profiler.EndFragment("Vertex data updates");
+            profiler.EndFrame();
+
+            if (profiler.FrameTime > 2)
+                profiler.PrintInfo();
         }
 
         private void OnChunkUpdate(int x, int z)

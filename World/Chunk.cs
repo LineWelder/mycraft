@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using OpenGL;
 
 using Mycraft.Blocks;
@@ -23,6 +24,7 @@ namespace Mycraft.World
 
         public bool isLoaded;
         public bool needsUpdate;
+        public bool needsTransparentGeometrySort;
         public readonly Block[,,] blocks;
         public readonly int[,] groundLevel;
 
@@ -251,73 +253,97 @@ namespace Mycraft.World
             lightMapNeedsUpdate = true;
         }
 
-        public void UpdateMesh()
+        public Task UpdateMeshAsync()
         {
             if (!needsUpdate)
-                return;
+                return Task.CompletedTask;
 
             needsUpdate = false;
 
-            RecalculateLight();
+            return Task.Run(() =>
+            {
+                RecalculateLight();
 
-            List<Quad> solidQuads = new List<Quad>();
-            List<Quad> doubleSidedQuads = new List<Quad>();
-            waterQuads.Clear();
+                List<Quad> solidQuads = new List<Quad>();
+                List<Quad> doubleSidedQuads = new List<Quad>();
+                waterQuads.Clear();
 
-            for (int cx = 0; cx < SIZE; cx++)
-                for (int cz = 0; cz < SIZE; cz++)
-                    for (int cy = 0; cy < HEIGHT; cy++)
-                    {
-                        Block block = blocks[cx, cy, cz];
+                for (int cx = 0; cx < SIZE; cx++)
+                    for (int cz = 0; cz < SIZE; cz++)
+                        for (int cy = 0; cy < HEIGHT; cy++)
+                        {
+                            Block block = blocks[cx, cy, cz];
 
-                        if (block is LiquidBlock)
-                            block.EmitMesh(waterQuads, this, cx, cy, cz);
-                        else if (block is PlantBlock)
-                            block.EmitMesh(doubleSidedQuads, this, cx, cy, cz);
-                        else
-                            block.EmitMesh(solidQuads, this, cx, cy, cz);
-                    }
+                            if (block is LiquidBlock)
+                                block.EmitMesh(waterQuads, this, cx, cy, cz);
+                            else if (block is PlantBlock)
+                                block.EmitMesh(doubleSidedQuads, this, cx, cy, cz);
+                            else
+                                block.EmitMesh(solidQuads, this, cx, cy, cz);
+                        }
 
-            solidVertices = ToFloatArray(solidQuads);
-            doubleSidedVertices = ToFloatArray(doubleSidedQuads);
+                solidVertices = ToFloatArray(solidQuads);
+                doubleSidedVertices = ToFloatArray(doubleSidedQuads);
+
+                needsTransparentGeometrySort = true;
+            });
         }
 
-        public void SortTransparentGeometry(Vertex3f cameraPosition)
+        public Task EnsureTransparentGeometrySortedAsync()
         {
-            Vertex3f offset = new Vertex3f(xOffset, 0f, zOffset) - cameraPosition;
-            waterQuads.Sort(
-                (Quad a, Quad b) => (b.Center + offset).ModuleSquared()
-                         .CompareTo((a.Center + offset).ModuleSquared())
-            );
+            if (!needsTransparentGeometrySort)
+                return Task.CompletedTask;
 
-            waterVertices = ToFloatArray(waterQuads);
+            needsTransparentGeometrySort = false;
+            return Task.Run(() =>
+            {
+                Vertex3f offset = new Vertex3f(xOffset, 0f, zOffset) - world.ObservingCamera.Position;
+                waterQuads.Sort(
+                    (Quad a, Quad b) => (b.Center + offset).ModuleSquared()
+                             .CompareTo((a.Center + offset).ModuleSquared())
+                );
+
+                waterVertices = ToFloatArray(waterQuads);
+            });
         }
 
-        public void RefreshVertexData()
+        public bool RefreshVertexData()
         {
+            bool refreshed = false;
+
             if (lightMapNeedsUpdate)
             {
                 lightMap.Data = lightMapData;
                 lightMapNeedsUpdate = false;
+
+                refreshed = true;
             }
 
             if (!(solidVertices is null))
             {
                 solidMesh.Data = solidVertices;
                 solidVertices = null;
+
+                refreshed = true;
             }
 
             if (!(doubleSidedVertices is null))
             {
                 doubleSidedMesh.Data = doubleSidedVertices;
                 doubleSidedVertices = null;
+
+                refreshed = true;
             }
 
             if (!(waterVertices is null))
             {
                 waterMesh.Data = waterVertices;
                 waterVertices = null;
+
+                refreshed = true;
             }
+
+            return refreshed;
         }
 
         public void Dispose()

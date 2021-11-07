@@ -92,7 +92,8 @@ namespace Mycraft
 
             playerMovement = new SmoothChangingVertex2f(new Vertex2f(), MOVEMENT_ACCELERATION);
             player = new Player(world, new Vertex3f(.5f, world.GetGroundLevel(0, 0) + 1f, .5f));
-            world.Update(player.camera.Position);
+            world.ObservingCamera = player.camera;
+            world.Update();
 
             particles = new ParticleSystem(world, .2f, .5d);
         }
@@ -241,9 +242,9 @@ namespace Mycraft
             // Update the game objects
 
             player.Update(deltaTime);
-            world.Update(player.camera.Position);
             particles.Update(deltaTime);
             chunkBorders.Update(player.camera.Position);
+            world.Update();
 
             // Update the sky state
 

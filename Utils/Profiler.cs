@@ -6,6 +6,8 @@ namespace Mycraft.Utils
 {
     public class Profiler
     {
+        public long FrameTime => frameStopwatch.ElapsedMilliseconds;
+
         private readonly Stopwatch frameStopwatch;
         private readonly Stopwatch fragmentStopwatch;
         private readonly Dictionary<string, long> fragments;
