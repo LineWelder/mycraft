@@ -171,7 +171,7 @@ namespace Mycraft.Utils
                 }
 
                 Block hitBlock = world.GetBlock(hitCoords.x, hitCoords.y, hitCoords.z);
-                if (hitBlock.HasCollider)
+                if (hitBlock.IsSelectable)
                 {
                     ray = new Hit(currentPoint, hitSide, hitCoords, hitBlock);
                     return true;

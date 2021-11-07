@@ -9,6 +9,7 @@ namespace Mycraft.Blocks
         public override bool IsTransparent => true;
         public override bool HasCollider => false;
         public override bool IsVisible => true;
+        public override bool IsSelectable => false;
 
         public LiquidBlock(int textureId)
             : base(textureId) { }
