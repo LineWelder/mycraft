@@ -53,7 +53,7 @@ namespace Mycraft.World
             doubleSidedMesh = new WorldGeometry();
             waterMesh = new WorldGeometry();
 
-            lightMap = new LightMap();
+            lightMap = new LightMap(SIZE + 2, HEIGHT, SIZE + 2);
             lightMapData = new float[SIZE + 2, HEIGHT, SIZE + 2];
         }
 

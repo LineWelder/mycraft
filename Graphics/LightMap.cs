@@ -17,10 +17,10 @@ namespace Mycraft.Graphics
                 fixed (float* valuePtr = value)
                 {
                     Gl.BindTexture(TextureTarget.Texture3d, glId);
-                    Gl.TexImage3D(
+                    Gl.TexSubImage3D(
                         TextureTarget.Texture3d, 0,
-                        InternalFormat.Luminance8,
-                        value.GetLength(2), value.GetLength(1), value.GetLength(0), 0,
+                        0, 0, 0,
+                        width, height, depth,
                         PixelFormat.Luminance, PixelType.Float,
                         new IntPtr(valuePtr)
                     );
@@ -28,8 +28,14 @@ namespace Mycraft.Graphics
             }
         }
 
-        public LightMap()
+        private readonly int width, height, depth;
+
+        public LightMap(int width, int height, int depth)
         {
+            this.width  = width;
+            this.height = height;
+            this.depth  = depth;
+
             glId = Gl.GenTexture();
             Gl.BindTexture(TextureTarget.Texture3d, glId);
             
@@ -38,6 +44,12 @@ namespace Mycraft.Graphics
             Gl.TexParameteri(TextureTarget.Texture3d, TextureParameterName.TextureWrapR, TextureWrapMode.ClampToEdge);
             Gl.TexParameteri(TextureTarget.Texture3d, TextureParameterName.TextureMinFilter, TextureMinFilter.Linear);
             Gl.TexParameteri(TextureTarget.Texture3d, TextureParameterName.TextureMagFilter, TextureMagFilter.Linear);
+
+            Gl.TexStorage3D(
+                TextureTarget.Texture3d, 1,
+                InternalFormat.Luminance8,
+                width, height, depth
+            );
         }
 
         public void Bind() => Gl.BindTexture(TextureTarget.Texture3d, glId);
