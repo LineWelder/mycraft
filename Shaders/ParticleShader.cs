@@ -31,7 +31,11 @@ in vec3 _textureCoords;
 
 void main()
 {
-    gl_FragColor = texture(tex, _textureCoords);
+    vec4 textureSample = texture(tex, _textureCoords);
+    if (textureSample.a == 0)
+        discard;
+
+    gl_FragColor = textureSample;
 }";
 
         public Matrix4x4f View
