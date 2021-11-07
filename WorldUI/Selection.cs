@@ -16,8 +16,8 @@ namespace Mycraft.WorldUI
 
         public Selection()
             : base(
-                  new Vertex3f(-.01f, -.01f, -.01f),
-                  new Vertex3f(1.01f, 1.01f, 1.01f),
+                  new Vertex3f(0f, 0f, -0f),
+                  new Vertex3f(1f, 1f, 1f),
                   new Vertex3f(.1f, .1f, .1f)
               ) { }
 
