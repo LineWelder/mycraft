@@ -25,6 +25,7 @@ namespace Mycraft
             Void
         }
 
+        private const float MOUSE_SENSIVITY = .3f;
         private const float MOVEMENT_ACCELERATION = 20f, MOVEMENT_SPEED = 3.7f;
         private const float MAX_ACCENDING_SPEED = 2f, ACCENDING_ACCELERATION = 4f;
 
@@ -107,9 +108,9 @@ namespace Mycraft
                 hotbar.Selected = select % Hotbar.CAPACITY;
         }
 
-        public void RotateCamera(float dpitch, float dyaw)
+        public void MouseInput(float dx, float dy)
         {
-            player.RotateCamera(dpitch, dyaw);
+            player.RotateCamera(dx * MOUSE_SENSIVITY, -dy * MOUSE_SENSIVITY);
         }
 
         public void BreakBlock()

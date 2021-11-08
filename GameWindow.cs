@@ -9,12 +9,12 @@ namespace Mycraft
 {
     public class GameWindow : Form
     {
-        private const float MOUSE_SENSIVITY = .003f;
-
         private readonly GlControl glControl;
         private readonly Stopwatch stopwatch;
 
         private readonly Game game;
+
+        private float mouseDx, mouseDy;
 
         public GameWindow()
         {
@@ -81,8 +81,7 @@ namespace Mycraft
 
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
-            var (dx, dy) = GrabCursor();
-            game.RotateCamera(MOUSE_SENSIVITY * dx, -MOUSE_SENSIVITY * dy);
+            (mouseDx, mouseDy) = GrabCursor();
         }
 
         private void OnMouseDown(object sender, MouseEventArgs e)
@@ -134,7 +133,14 @@ namespace Mycraft
                 frameTimeSum = 0d;
                 numFrames = 0;
             }
-            
+
+            game.MouseInput(
+                (float)(mouseDx * deltaTime),
+                (float)(mouseDy * deltaTime)
+            );
+            mouseDx = 0f;
+            mouseDy = 0f;
+
             game.Update(deltaTime);
         }
 
