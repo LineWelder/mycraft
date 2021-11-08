@@ -18,16 +18,10 @@ namespace Mycraft
 {
     public class Game : IDisposable
     {
-        private enum SkyState
-        {
-            Normal,
-            UnderWater,
-            Void
-        }
-
         private const float MOUSE_SENSIVITY = .3f;
         private const float MOVEMENT_ACCELERATION = 20f, MOVEMENT_SPEED = 3.7f;
         private const float MAX_ACCENDING_SPEED = 2f, ACCENDING_ACCELERATION = 4f;
+        private const float DAY_CYCLE_SPEED = .02f;
 
         private static readonly float[] screenQuad =
         {
@@ -38,7 +32,6 @@ namespace Mycraft
         };
 
         private Matrix4x4f projection;
-        private SkyState skyState = (SkyState)(-1);
         private Block blockIn;
 
         private Origin origin;
@@ -50,6 +43,8 @@ namespace Mycraft
         private SmoothChangingVertex2f playerMovement;
         private Player player;
         private Hotbar hotbar;
+
+        private float time = 0.3f;
 
         public void Init()
         {
@@ -96,7 +91,7 @@ namespace Mycraft
             origin = new Origin();
             chunkBorders = new ChunkBorders();
 
-            world = new GameWorld(new FlatWorldGenerator());
+            world = new GameWorld(new SimpleWorldGenerator(1337));
             world.GenerateSpawnArea();
 
             playerMovement = new SmoothChangingVertex2f(new Vertex2f(), MOVEMENT_ACCELERATION);
@@ -257,63 +252,62 @@ namespace Mycraft
 
             // Update the sky state
 
+            time += (float)(DAY_CYCLE_SPEED * deltaTime);
+            if (time > 1f)
+                time = 0f;
+
+            Gl.UseProgram(Resources.SkyShader.glId);
+            Resources.SkyShader.Time = time;
+
+            Vertex3f skyColor, fogColor;
+            if (player.camera.Position.y < 0)
+            {
+                skyColor = new Vertex3f(.05f, .05f, .05f);
+                fogColor = new Vertex3f(.05f, .05f, .05f);
+            }
+            else
+            {
+                if (time < .25f || time > .75f)
+                {
+                    skyColor = new Vertex3f(0.00f, 0.00f, 0.00f);
+                    fogColor = new Vertex3f(0.00f, 0.00f, 0.09f);
+                }
+                else
+                {
+                    skyColor = new Vertex3f(0.43f, 0.77f, 0.98f);
+
+                    if (time < .3f || time > .7f)
+                    {
+                        fogColor = new Vertex3f(1.00f, 0.60f, 0.40f);
+                    }
+                    else
+                    {
+                        fogColor = new Vertex3f(0.53f, 0.81f, 0.98f);
+                    }
+                }
+            }
+
+            Gl.ClearColor(fogColor.x, fogColor.y, fogColor.z, 1f);
+            Resources.SkyShader.SkyColor = skyColor;
+            Resources.SkyShader.FogColor = fogColor;
+            
+            Gl.UseProgram(Resources.GameWorldShader.glId);
+            Resources.GameWorldShader.FogColor = fogColor;
+
             blockIn = world.GetBlock(
                 (int)Math.Floor(player.camera.Position.x),
                 (int)Math.Floor(player.camera.Position.y),
                 (int)Math.Floor(player.camera.Position.z)
             );
 
-            SkyState newSkyState;
-            if (player.camera.Position.y < 0)
-                newSkyState = SkyState.Void;
-            else if (blockIn is LiquidBlock)
-                newSkyState = SkyState.UnderWater;
-            else
-                newSkyState = SkyState.Normal;
-
-            if (newSkyState == skyState)
-                return;
-            skyState = newSkyState;
-
-            // Update the fog
-
-            Gl.UseProgram(Resources.GameWorldShader.glId);
-
-            if (skyState is SkyState.UnderWater)
-                Resources.GameWorldShader.FogDistance = 16f;
-            else
-                Resources.GameWorldShader.FogDistance = GameWorld.LOAD_DISTANCE * 16f - 24f;
-
-            // Update the sky color
-
-            Vertex3f skyColor, fogColor;
-            switch (newSkyState)
+            if (blockIn is LiquidBlock)
             {
-                case SkyState.Normal:
-                    skyColor = new Vertex3f(0.43f, 0.77f, 0.98f);
-                    fogColor = new Vertex3f(0.53f, 0.81f, 0.98f);
-                    break;
-
-                case SkyState.UnderWater:
-                    skyColor = new Vertex3f(0.43f, 0.77f, 0.98f);
-                    fogColor = new Vertex3f(0.53f, 0.81f, 0.98f);
-                    break;
-
-                case SkyState.Void:
-                    skyColor = new Vertex3f(.05f, .05f, .05f);
-                    fogColor = new Vertex3f(.05f, .05f, .05f);
-                    break;
-
-                default:
-                    return;
+                Resources.GameWorldShader.FogDistance = 16f;
             }
-
-            Gl.ClearColor(fogColor.x, fogColor.y, fogColor.z, 1f);
-            Resources.GameWorldShader.FogColor = fogColor;
-
-            Gl.UseProgram(Resources.SkyShader.glId);
-            Resources.SkyShader.SkyColor = skyColor;
-            Resources.SkyShader.FogColor = fogColor;
+            else
+            {
+                Resources.GameWorldShader.FogDistance = GameWorld.LOAD_DISTANCE * 16f - 24f;
+            }
         }
 
         public void Draw()

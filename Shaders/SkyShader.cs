@@ -24,19 +24,30 @@ void main()
 uniform mat4 transformMatrix;
 uniform vec3 skyColor;
 uniform vec3 fogColor;
+uniform float time;
 
 in vec2 _screenCoords;
 
+const float TWO_PI = 6.28318530718;
+const vec3 SUN_COLOR = vec3(1.0, 1.0, 0.9);
+
 void main()
 {
+    vec3 sunDirection = vec3(0.0, -cos(time * TWO_PI), sin(time * TWO_PI));
+
     vec4 transformed = transformMatrix * vec4(_screenCoords, -1.0, 1.0);
     vec3 direction = normalize(transformed.xyz / transformed.w);
 
+    vec3 color = mix(
+        fogColor, skyColor,
+        smoothstep(0.15, 0.4, abs(direction.y))
+    );
+
+    float sunDot = dot(direction, sunDirection);
+    float sunness = min(1.0, 1.0 / 256.0 / (1.0 - sunDot));
+
     gl_FragColor = vec4(
-        mix(
-            fogColor, skyColor,
-            smoothstep(0.15, 0.5, abs(direction.y))
-        ),
+        mix(color, SUN_COLOR, sunness),
         1.0
     );
 }";
@@ -55,9 +66,15 @@ void main()
             set => Gl.Uniform3f(fogColorLocation, 1, value);
         }
 
+        public float Time
+        {
+            set => Gl.Uniform1f(timeLocation, 1, value);
+        }
+
         private readonly int transformMatrixLocation;
         private readonly int skyColorLocation;
         private readonly int fogColorLocation;
+        private readonly int timeLocation;
 
         public SkyShader()
             : base(new int[] { 2 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
@@ -65,6 +82,7 @@ void main()
             transformMatrixLocation = FindVariable("transformMatrix");
             skyColorLocation = FindVariable("skyColor");
             fogColorLocation = FindVariable("fogColor");
+            timeLocation = FindVariable("time");
         }
     }
 }
