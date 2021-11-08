@@ -81,7 +81,9 @@ namespace Mycraft
 
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
-            (mouseDx, mouseDy) = GrabCursor();
+            var (dx, dy) = GrabCursor();
+            mouseDx += dx;
+            mouseDy += dy;
         }
 
         private void OnMouseDown(object sender, MouseEventArgs e)
