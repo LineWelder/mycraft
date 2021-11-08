@@ -29,6 +29,14 @@ namespace Mycraft
         private const float MOVEMENT_ACCELERATION = 20f, MOVEMENT_SPEED = 3.7f;
         private const float MAX_ACCENDING_SPEED = 2f, ACCENDING_ACCELERATION = 4f;
 
+        private static readonly float[] screenQuad =
+        {
+            1f,  1f,
+            1f, -1f,
+           -1f, -1f,
+           -1f,  1f,
+        };
+
         private Matrix4x4f projection;
         private SkyState skyState = (SkyState)(-1);
         private Block blockIn;
@@ -313,13 +321,7 @@ namespace Mycraft
 
             using (VertexArray skyQuad = new VertexArray(
                 PrimitiveType.Quads, Resources.SkyShader,
-                new float[]
-                {
-                    1f,  1f,
-                    1f, -1f,
-                   -1f, -1f,
-                   -1f,  1f,
-                }
+                screenQuad
             )) skyQuad.Draw();
 
             // Draw UI stuff
@@ -361,13 +363,7 @@ namespace Mycraft
                 Resources.OverlayShader.TextureId = blockIn.GetTexture(BlockSide.Top);
                 using (VertexArray overlay = new VertexArray(
                     PrimitiveType.Quads, Resources.OverlayShader,
-                    new float[]
-                    {
-                         1f,  1f,  1f, 0f,
-                         1f, -1f,  1f, 1f,
-                        -1f, -1f,  0f, 1f,
-                        -1f,  1f,  0f, 0f
-                    }
+                    screenQuad
                 )) overlay.Draw();
             }
 

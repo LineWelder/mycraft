@@ -9,13 +9,12 @@ namespace Mycraft.Shaders
 @"#version 330 core
 
 layout(location = 0) in vec2 position;
-layout(location = 1) in vec2 textureCoords;
 
 out vec2 _textureCoords;
 
 void main()
 {
-    _textureCoords = textureCoords;
+    _textureCoords = position * vec2(0.5, -0.5) + vec2(0.5);
     gl_Position = vec4(position, 0.0, 1.0);
 }";
 
@@ -49,7 +48,7 @@ void main()
         private readonly int textureIdLocation;
 
         public OverlayShader()
-            : base(new int[] { 2, 2 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
+            : base(new int[] { 2 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
         {
             textureLocation = FindVariable("tex");
             textureIdLocation = FindVariable("textureId");
