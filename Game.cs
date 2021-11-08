@@ -96,7 +96,7 @@ namespace Mycraft
             origin = new Origin();
             chunkBorders = new ChunkBorders();
 
-            world = new GameWorld(new SimpleWorldGenerator(1337));
+            world = new GameWorld(new FlatWorldGenerator());
             world.GenerateSpawnArea();
 
             playerMovement = new SmoothChangingVertex2f(new Vertex2f(), MOVEMENT_ACCELERATION);
@@ -286,30 +286,34 @@ namespace Mycraft
 
             // Update the sky color
 
-            Vertex3f skyColor;
+            Vertex3f skyColor, fogColor;
             switch (newSkyState)
             {
                 case SkyState.Normal:
-                    skyColor = new Vertex3f(0.53f, 0.81f, 0.98f);
+                    skyColor = new Vertex3f(0.43f, 0.77f, 0.98f);
+                    fogColor = new Vertex3f(0.53f, 0.81f, 0.98f);
                     break;
 
                 case SkyState.UnderWater:
-                    skyColor = new Vertex3f(0.53f, 0.81f, 0.98f);
+                    skyColor = new Vertex3f(0.43f, 0.77f, 0.98f);
+                    fogColor = new Vertex3f(0.53f, 0.81f, 0.98f);
                     break;
 
                 case SkyState.Void:
                     skyColor = new Vertex3f(.05f, .05f, .05f);
+                    fogColor = new Vertex3f(.05f, .05f, .05f);
                     break;
 
                 default:
                     return;
             }
 
-            Gl.ClearColor(skyColor.x, skyColor.y, skyColor.z, 1f);
-            Resources.GameWorldShader.FogColor = skyColor;
+            Gl.ClearColor(fogColor.x, fogColor.y, fogColor.z, 1f);
+            Resources.GameWorldShader.FogColor = fogColor;
 
             Gl.UseProgram(Resources.SkyShader.glId);
             Resources.SkyShader.SkyColor = skyColor;
+            Resources.SkyShader.FogColor = fogColor;
         }
 
         public void Draw()
@@ -332,7 +336,7 @@ namespace Mycraft
             Resources.WorldUIShader.VP = projection * player.camera.TransformMatrix;
             player.Selection.Draw();
             origin.Draw();
-            chunkBorders.Draw();
+            // chunkBorders.Draw();
 
             // Draw particles
 
