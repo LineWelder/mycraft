@@ -299,10 +299,29 @@ namespace Mycraft
 
             Gl.ClearColor(skyColor.x, skyColor.y, skyColor.z, 1f);
             Resources.GameWorldShader.FogColor = skyColor;
+
+            Gl.UseProgram(Resources.SkyShader.glId);
+            Resources.SkyShader.SkyColor = skyColor;
         }
 
         public void Draw()
         {
+            // Draw the sky
+
+            Gl.UseProgram(Resources.SkyShader.glId);
+            Resources.SkyShader.TransformMatrix = player.camera.InversedRotationMatrix * projection.Inverse;
+
+            using (VertexArray skyQuad = new VertexArray(
+                PrimitiveType.Quads, Resources.SkyShader,
+                new float[]
+                {
+                    1f,  1f,
+                    1f, -1f,
+                   -1f, -1f,
+                   -1f,  1f,
+                }
+            )) skyQuad.Draw();
+
             // Draw UI stuff
 
             Gl.Enable(EnableCap.DepthTest);

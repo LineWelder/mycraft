@@ -16,6 +16,7 @@ namespace Mycraft.Utils
         public static GameWorldShader GameWorldShader { get; private set; }
         public static ParticleShader ParticleShader { get; private set; }
         public static OverlayShader OverlayShader { get; private set; }
+        public static SkyShader SkyShader { get; private set; }
 
         public static TextureArray BlocksTexture { get; private set; }
         public static Texture CrossTexture { get; private set; }
@@ -27,16 +28,17 @@ namespace Mycraft.Utils
             if (AreLoaded) return;
             AreLoaded = true;
 
-            WorldUIShader = new WorldUIShader();
-            GUIShader = new GUIShader();
+            WorldUIShader   = new WorldUIShader();
+            GUIShader       = new GUIShader();
             BlockViewShader = new BlockViewShader();
             GameWorldShader = new GameWorldShader();
-            ParticleShader = new ParticleShader();
-            OverlayShader = new OverlayShader();
+            ParticleShader  = new ParticleShader();
+            OverlayShader   = new OverlayShader();
+            SkyShader       = new SkyShader();
 
-            BlocksTexture = new TextureArray(@"resources\textures\blocks.png", 4, 4);
-            CrossTexture = new Texture(@"resources\textures\cross.png");
-            HotbarTexture = new Texture(@"resources\textures\hotbar.png", 20, 2);
+            BlocksTexture         = new TextureArray(@"resources\textures\blocks.png", 4, 4);
+            CrossTexture          = new Texture(@"resources\textures\cross.png");
+            HotbarTexture         = new Texture(@"resources\textures\hotbar.png", 20, 2);
             HotbarSelectorTexture = new Texture(@"resources\textures\hotbar_selector.png");
 
             GC.Collect();

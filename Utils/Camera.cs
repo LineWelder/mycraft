@@ -9,12 +9,15 @@ namespace Mycraft.Utils
 
         public Matrix4x4f TransformMatrix;
 
+        public Matrix4x4f InversedRotationMatrix
+            => Matrix4x4f.RotatedY(-Rotation.x * RADIANS_TO_DEGREES)
+             * Matrix4x4f.RotatedX(Rotation.y * RADIANS_TO_DEGREES);
+
         public Vertex3f Forward
         {
             get
             {
-                Vertex4f forward4 = Matrix4x4f.RotatedY(-Rotation.x * RADIANS_TO_DEGREES)
-                                  * Matrix4x4f.RotatedX(Rotation.y * RADIANS_TO_DEGREES)
+                Vertex4f forward4 = InversedRotationMatrix
                                   * new Vertex4f(0f, 0f, -1f, 0f);
                 return new Vertex3f(forward4.x, forward4.y, forward4.z);
             }
