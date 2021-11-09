@@ -80,5 +80,8 @@ namespace Mycraft.Blocks
                      .9f
                  ));
         }
+
+        private bool HasFace(Block neighbour)
+            => !(neighbour is LiquidBlock);
     }
 }

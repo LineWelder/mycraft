@@ -43,7 +43,7 @@ namespace Mycraft.Blocks
                 return;
 
             // Bottom
-            if (HasFace(GetChunkBlock(chunk, x, y - 1, z)))
+            if (GetChunkBlock(chunk, x, y - 1, z).IsTransparent)
                 mesh.Add(QuadGenerator.Bottom(
                     new Vertex3f(x + 1f, y, z + 1f),
                     new Vertex2f(1f, 1f),
@@ -52,7 +52,7 @@ namespace Mycraft.Blocks
                 ));
 
             // Top
-            if (HasFace(GetChunkBlock(chunk, x, y + 1, z)))
+            if (GetChunkBlock(chunk, x, y + 1, z).IsTransparent)
                 mesh.Add(QuadGenerator.Top(
                     new Vertex3f(x + 1f, y + 1f, z + 1f),
                     new Vertex2f(1f, 1f),
@@ -61,7 +61,7 @@ namespace Mycraft.Blocks
                 ));
 
             // Left
-            if (HasFace(GetChunkBlock(chunk, x - 1, y, z)))
+            if (GetChunkBlock(chunk, x - 1, y, z).IsTransparent)
                 mesh.Add(QuadGenerator.Left(
                     new Vertex3f(x, y, z + 1f),
                     new Vertex2f(1f, 1f),
@@ -70,7 +70,7 @@ namespace Mycraft.Blocks
                 ));
 
             // Right
-            if (HasFace(GetChunkBlock(chunk, x + 1, y, z)))
+            if (GetChunkBlock(chunk, x + 1, y, z).IsTransparent)
                 mesh.Add(QuadGenerator.Right(
                     new Vertex3f(x + 1f, y, z + 1f),
                     new Vertex2f(1f, 1f),
@@ -79,7 +79,7 @@ namespace Mycraft.Blocks
                 ));
 
             // Back
-            if (HasFace(GetChunkBlock(chunk, x, y, z - 1)))
+            if (GetChunkBlock(chunk, x, y, z - 1).IsTransparent)
                 mesh.Add(QuadGenerator.Back(
                     new Vertex3f(x + 1f, y, z),
                     new Vertex2f(1f, 1f),
@@ -88,7 +88,7 @@ namespace Mycraft.Blocks
                 ));
 
             // Front
-            if (HasFace(GetChunkBlock(chunk, x, y, z + 1)))
+            if (GetChunkBlock(chunk, x, y, z + 1).IsTransparent)
                 mesh.Add(QuadGenerator.Front(
                      new Vertex3f(x, y, z + 1f),
                      new Vertex2f(1f, 1f),
@@ -108,10 +108,6 @@ namespace Mycraft.Blocks
 
             return chunk.world.GetBlock(chunk.xOffset + x, y, chunk.zOffset + z);
         }
-
-        protected bool HasFace(Block neighbour)
-            => !IsTransparent && neighbour.IsTransparent
-            || IsTransparent && !neighbour.IsVisible;
 
         public static Vertex3i GetNeighbour(Vertex3i coords, BlockSide side)
         {
