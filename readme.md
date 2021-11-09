@@ -25,3 +25,7 @@
 - Added lighting
 - Removed block textures bleeding
 - Added shades in the hotbar
+### Version 0.5 - Live world
+- Added flowers
+- Added day/night cycle
+- Fixed performance issues
