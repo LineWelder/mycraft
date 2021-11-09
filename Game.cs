@@ -44,7 +44,7 @@ namespace Mycraft
         private Player player;
         private Hotbar hotbar;
 
-        private float time = 0.5f;
+        private float time = 0.3f;
 
         public void Init()
         {
