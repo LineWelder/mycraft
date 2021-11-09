@@ -215,23 +215,9 @@ namespace Mycraft.World
 
             // Update chunk meshes
 
-            profiler.NewFrame();
-
             ThrottleUpdates(chunk => !chunk.UpdateMeshAsync().IsCompleted, 3);
-
-            profiler.EndFragment("Mesh updates");
-
             ThrottleUpdates(chunk => !chunk.EnsureTransparentGeometrySortedAsync().IsCompleted, 3);
-
-            profiler.EndFragment("Transparent geometry sorting");
-
             ThrottleUpdates(chunk => chunk.RefreshVertexData(), 3);
-
-            profiler.EndFragment("Vertex data updates");
-            profiler.EndFrame();
-
-            if (profiler.FrameTime > 2)
-                profiler.PrintInfo();
         }
 
         private void OnChunkUpdate(int x, int z)
