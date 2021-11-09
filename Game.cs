@@ -21,7 +21,7 @@ namespace Mycraft
         private const float MOUSE_SENSIVITY = .3f;
         private const float MOVEMENT_ACCELERATION = 20f, MOVEMENT_SPEED = 3.7f;
         private const float MAX_ACCENDING_SPEED = 2f, ACCENDING_ACCELERATION = 4f;
-        private const float DAY_CYCLE_SPEED = .02f;
+        private const float DAY_CYCLE_SPEED = .005f;
 
         private static readonly float[] screenQuad =
         {
@@ -44,7 +44,7 @@ namespace Mycraft
         private Player player;
         private Hotbar hotbar;
 
-        private float time = 0.3f;
+        private float time = 0.5f;
 
         public void Init()
         {
@@ -267,24 +267,26 @@ namespace Mycraft
             }
             else
             {
-                if (time < .25f || time > .75f)
+                double time_ = time;
+                if (time_ > .5d)
                 {
-                    skyColor = new Vertex3f(0.00f, 0.00f, 0.00f);
-                    fogColor = new Vertex3f(0.00f, 0.00f, 0.09f);
+                    time_ = 1d - time_;
                 }
-                else
-                {
-                    skyColor = new Vertex3f(0.43f, 0.77f, 0.98f);
 
-                    if (time < .3f || time > .7f)
-                    {
-                        fogColor = new Vertex3f(1.00f, 0.60f, 0.40f);
-                    }
-                    else
-                    {
-                        fogColor = new Vertex3f(0.53f, 0.81f, 0.98f);
-                    }
-                }
+                double mix = 1d / ( 1d + Math.Exp(-40d * (time_ - .25d)) );
+
+                Vertex3f nightSkyColor = new Vertex3f(0.00f, 0.00f, 0.09f);
+                Vertex3f daySkyColor   = new Vertex3f(0.43f, 0.77f, 0.98f);
+                skyColor = nightSkyColor + (daySkyColor - nightSkyColor) * mix;
+
+                Vertex3f nightFogColor = new Vertex3f(0.00f, 0.01f, 0.17f);
+                Vertex3f dayFogColor   = new Vertex3f(0.53f, 0.81f, 0.98f);
+                fogColor = nightFogColor + (dayFogColor - nightFogColor) * mix;
+
+                double sunset = 1d / (1d + Math.Pow(40d * (time_ - .25d), 4d));
+
+                Vertex3f sunsetColor = new Vertex3f(1.00f, 0.60f, 0.40f);
+                fogColor += (sunsetColor - fogColor) * sunset;
             }
 
             Gl.ClearColor(fogColor.x, fogColor.y, fogColor.z, 1f);
