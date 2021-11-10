@@ -5,8 +5,8 @@ from math import floor, ceil
 pg.font.init()
 
 
-WIN_WIDTH, WIN_HEIGHT = 1920, 1080
-BLOCK_SIZE = 60
+WIN_WIDTH, WIN_HEIGHT = 1080, 720
+BLOCK_SIZE = 40
 GRID_SIZE = 16
 GRID_START = ((WIN_WIDTH - BLOCK_SIZE * GRID_SIZE) / 2, (WIN_HEIGHT - BLOCK_SIZE * GRID_SIZE) / 2)
 
@@ -49,7 +49,7 @@ def sqr_distance(a, b):
 
 
 def main():
-    screen = pg.display.set_mode((1920, 1080))
+    screen = pg.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
     pg.display.set_caption("Ray casting")
 
     def text(line, value):

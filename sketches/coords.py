@@ -5,9 +5,9 @@ from math import floor, ceil
 pg.font.init()
 
 
-WIN_WIDTH, WIN_HEIGHT = 1920, 1080
+WIN_WIDTH, WIN_HEIGHT = 1080, 720
 ORIGIN = (WIN_WIDTH / 2, WIN_HEIGHT / 2)
-BLOCK_SIZE = 20
+BLOCK_SIZE = 17
 CHUNK_SIZE = 16
 
 BACKGROUND_COLOR = (50, 50, 50)
@@ -45,7 +45,7 @@ def csharp_div(a, b):
 
 
 def main():
-    screen = pg.display.set_mode((1920, 1080))
+    screen = pg.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
     pg.display.set_caption("Coords")
 
     def text(line, value):
