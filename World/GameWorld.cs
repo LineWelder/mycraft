@@ -217,6 +217,7 @@ namespace Mycraft.World
 
             ThrottleUpdates(chunk => !chunk.UpdateMeshAsync().IsCompleted, 3);
             ThrottleUpdates(chunk => !chunk.EnsureTransparentGeometrySortedAsync().IsCompleted, 3);
+            ThrottleUpdates(chunk => !chunk.EnsureLightRecalculatedAsync().IsCompleted, 3);
             ThrottleUpdates(chunk => chunk.RefreshVertexData(), 3);
         }
 

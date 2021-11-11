@@ -35,7 +35,8 @@ namespace Mycraft.World
         private float[] solidVertices, doubleSidedVertices, waterVertices;
         private readonly WorldGeometry solidMesh, doubleSidedMesh, waterMesh;
 
-        public bool lightMapNeedsUpdate;
+        public bool needsLightRecalculation;
+        public bool lightDataNeedsRefresh;
         public float[,,] flatLightMapData;
         private float[,,] lightMapData;
         private readonly LightMap lightMap;
@@ -111,7 +112,7 @@ namespace Mycraft.World
             return array;
         }
 
-        private void RecalculateLight()
+        private void RecalculateLight(bool updateNeighbourds)
         {
             // Caching the neighbouring chunks
 
@@ -136,7 +137,8 @@ namespace Mycraft.World
             void MakeShade(int x, int y, int z)
             {
                 for (int y_ = y - 1; y_ >= 0; y_--)
-                    flatLightMapData[x, y_, z] = 0f;
+                    if (!(blocks[x, y_, z] is TorchBlock))
+                        flatLightMapData[x, y_, z] = 0f;
             }
 
             for (int y = HEIGHT - 1; y > 0; y--)
@@ -284,7 +286,43 @@ namespace Mycraft.World
                         lightMapData[z, y, x] = lightAccum / probesCount;
                     }
 
-            lightMapNeedsUpdate = true;
+            if (updateNeighbourds)
+            {
+                if (!(frontChunk is null))
+                    frontChunk.RecalculateLight(false);
+
+                if (!(backChunk is null))
+                    backChunk.RecalculateLight(false);
+
+                if (!(rightChunk is null))
+                    rightChunk.RecalculateLight(false);
+
+                if (!(leftChunk is null))
+                    leftChunk.RecalculateLight(false);
+
+                if (!(frontRightChunk is null))
+                    frontRightChunk.RecalculateLight(false);
+
+                if (!(backRightChunk is null))
+                    backRightChunk.RecalculateLight(false);
+
+                if (!(frontLeftChunk is null))
+                    frontLeftChunk.RecalculateLight(false);
+
+                if (!(backLeftChunk is null))
+                    backLeftChunk.RecalculateLight(false);
+            }
+
+            lightDataNeedsRefresh = true;
+        }
+
+        public Task EnsureLightRecalculatedAsync()
+        {
+            if (!needsLightRecalculation)
+                return Task.CompletedTask;
+
+            needsLightRecalculation = false;
+            return Task.Run(() => RecalculateLight(true));
         }
 
         public Task UpdateMeshAsync()
@@ -293,11 +331,10 @@ namespace Mycraft.World
                 return Task.CompletedTask;
 
             needsUpdate = false;
+            needsLightRecalculation = true;
 
             return Task.Run(() =>
             {
-                RecalculateLight();
-
                 List<Quad> solidQuads = new List<Quad>();
                 List<Quad> doubleSidedQuads = new List<Quad>();
                 waterQuads.Clear();
@@ -345,10 +382,10 @@ namespace Mycraft.World
         {
             bool refreshed = false;
 
-            if (lightMapNeedsUpdate)
+            if (lightDataNeedsRefresh)
             {
                 lightMap.Data = lightMapData;
-                lightMapNeedsUpdate = false;
+                lightDataNeedsRefresh = false;
 
                 refreshed = true;
             }
