@@ -36,7 +36,8 @@ namespace Mycraft.World
         private readonly WorldGeometry solidMesh, doubleSidedMesh, waterMesh;
 
         public bool lightMapNeedsUpdate;
-        public float[,,] lightMapData;
+        public float[,,] flatLightMapData;
+        private float[,,] lightMapData;
         private readonly LightMap lightMap;
 
         public Chunk(GameWorld world, int x, int z)
@@ -53,8 +54,9 @@ namespace Mycraft.World
             doubleSidedMesh = new WorldGeometry();
             waterMesh = new WorldGeometry();
 
-            lightMap = new LightMap(SIZE + 2, HEIGHT, SIZE + 2);
-            lightMapData = new float[SIZE + 2, HEIGHT, SIZE + 2];
+            lightMap = new LightMap(SIZE + 1, HEIGHT + 1, SIZE + 1);
+            flatLightMapData = new float[SIZE, HEIGHT, SIZE];
+            lightMapData = new float[SIZE + 1, HEIGHT + 1, SIZE + 1];
         }
 
         public void Draw()
@@ -88,6 +90,9 @@ namespace Mycraft.World
                 Quad quad = quads[i];
                 void SaveVertex(int index, Vertex vertex)
                 {
+                    if (index >= array.Length)
+                        return;
+
                     array[index]     = vertex.position.x;
                     array[index + 1] = vertex.position.y;
                     array[index + 2] = vertex.position.z;
@@ -108,147 +113,176 @@ namespace Mycraft.World
 
         private void RecalculateLight()
         {
+            // Caching the neighbouring chunks
+
+            Chunk frontChunk = world.GetChunk(xOffset / SIZE, zOffset / SIZE + 1);
+            Chunk backChunk = world.GetChunk(xOffset / SIZE, zOffset / SIZE - 1);
+            Chunk rightChunk = world.GetChunk(xOffset / SIZE + 1, zOffset / SIZE);
+            Chunk leftChunk = world.GetChunk(xOffset / SIZE - 1, zOffset / SIZE);
+            Chunk frontRightChunk = world.GetChunk(xOffset / SIZE + 1, zOffset / SIZE + 1);
+            Chunk backRightChunk = world.GetChunk(xOffset / SIZE + 1, zOffset / SIZE - 1);
+            Chunk frontLeftChunk = world.GetChunk(xOffset / SIZE - 1, zOffset / SIZE + 1);
+            Chunk backLeftChunk = world.GetChunk(xOffset / SIZE - 1, zOffset / SIZE - 1);
+
             // Reset the light map
 
             for (int x = 0; x < SIZE; x++)
                 for (int y = 0; y < HEIGHT; y++)
                     for (int z = 0; z < SIZE; z++)
-                        lightMapData[z + 1, y, x + 1] = 1f;
+                        flatLightMapData[x, y, z] = 1f;
 
             // Apply the shades
+
+            void MakeShade(int x, int y, int z)
+            {
+                for (int y_ = y - 1; y_ >= 0; y_--)
+                    flatLightMapData[x, y_, z] = 0f;
+            }
 
             for (int y = HEIGHT - 1; y > 0; y--)
                 for (int x = 0; x < SIZE; x++)
                     for (int z = 0; z < SIZE; z++)
                         if (!blocks[x, y, z].IsTransparent)
-                            for (int y_ = y - 1; y_ >= 0; y_--)
-                                lightMapData[z + 1, y_, x + 1] = .7f;
+                            MakeShade(x, y, z);
 
-            // Update the neighbouring chunks
+            // Blend the shades
 
-            Chunk frontChunk = world.GetChunk(xOffset / SIZE, zOffset / SIZE + 1);
-            if (!(frontChunk is null))
+            Chunk GetChunkFromCoords(int x, int z, out int newX, out int newZ)
             {
-                for (int y = 0; y < HEIGHT; y++)
+                if (x >= SIZE)
+                {
+                    newX = x - SIZE;
+
+                    if (z >= SIZE)
+                    {
+                        newZ = z - SIZE;
+                        return frontRightChunk;
+                    }
+                    else if (z < 0)
+                    {
+                        newZ = z + SIZE;
+                        return backRightChunk;
+                    }
+                    else
+                    {
+                        newZ = z;
+                        return rightChunk;
+                    }
+                }
+                else if (x < 0)
+                {
+                    newX = x + SIZE;
+
+                    if (z >= SIZE)
+                    {
+                        newZ = z - SIZE;
+                        return frontLeftChunk;
+                    }
+                    else if (z < 0)
+                    {
+                        newZ = z + SIZE;
+                        return backLeftChunk;
+                    }
+                    else
+                    {
+                        newZ = z;
+                        return leftChunk;
+                    }
+                }
+                else
+                {
+                    newX = x;
+
+                    if (z >= SIZE)
+                    {
+                        newZ = z - SIZE;
+                        return frontChunk;
+                    }
+                    else if (z < 0)
+                    {
+                        newZ = z + SIZE;
+                        return backChunk;
+                    }
+                    else
+                    {
+                        newZ = z;
+                        return this;
+                    }
+                }
+            }
+
+            bool ProbeLight(int x, int y, int z, out float level)
+            {
+                if (y >= HEIGHT)
+                {
+                    level = 1f;
+                    return false;
+                }
+                else if (y < 0)
+                {
+                    level = 0f;
+                    return false;
+                }
+
+                Chunk chunk = GetChunkFromCoords(x, z, out int newX, out int newZ);
+                if (chunk is null || !chunk.blocks[newX, y, newZ].IsTransparent)
+                {
+                    level = 0f;
+                    return false;
+                }
+
+                level = chunk.flatLightMapData[newX, y, newZ];
+                return true;
+            }
+
+            bool IsNeighbouring(int x, int y, int z)
+                => x == 0 && y == 0 && z != 0
+                || x == 0 && y != 0 && z == 0
+                || x != 0 && y == 0 && z == 0;
+
+            void BlendShades(int x, int y, int z)
+            {
+                for (int dx = -1; dx <= 1; dx++)
+                    for (int dy = -1; dy <= 1; dy++)
+                        for (int dz = -1; dz <= 1; dz++)
+                            if (IsNeighbouring(dx, dy, dz))
+                            {
+                                if (ProbeLight(x + dx, y + dy, z + dz, out float level))
+                                {
+                                    float blendValue = level - 1f / 16f;
+                                    if (flatLightMapData[x, y, z] < blendValue)
+                                        flatLightMapData[x, y, z] = blendValue;
+                                }
+                            }
+            }
+
+            for (int i = 0; i < 16; i++)
+            {
+                for (int y = HEIGHT - 1; y > 0; y--)
                     for (int x = 0; x < SIZE; x++)
+                        for (int z = 0; z < SIZE; z++)
+                            BlendShades(x, y, z);
+            }
+
+            // Use the flat light map to generate the actual LightMap data
+
+            for (int x = 0; x <= SIZE; x++)
+                for (int y = 0; y <= HEIGHT; y++)
+                    for (int z = 0; z <= SIZE; z++)
                     {
-                        frontChunk.lightMapData[0, y, x + 1]
-                            = lightMapData[16, y, x + 1];
+                        float lightAccum = 0f;
+                        int probesCount = 0;
+                        for (int x_ = -1; x_ <= 0; x_++)
+                            for (int y_ = -1; y_ <= 0; y_++)
+                                for (int z_ = -1; z_ <= 0; z_++)
+                                    if (ProbeLight(x + x_, y + y_, z + z_, out float level))
+                                    {
+                                        lightAccum += level;
+                                        probesCount++;
+                                    }
 
-                        lightMapData[17, y, x + 1]
-                            = frontChunk.lightMapData[1, y, x + 1];
-
-                        frontChunk.lightMapNeedsUpdate = true;
+                        lightMapData[z, y, x] = lightAccum / probesCount;
                     }
-            }
-
-            Chunk backChunk = world.GetChunk(xOffset / SIZE, zOffset / SIZE - 1);
-            if (!(backChunk is null))
-            {
-                for (int y = 0; y < HEIGHT; y++)
-                    for (int x = 0; x < SIZE; x++)
-                    {
-                        backChunk.lightMapData[17, y, x + 1]
-                            = lightMapData[1, y, x + 1];
-
-                        lightMapData[0, y, x + 1]
-                            = backChunk.lightMapData[16, y, x + 1];
-
-                        backChunk.lightMapNeedsUpdate = true;
-                    }
-            }
-
-            Chunk rightChunk = world.GetChunk(xOffset / SIZE + 1, zOffset / SIZE);
-            if (!(rightChunk is null))
-            {
-                for (int y = 0; y < HEIGHT; y++)
-                    for (int z = 0; z < SIZE; z++)
-                    {
-                        rightChunk.lightMapData[z + 1, y, 0]
-                            = lightMapData[z + 1, y, 16];
-
-                        lightMapData[z + 1, y, 17]
-                            = rightChunk.lightMapData[z + 1, y, 1];
-
-                        rightChunk.lightMapNeedsUpdate = true;
-                    }
-            }
-
-            Chunk leftChunk = world.GetChunk(xOffset / SIZE - 1, zOffset / SIZE);
-            if (!(leftChunk is null))
-            {
-                for (int y = 0; y < HEIGHT; y++)
-                    for (int z = 0; z < SIZE; z++)
-                    {
-                        leftChunk.lightMapData[z + 1, y, 17]
-                            = lightMapData[z + 1, y, 1];
-
-                        lightMapData[z + 1, y, 0]
-                            = leftChunk.lightMapData[z + 1, y, 16];
-
-                        leftChunk.lightMapNeedsUpdate = true;
-                    }
-            }
-
-            Chunk frontRightChunk = world.GetChunk(xOffset / SIZE + 1, zOffset / SIZE + 1);
-            if (!(frontRightChunk is null))
-            {
-                for (int y = 0; y < HEIGHT; y++)
-                {
-                    frontRightChunk.lightMapData[0, y, 0]
-                        = lightMapData[16, y, 16];
-
-                    lightMapData[17, y, 17]
-                        = frontRightChunk.lightMapData[1, y, 1];
-
-                    frontRightChunk.lightMapNeedsUpdate = true;
-                }
-            }
-
-            Chunk backRightChunk = world.GetChunk(xOffset / SIZE + 1, zOffset / SIZE - 1);
-            if (!(backRightChunk is null))
-            {
-                for (int y = 0; y < HEIGHT; y++)
-                {
-                    backRightChunk.lightMapData[17, y, 0]
-                        = lightMapData[1, y, 16];
-
-                    lightMapData[0, y, 17]
-                        = backRightChunk.lightMapData[16, y, 1];
-
-                    backRightChunk.lightMapNeedsUpdate = true;
-                }
-            }
-
-            Chunk frontLeftChunk = world.GetChunk(xOffset / SIZE - 1, zOffset / SIZE + 1);
-            if (!(frontLeftChunk is null))
-            {
-                for (int y = 0; y < HEIGHT; y++)
-                {
-                    frontLeftChunk.lightMapData[0, y, 17]
-                        = lightMapData[16, y, 1];
-
-                    lightMapData[17, y, 0]
-                        = frontLeftChunk.lightMapData[1, y, 16];
-
-                    frontLeftChunk.lightMapNeedsUpdate = true;
-                }
-            }
-
-            Chunk backLeftChunk = world.GetChunk(xOffset / SIZE - 1, zOffset / SIZE - 1);
-            if (!(backLeftChunk is null))
-            {
-                for (int y = 0; y < HEIGHT; y++)
-                {
-                    backLeftChunk.lightMapData[17, y, 17]
-                        = lightMapData[1, y, 1];
-
-                    lightMapData[0, y, 0]
-                        = backLeftChunk.lightMapData[16, y, 16];
-
-                    backLeftChunk.lightMapNeedsUpdate = true;
-                }
-            }
 
             lightMapNeedsUpdate = true;
         }

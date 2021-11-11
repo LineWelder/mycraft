@@ -11,7 +11,7 @@ namespace Mycraft.World
 {
     public class GameWorld : IDisposable
     {
-        public const int LOAD_DISTANCE = 16;
+        public const int LOAD_DISTANCE = 4;
         public const int UNLOAD_DISTANCE = LOAD_DISTANCE + 2;
 
         public Camera ObservingCamera { get; set; }
@@ -97,10 +97,10 @@ namespace Mycraft.World
 
             if (!chunks.TryGetValue((chunkX, chunkZ), out Chunk chunk)
              || !chunk.isLoaded
-             || chunk.lightMapData is null)
+             || chunk.flatLightMapData is null)
                 return 0f;
 
-            return chunk.lightMapData[blockX + 1, y, blockZ + 1];
+            return chunk.flatLightMapData[blockX + 1, y, blockZ + 1];
         }
 
         public Chunk GetChunk(int x, int z)

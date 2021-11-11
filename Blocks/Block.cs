@@ -27,7 +27,7 @@ namespace Mycraft.Blocks
 
         public virtual bool IsSelectable => true;
 
-        private int textureId;
+        private readonly int textureId;
 
         public Block(int textureId)
         {

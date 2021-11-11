@@ -53,7 +53,7 @@ in float _light;
 
 void main()
 {
-    vec3 lightMapCoords = (_position + vec3(1.0, 0.0, 1.0)) / lightMapScale;
+    vec3 lightMapCoords = (_position + vec3(0.5, 0.5, 0.5)) / lightMapScale;
     float lightMapSample = texture(lightMap, lightMapCoords).x;
 
     vec4 textureSample = texture(tex, _textureCoords);
