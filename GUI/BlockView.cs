@@ -18,7 +18,7 @@ namespace Mycraft.GUI
 
         public void Resize(Vertex2i position, Vertex2i size)
         {
-            if (block is PlantBlock)
+            if (block is PlantBlock || block is TorchBlock)
             {
                 float texture = block.GetTexture(BlockSide.Top);
 

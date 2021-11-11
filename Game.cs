@@ -78,9 +78,9 @@ namespace Mycraft
                     BlockRegistry.Dirt,
                     BlockRegistry.Log,
                     BlockRegistry.Leaves,
-                    BlockRegistry.Water,
                     BlockRegistry.Sand,
                     BlockRegistry.Planks,
+                    BlockRegistry.Torch,
                     BlockRegistry.RedFlower,
                     BlockRegistry.YellowFlower
                 }

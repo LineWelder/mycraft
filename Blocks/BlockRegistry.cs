@@ -14,5 +14,6 @@
         public static readonly Block Planks = new Block(9);
         public static readonly Block RedFlower = new PlantBlock(10);
         public static readonly Block YellowFlower = new PlantBlock(11);
+        public static readonly Block Torch = new TorchBlock(12);
     }
 }
