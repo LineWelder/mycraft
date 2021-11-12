@@ -84,16 +84,14 @@ namespace Mycraft.World
             const int VERTEX_SIZE = 7;
             const int QUAD_SIZE = VERTEX_SIZE * 4;
 
-            float[] array = new float[quads.Count * QUAD_SIZE];
+            List<Quad> cachedQuads = new List<Quad>(quads);
+            float[] array = new float[cachedQuads.Count * QUAD_SIZE];
 
-            for (int i = 0; i < quads.Count; i++)
+            for (int i = 0; i < cachedQuads.Count; i++)
             {
-                Quad quad = quads[i];
+                Quad quad = cachedQuads[i];
                 void SaveVertex(int index, Vertex vertex)
                 {
-                    if (index >= array.Length)
-                        return;
-
                     array[index]     = vertex.position.x;
                     array[index + 1] = vertex.position.y;
                     array[index + 2] = vertex.position.z;
@@ -368,13 +366,15 @@ namespace Mycraft.World
             needsTransparentGeometrySort = false;
             return Task.Run(() =>
             {
+                List<Quad> cachedWaterQuads = new List<Quad>(waterQuads);
+
                 Vertex3f offset = new Vertex3f(xOffset, 0f, zOffset) - world.ObservingCamera.Position;
-                waterQuads.Sort(
+                cachedWaterQuads.Sort(
                     (Quad a, Quad b) => (b.Center + offset).ModuleSquared()
                              .CompareTo((a.Center + offset).ModuleSquared())
                 );
 
-                waterVertices = ToFloatArray(waterQuads);
+                waterVertices = ToFloatArray(cachedWaterQuads);
             });
         }
 

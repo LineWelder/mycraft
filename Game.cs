@@ -35,7 +35,7 @@ namespace Mycraft
         private Block blockIn;
 
         private Origin origin;
-        // private ChunkBorders chunkBorders;
+        private ChunkBorders chunkBorders;
         private GameWorld world;
         private GUIRectangle cross;
         private ParticleSystem particles;
@@ -89,7 +89,7 @@ namespace Mycraft
             // Create the game objects
 
             origin = new Origin();
-            // chunkBorders = new ChunkBorders();
+            chunkBorders = new ChunkBorders();
 
             world = new GameWorld(new SimpleWorldGenerator(1337));
             world.GenerateSpawnArea();
@@ -247,7 +247,7 @@ namespace Mycraft
 
             player.Update(deltaTime);
             particles.Update(deltaTime);
-            // chunkBorders.Update(player.camera.Position);
+            chunkBorders.Update(player.camera.Position);
             world.Update();
 
             // Update the sky state
@@ -332,7 +332,7 @@ namespace Mycraft
             Resources.WorldUIShader.VP = projection * player.camera.TransformMatrix;
             player.Selection.Draw();
             origin.Draw();
-            // chunkBorders.Draw();
+            chunkBorders.Draw();
 
             // Draw particles
 
@@ -382,7 +382,7 @@ namespace Mycraft
         {
             world.Dispose();
             origin.Dispose();
-            // chunkBorders.Dispose();
+            chunkBorders.Dispose();
             player.Dispose();
             hotbar.Dispose();
         }

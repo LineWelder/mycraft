@@ -123,8 +123,6 @@ namespace Mycraft.World
             renderQueueNeedsUpdate = true;
         }
 
-        private readonly Profiler profiler = new Profiler();
-
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         private void ThrottleUpdates(Func<Chunk, bool> updateFunc, int updates)
         {
