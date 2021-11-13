@@ -46,6 +46,7 @@ namespace Mycraft
 
         private float time = 0.3f;
 
+        private GUIRectangle imageShowcase;
         private ComputeShader computeShader;
 
         public void Init()
@@ -103,6 +104,7 @@ namespace Mycraft
 
             particles = new ParticleSystem(world, .2f, .5d);
 
+            imageShowcase = new GUIRectangle(new Vertex2i(), new Vertex2i());
             computeShader = new ComputeShader();
             computeShader.Run();
         }
@@ -207,6 +209,14 @@ namespace Mycraft
                     height - 21 * pixelSize
                 ),
                 pixelSize
+            );
+
+            imageShowcase.Resize(
+                new Vertex2i(
+                    width / 2 - 16 * pixelSize,
+                    height / 2 - 16 * pixelSize
+                ),
+                new Vertex2i(32 * pixelSize, 32 * pixelSize)
             );
         }
 
@@ -378,8 +388,9 @@ namespace Mycraft
             Gl.Disable(EnableCap.Blend);
 
             // Resources.CrossTexture.Bind();
+            // cross.Draw();
             computeShader.BindTexture();
-            cross.Draw();
+            imageShowcase.Draw();
 
             hotbar.Draw();
         }
@@ -390,7 +401,10 @@ namespace Mycraft
             origin.Dispose();
             chunkBorders.Dispose();
             player.Dispose();
+            cross.Dispose();
             hotbar.Dispose();
+            
+            imageShowcase.Dispose();
             computeShader.Dispose();
         }
     }

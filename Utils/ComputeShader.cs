@@ -1,6 +1,7 @@
-﻿using System;
-using System.Text;
+﻿using Mycraft.Graphics;
 using OpenGL;
+using System;
+using System.Text;
 
 namespace Mycraft.Utils
 {
@@ -10,41 +11,55 @@ namespace Mycraft.Utils
 @"#version 430
 
 layout(local_size_x = 1, local_size_y = 1) in;
-layout(rgba8, binding = 0) uniform image2D img_output;
+layout(rgba8, binding = 0) uniform image2D imageIn;
+layout(rgba8, binding = 1) uniform image2D imageOut;
+
+#define LIGHT_PROPOGATION 16
+
+float getLight(ivec2 coords)
+{
+    vec4 pixel = imageLoad(imageIn, coords);
+    return 1.0 - step((pixel.r + pixel.g + pixel.b) * pixel.a, 0.0);
+}
+
+float propogateLight(ivec2 coords)
+{
+    return getLight(coords) - 0.5;
+}
 
 void main()
 {
-    vec4 pixel = vec4(1.0, 1.0, 1.0, 1.0);
     ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
-  
-    imageStore(img_output, pixel_coords, pixel);
+ 
+    float light = getLight(pixel_coords);
+    for (int dx = -LIGHT_PROPOGATION; dx <= LIGHT_PROPOGATION; dx++)
+    {
+        for (int dy = -LIGHT_PROPOGATION; dy <= LIGHT_PROPOGATION; dy++)
+        {
+            float lightDecrease = (abs(dx) + abs(dy))  / float(LIGHT_PROPOGATION + 1);
+            float currentLight = getLight(pixel_coords + ivec2(dx, dy));
+            float borowedLight = max(0.0, currentLight - lightDecrease);
+            light = max(light, borowedLight);
+        }
+    }
+
+    imageStore(
+        imageOut, pixel_coords,
+        vec4(vec3(light), 1.0)
+    );
 }";
 
-        private const int TEXTURE_WIDTH = 16, TEXTURE_HEIGHT = 16;
+        private const int TEXTURE_WIDTH = 24, TEXTURE_HEIGHT = 24;
 
-        private uint textureId;
-        private uint programId;
+        private readonly Texture textureIn, textureOut;
+        private readonly uint programId;
 
         public ComputeShader()
         {
             // Set up the texture
 
-            textureId = Gl.GenTexture();
-            Gl.ActiveTexture(TextureUnit.Texture0);
-            Gl.BindTexture(TextureTarget.Texture2d, textureId);
-
-            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapS, TextureWrapMode.ClampToEdge);
-            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapT, TextureWrapMode.ClampToEdge);
-            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, TextureMagFilter.Linear);
-            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, TextureMinFilter.Linear);
-
-            Gl.TexImage2D(
-                TextureTarget.Texture2d, 0,
-                InternalFormat.Rgba8,
-                TEXTURE_WIDTH, TEXTURE_HEIGHT, 0,
-                PixelFormat.Bgra, PixelType.UnsignedByte,
-                IntPtr.Zero
-            );
+            textureIn = new Texture(@"resources\textures\cross.png", 24, 24);
+            textureOut = new Texture("", 24, 24);
 
             // Set up the shader
 
@@ -83,14 +98,20 @@ void main()
 
         public void BindTexture()
         {
-            Gl.BindTexture(TextureTarget.Texture2d, textureId);
+            textureOut.Bind();
         }
 
         public void Run()
         {
-            Gl.ActiveTexture(TextureUnit.Texture0);
             Gl.BindImageTexture(
-                0, textureId, 0,
+                0, textureIn.glId, 0,
+                false, 0,
+                BufferAccess.ReadOnly,
+                InternalFormat.Rgba8
+            );
+
+            Gl.BindImageTexture(
+                1, textureOut.glId, 0,
                 false, 0,
                 BufferAccess.WriteOnly,
                 InternalFormat.Rgba8
@@ -98,15 +119,12 @@ void main()
 
             Gl.UseProgram(programId);
             Gl.DispatchCompute(TEXTURE_WIDTH, TEXTURE_HEIGHT, 1);
-
-            ErrorCode code = Gl.GetError();
-            if (code != ErrorCode.NoError)
-                Console.WriteLine($"Error! {code}");
         }
 
         public void Dispose()
         {
-            Gl.DeleteTextures(textureId);
+            textureIn.Dispose();
+            textureOut.Dispose();
             Gl.DeleteProgram(programId);
         }
     }
