@@ -106,6 +106,7 @@ namespace Mycraft
 
             imageShowcase = new GUIRectangle(new Vertex2i(), new Vertex2i());
             computeShader = new LightComputeShader();
+            computeShader.BuildDataMap(world.GetChunk(0, 0), 0, 16);
             computeShader.Run();
         }
 

@@ -1,7 +1,10 @@
-﻿using Mycraft.Graphics;
-using OpenGL;
-using System;
+﻿using System;
 using System.Text;
+using OpenGL;
+
+using Mycraft.Blocks;
+using Mycraft.Graphics;
+using Mycraft.World;
 
 namespace Mycraft.Utils
 {
@@ -81,30 +84,72 @@ void main()
 }
 ";
 
-        private const int REGION_WIDTH = 16, REGION_HEIGHT = 16;
+        private const int REGION_HEIGHT = 16;
 
-        private readonly Texture flatLighting, fancyLighting;
+        private readonly Texture fancyLighting;
+        private readonly uint dataTextureId;
         private readonly uint lightingProgramId;
         private readonly uint convertingProgramId;
 
-        public LightComputeShader()
+        public unsafe LightComputeShader()
         {
             // Set up the textures
 
-            flatLighting = new Texture(
-                @"resources\textures\test_map.png",
-                REGION_WIDTH, REGION_HEIGHT
+            dataTextureId = Gl.GenTexture();
+            Gl.BindTexture(TextureTarget.Texture2d, dataTextureId);
+
+            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapS, TextureWrapMode.ClampToEdge);
+            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapT, TextureWrapMode.ClampToEdge);
+            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, TextureMinFilter.Nearest);
+            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, TextureMagFilter.Nearest);
+
+            Gl.TexStorage2D(
+                TextureTarget.Texture2d, 1,
+                InternalFormat.Rgba8,
+                Chunk.SIZE, REGION_HEIGHT
             );
 
             fancyLighting = new Texture(
                 "",
-                REGION_WIDTH + 1, REGION_HEIGHT + 1
+                Chunk.SIZE + 1, REGION_HEIGHT + 1
             );
 
             // Set up the shaders
 
             lightingProgramId = BuildProgram(LIGHTING_SOURCE);
             convertingProgramId = BuildProgram(CONVERTING_SOURCE);
+        }
+
+        public unsafe void BuildDataMap(Chunk chunk, int z, int y)
+        {
+            float[,,] data = new float[REGION_HEIGHT, Chunk.SIZE, 4];
+            for (int x_ = 0; x_ < Chunk.SIZE; x_++)
+            {
+                bool drawSunLight = true;
+                for (int y_ = 0; y_ < REGION_HEIGHT; y_++)
+                {
+                    bool blockTransparent = chunk.blocks[x_, y + REGION_HEIGHT - y_, z].IsTransparent;
+                    if (!blockTransparent)
+                        drawSunLight = false;
+
+                    data[y_, x_, 0] = blockTransparent ? 0f : 1f;
+                    data[y_, x_, 3] = 1f;
+                    if (drawSunLight)
+                        data[y_, x_, 1] = 1f;
+                }
+            }
+
+            fixed (float* dataPtr = data)
+            {
+                Gl.BindTexture(TextureTarget.Texture2d, dataTextureId);
+                Gl.TexSubImage2D(
+                    TextureTarget.Texture2d, 0,
+                    0, 0,
+                    Chunk.SIZE, REGION_HEIGHT,
+                    PixelFormat.Rgba, PixelType.Float,
+                    new IntPtr(dataPtr)
+                );
+            }
         }
 
         private uint CompileShader(string source)
@@ -152,13 +197,14 @@ void main()
 
         public void BindTexture()
         {
-            fancyLighting.Bind();
+            // fancyLighting.Bind();
+            Gl.BindTexture(TextureTarget.Texture2d, dataTextureId);
         }
 
         public void Run()
         {
-            Gl.BindImageTexture(
-                0, flatLighting.glId, 0,
+            /* Gl.BindImageTexture(
+                0, dataTextureId, 0,
                 false, 0,
                 BufferAccess.ReadWrite,
                 InternalFormat.Rgba8
@@ -175,18 +221,18 @@ void main()
             for (int i = 0; i < 16; i++)
             {
                 Gl.MemoryBarrier(MemoryBarrierMask.ShaderImageAccessBarrierBit);
-                Gl.DispatchCompute(REGION_WIDTH, REGION_HEIGHT, 1);
+                Gl.DispatchCompute(Chunk.SIZE, REGION_HEIGHT, 1);
             }
 
             Gl.UseProgram(convertingProgramId);
             Gl.MemoryBarrier(MemoryBarrierMask.ShaderImageAccessBarrierBit);
-            Gl.DispatchCompute(REGION_WIDTH + 1, REGION_HEIGHT + 1, 1);
+            Gl.DispatchCompute(Chunk.SIZE + 1, REGION_HEIGHT + 1, 1); */
         }
 
         public void Dispose()
         {
-            flatLighting.Dispose();
             fancyLighting.Dispose();
+            Gl.DeleteTextures(dataTextureId);
             Gl.DeleteProgram(lightingProgramId);
             Gl.DeleteProgram(convertingProgramId);
         }
