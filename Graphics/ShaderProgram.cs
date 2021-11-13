@@ -27,9 +27,9 @@ namespace Mycraft.Graphics
                 Gl.GetProgram(glId, ProgramProperty.InfoLogLength, out int infoLogLength);
 
                 StringBuilder errorString = new StringBuilder(infoLogLength);
-                Gl.GetShaderInfoLog(glId, infoLogLength, out _, errorString);
+                Gl.GetProgramInfoLog(glId, infoLogLength, out _, errorString);
 
-                throw new InvalidOperationException($"Shader compiling error: {errorString}");
+                throw new InvalidOperationException($"Program linking error: {errorString}");
             };
 
             Gl.DeleteShader(vertex);
