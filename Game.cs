@@ -46,6 +46,8 @@ namespace Mycraft
 
         private float time = 0.3f;
 
+        private ComputeShader computeShader;
+
         public void Init()
         {
             // Configure the graphics
@@ -100,6 +102,9 @@ namespace Mycraft
             world.Update();
 
             particles = new ParticleSystem(world, .2f, .5d);
+
+            computeShader = new ComputeShader();
+            computeShader.Run();
         }
 
         public void MoveHotbarSelection(int delta)
@@ -372,7 +377,8 @@ namespace Mycraft
             Gl.UseProgram(Resources.GUIShader.glId);
             Gl.Disable(EnableCap.Blend);
 
-            Resources.CrossTexture.Bind();
+            // Resources.CrossTexture.Bind();
+            computeShader.BindTexture();
             cross.Draw();
 
             hotbar.Draw();
@@ -385,6 +391,7 @@ namespace Mycraft
             chunkBorders.Dispose();
             player.Dispose();
             hotbar.Dispose();
+            computeShader.Dispose();
         }
     }
 }
