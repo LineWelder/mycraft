@@ -14,13 +14,13 @@ namespace Mycraft.Utils
 @"#version 430
 
 layout(local_size_x = 1, local_size_y = 1) in;
-layout(rgba8, binding = 0) uniform image2D image;
+layout(rg8, binding = 0) uniform image2D dataMap;
 
 #define LIGHT_DECREASE 1.0 / 16.0
 
 float getLight(ivec2 coords)
 {
-    vec4 pixel = imageLoad(image, coords);
+    vec4 pixel = imageLoad(dataMap, coords);
     return (1.0 - pixel.r) * pixel.g;
 }
 
@@ -28,8 +28,8 @@ void main()
 {
     ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
     
-    vec4 color = imageLoad(image, pixelCoords);
-    float light = color.g;
+    vec4 info = imageLoad(dataMap, pixelCoords);
+    float light = info.g;
 
     light = max(light, getLight(pixelCoords + ivec2( 1,  0)) - LIGHT_DECREASE);
     light = max(light, getLight(pixelCoords + ivec2(-1,  0)) - LIGHT_DECREASE);
@@ -37,12 +37,11 @@ void main()
     light = max(light, getLight(pixelCoords + ivec2( 0, -1)) - LIGHT_DECREASE);
     light = max(0.0, light);
 
-    light = (1.0 - color.r) * light;
-    color.g = light;
+    info.g = (1.0 - info.r) * light;
 
     imageStore(
-        image, pixelCoords,
-        color
+        dataMap, pixelCoords,
+        info
     );
 }";
 
@@ -50,8 +49,8 @@ void main()
 @"#version 430
 
 layout(local_size_x = 1, local_size_y = 1) in;
-layout(rgba8, binding = 0) uniform image2D flatLighting;
-layout(rgba8, binding = 1) uniform image2D fancyLighting;
+layout(rg8, binding = 0) uniform image2D dataMap;
+layout(r8, binding = 1) uniform image2D lightingMap;
 
 #define REGION_WIDTH 16
 #define REGION_HEIGHT 16
@@ -68,7 +67,7 @@ void main()
         for (int dy = -1; dy <= 0; dy++)
         {
             ivec2 probeCoords = pixelCoords + ivec2(dx, dy);
-            vec4 info = imageLoad(flatLighting, probeCoords);
+            vec4 info = imageLoad(dataMap, probeCoords);
             accumulator += info.g;
 
             probesCount += step(0, probeCoords.x) * step(probeCoords.x, REGION_WIDTH - 1)
@@ -78,7 +77,7 @@ void main()
     }
 
     imageStore(
-        fancyLighting, pixelCoords,
+        lightingMap, pixelCoords,
         vec4(vec3(accumulator / probesCount), 1.0)
     );
 }
@@ -86,8 +85,9 @@ void main()
 
         private const int REGION_HEIGHT = 16;
 
-        private readonly Texture fancyLighting;
-        private readonly uint dataTextureId;
+        private readonly uint dataMapId;
+        private readonly uint lightMapId;
+
         private readonly uint lightingProgramId;
         private readonly uint convertingProgramId;
 
@@ -95,23 +95,20 @@ void main()
         {
             // Set up the textures
 
-            dataTextureId = Gl.GenTexture();
-            Gl.BindTexture(TextureTarget.Texture2d, dataTextureId);
-
-            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapS, TextureWrapMode.ClampToEdge);
-            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapT, TextureWrapMode.ClampToEdge);
-            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, TextureMinFilter.Nearest);
-            Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, TextureMagFilter.Nearest);
-
+            dataMapId = Gl.GenTexture();
+            Gl.BindTexture(TextureTarget.Texture2d, dataMapId);
             Gl.TexStorage2D(
                 TextureTarget.Texture2d, 1,
-                InternalFormat.Rgba8,
+                InternalFormat.Rg8,
                 Chunk.SIZE, REGION_HEIGHT
             );
 
-            fancyLighting = new Texture(
-                "",
-                Chunk.SIZE + 1, REGION_HEIGHT + 1
+            lightMapId = Gl.GenTexture();
+            Gl.BindTexture(TextureTarget.Texture2d, lightMapId);
+            Gl.TexStorage2D(
+                TextureTarget.Texture2d, 1,
+                InternalFormat.R8,
+                Chunk.SIZE, REGION_HEIGHT
             );
 
             // Set up the shaders
@@ -122,7 +119,7 @@ void main()
 
         public unsafe void BuildDataMap(Chunk chunk, int z, int y)
         {
-            float[,,] data = new float[REGION_HEIGHT, Chunk.SIZE, 4];
+            float[,,] data = new float[REGION_HEIGHT, Chunk.SIZE, 2];
             for (int x_ = 0; x_ < Chunk.SIZE; x_++)
             {
                 bool drawSunLight = true;
@@ -133,20 +130,18 @@ void main()
                         drawSunLight = false;
 
                     data[y_, x_, 0] = blockTransparent ? 0f : 1f;
-                    data[y_, x_, 3] = 1f;
-                    if (drawSunLight)
-                        data[y_, x_, 1] = 1f;
+                    data[y_, x_, 1] = drawSunLight ? 1f : 0f;
                 }
             }
 
             fixed (float* dataPtr = data)
             {
-                Gl.BindTexture(TextureTarget.Texture2d, dataTextureId);
+                Gl.BindTexture(TextureTarget.Texture2d, dataMapId);
                 Gl.TexSubImage2D(
                     TextureTarget.Texture2d, 0,
                     0, 0,
                     Chunk.SIZE, REGION_HEIGHT,
-                    PixelFormat.Rgba, PixelType.Float,
+                    PixelFormat.Rg, PixelType.Float,
                     new IntPtr(dataPtr)
                 );
             }
@@ -197,23 +192,23 @@ void main()
 
         public void BindTexture()
         {
-            fancyLighting.Bind();
+            Gl.BindTexture(TextureTarget.Texture2d, lightMapId);
         }
 
         public void Run()
         {
             Gl.BindImageTexture(
-                0, dataTextureId, 0,
+                0, dataMapId, 0,
                 false, 0,
                 BufferAccess.ReadWrite,
-                InternalFormat.Rgba8
+                InternalFormat.Rg8
             );
 
             Gl.BindImageTexture(
-                1, fancyLighting.glId, 0,
+                1, lightMapId, 0,
                 false, 0,
                 BufferAccess.WriteOnly,
-                InternalFormat.Rgba8
+                InternalFormat.R8
             );
 
             Gl.UseProgram(lightingProgramId);
@@ -230,8 +225,7 @@ void main()
 
         public void Dispose()
         {
-            fancyLighting.Dispose();
-            Gl.DeleteTextures(dataTextureId);
+            Gl.DeleteTextures(dataMapId, lightMapId);
             Gl.DeleteProgram(lightingProgramId);
             Gl.DeleteProgram(convertingProgramId);
         }
