@@ -47,7 +47,7 @@ namespace Mycraft
         private float time = 0.3f;
 
         private GUIRectangle imageShowcase;
-        private ComputeShader computeShader;
+        private LightComputeShader computeShader;
 
         public void Init()
         {
@@ -105,7 +105,7 @@ namespace Mycraft
             particles = new ParticleSystem(world, .2f, .5d);
 
             imageShowcase = new GUIRectangle(new Vertex2i(), new Vertex2i());
-            computeShader = new ComputeShader();
+            computeShader = new LightComputeShader();
             computeShader.Run();
         }
 

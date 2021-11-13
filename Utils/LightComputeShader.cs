@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Mycraft.Utils
 {
-    public class ComputeShader
+    public class LightComputeShader
     {
         private const string LIGHTING_SOURCE =
 @"#version 430
@@ -87,7 +87,7 @@ void main()
         private readonly uint lightingProgramId;
         private readonly uint convertingProgramId;
 
-        public ComputeShader()
+        public LightComputeShader()
         {
             // Set up the textures
 

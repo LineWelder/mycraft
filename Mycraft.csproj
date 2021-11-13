@@ -106,7 +106,7 @@
     <Compile Include="Physics\FallingBox.cs" />
     <Compile Include="Physics\ParticleSystem.cs" />
     <Compile Include="Shaders\SkyShader.cs" />
-    <Compile Include="Utils\ComputeShader.cs" />
+    <Compile Include="Utils\LightComputeShader.cs" />
     <Compile Include="Utils\FastNoise.cs" />
     <Compile Include="Utils\Player.cs" />
     <Compile Include="Utils\Profiler.cs" />
