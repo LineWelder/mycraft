@@ -23,22 +23,22 @@ float getLight(ivec2 coords)
 
 void main()
 {
-    ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
     
-    vec4 color = imageLoad(image, pixel_coords);
+    vec4 color = imageLoad(image, pixelCoords);
     float light = color.g;
 
-    light = max(light, getLight(pixel_coords + ivec2( 1,  0)) - LIGHT_DECREASE);
-    light = max(light, getLight(pixel_coords + ivec2(-1,  0)) - LIGHT_DECREASE);
-    light = max(light, getLight(pixel_coords + ivec2( 0,  1)) - LIGHT_DECREASE);
-    light = max(light, getLight(pixel_coords + ivec2( 0, -1)) - LIGHT_DECREASE);
+    light = max(light, getLight(pixelCoords + ivec2( 1,  0)) - LIGHT_DECREASE);
+    light = max(light, getLight(pixelCoords + ivec2(-1,  0)) - LIGHT_DECREASE);
+    light = max(light, getLight(pixelCoords + ivec2( 0,  1)) - LIGHT_DECREASE);
+    light = max(light, getLight(pixelCoords + ivec2( 0, -1)) - LIGHT_DECREASE);
     light = max(0.0, light);
 
     light = (1.0 - color.r) * light;
     color.g = light;
 
     imageStore(
-        image, pixel_coords,
+        image, pixelCoords,
         color
     );
 }";
@@ -50,18 +50,33 @@ layout(local_size_x = 1, local_size_y = 1) in;
 layout(rgba8, binding = 0) uniform image2D flatLighting;
 layout(rgba8, binding = 1) uniform image2D fancyLighting;
 
+#define REGION_WIDTH 16
+#define REGION_HEIGHT 16
+
 void main()
 {
-    ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
 
     float accumulator = 0.0;
     float probesCount = 0.0;
 
-    accumulator += imageLoad(flatLighting, pixel_coords).g;
+    for (int dx = -1; dx <= 0; dx++)
+    {
+        for (int dy = -1; dy <= 0; dy++)
+        {
+            ivec2 probeCoords = pixelCoords + ivec2(dx, dy);
+            vec4 info = imageLoad(flatLighting, probeCoords);
+            accumulator += info.g;
+
+            probesCount += step(0, probeCoords.x) * step(probeCoords.x, REGION_WIDTH - 1)
+                         * step(0, probeCoords.y) * step(probeCoords.y, REGION_HEIGHT - 1)
+                         * (1.0 - info.r);
+       }
+    }
 
     imageStore(
-        fancyLighting, pixel_coords,
-        vec4(vec3(accumulator), 1.0)
+        fancyLighting, pixelCoords,
+        vec4(vec3(accumulator / probesCount), 1.0)
     );
 }
 ";
@@ -83,7 +98,7 @@ void main()
 
             fancyLighting = new Texture(
                 "",
-                REGION_WIDTH, REGION_HEIGHT
+                REGION_WIDTH + 1, REGION_HEIGHT + 1
             );
 
             // Set up the shaders
@@ -165,7 +180,7 @@ void main()
 
             Gl.UseProgram(convertingProgramId);
             Gl.MemoryBarrier(MemoryBarrierMask.ShaderImageAccessBarrierBit);
-            Gl.DispatchCompute(REGION_WIDTH, REGION_HEIGHT, 1);
+            Gl.DispatchCompute(REGION_WIDTH + 1, REGION_HEIGHT + 1, 1);
         }
 
         public void Dispose()
