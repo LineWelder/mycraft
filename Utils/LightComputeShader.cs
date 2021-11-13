@@ -197,13 +197,12 @@ void main()
 
         public void BindTexture()
         {
-            // fancyLighting.Bind();
-            Gl.BindTexture(TextureTarget.Texture2d, dataTextureId);
+            fancyLighting.Bind();
         }
 
         public void Run()
         {
-            /* Gl.BindImageTexture(
+            Gl.BindImageTexture(
                 0, dataTextureId, 0,
                 false, 0,
                 BufferAccess.ReadWrite,
@@ -226,7 +225,7 @@ void main()
 
             Gl.UseProgram(convertingProgramId);
             Gl.MemoryBarrier(MemoryBarrierMask.ShaderImageAccessBarrierBit);
-            Gl.DispatchCompute(Chunk.SIZE + 1, REGION_HEIGHT + 1, 1); */
+            Gl.DispatchCompute(Chunk.SIZE + 1, REGION_HEIGHT + 1, 1);
         }
 
         public void Dispose()
