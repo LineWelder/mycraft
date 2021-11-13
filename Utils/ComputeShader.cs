@@ -7,64 +7,95 @@ namespace Mycraft.Utils
 {
     public class ComputeShader
     {
-        private const string SHADER_SOURCE =
+        private const string LIGHTING_SOURCE =
 @"#version 430
 
 layout(local_size_x = 1, local_size_y = 1) in;
-layout(rgba8, binding = 0) uniform image2D imageIn;
-layout(rgba8, binding = 1) uniform image2D imageOut;
+layout(rgba8, binding = 0) uniform image2D image;
 
-#define LIGHT_PROPOGATION 16
+#define LIGHT_DECREASE 1.0 / 16.0
 
 float getLight(ivec2 coords)
 {
-    vec4 pixel = imageLoad(imageIn, coords);
-    return 1.0 - step((pixel.r + pixel.g + pixel.b) * pixel.a, 0.0);
-}
-
-float propogateLight(ivec2 coords)
-{
-    return getLight(coords) - 0.5;
+    vec4 pixel = imageLoad(image, coords);
+    return (1.0 - pixel.r) * pixel.g;
 }
 
 void main()
 {
     ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
- 
-    float light = getLight(pixel_coords);
-    for (int dx = -LIGHT_PROPOGATION; dx <= LIGHT_PROPOGATION; dx++)
-    {
-        for (int dy = -LIGHT_PROPOGATION; dy <= LIGHT_PROPOGATION; dy++)
-        {
-            float lightDecrease = (abs(dx) + abs(dy))  / float(LIGHT_PROPOGATION + 1);
-            float currentLight = getLight(pixel_coords + ivec2(dx, dy));
-            float borowedLight = max(0.0, currentLight - lightDecrease);
-            light = max(light, borowedLight);
-        }
-    }
+    
+    vec4 color = imageLoad(image, pixel_coords);
+    float light = color.g;
+
+    light = max(light, getLight(pixel_coords + ivec2( 1,  0)) - LIGHT_DECREASE);
+    light = max(light, getLight(pixel_coords + ivec2(-1,  0)) - LIGHT_DECREASE);
+    light = max(light, getLight(pixel_coords + ivec2( 0,  1)) - LIGHT_DECREASE);
+    light = max(light, getLight(pixel_coords + ivec2( 0, -1)) - LIGHT_DECREASE);
+    light = max(0.0, light);
+
+    light = (1.0 - color.r) * light;
+    color.g = light;
 
     imageStore(
-        imageOut, pixel_coords,
-        vec4(vec3(light), 1.0)
+        image, pixel_coords,
+        color
     );
 }";
 
-        private const int TEXTURE_WIDTH = 24, TEXTURE_HEIGHT = 24;
+        private const string CONVERTING_SOURCE =
+@"#version 430
 
-        private readonly Texture textureIn, textureOut;
-        private readonly uint programId;
+layout(local_size_x = 1, local_size_y = 1) in;
+layout(rgba8, binding = 0) uniform image2D flatLighting;
+layout(rgba8, binding = 1) uniform image2D fancyLighting;
+
+void main()
+{
+    ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+
+    float accumulator = 0.0;
+    float probesCount = 0.0;
+
+    accumulator += imageLoad(flatLighting, pixel_coords).g;
+
+    imageStore(
+        fancyLighting, pixel_coords,
+        vec4(vec3(accumulator), 1.0)
+    );
+}
+";
+
+        private const int REGION_WIDTH = 16, REGION_HEIGHT = 16;
+
+        private readonly Texture flatLighting, fancyLighting;
+        private readonly uint lightingProgramId;
+        private readonly uint convertingProgramId;
 
         public ComputeShader()
         {
-            // Set up the texture
+            // Set up the textures
 
-            textureIn = new Texture(@"resources\textures\cross.png", 24, 24);
-            textureOut = new Texture("", 24, 24);
+            flatLighting = new Texture(
+                @"resources\textures\test_map.png",
+                REGION_WIDTH, REGION_HEIGHT
+            );
 
-            // Set up the shader
+            fancyLighting = new Texture(
+                "",
+                REGION_WIDTH, REGION_HEIGHT
+            );
 
+            // Set up the shaders
+
+            lightingProgramId = BuildProgram(LIGHTING_SOURCE);
+            convertingProgramId = BuildProgram(CONVERTING_SOURCE);
+        }
+
+        private uint CompileShader(string source)
+        {
             uint shaderId = Gl.CreateShader(ShaderType.ComputeShader);
-            Gl.ShaderSource(shaderId, new string[] { SHADER_SOURCE });
+            Gl.ShaderSource(shaderId, new string[] { source });
             Gl.CompileShader(shaderId);
 
             Gl.GetShader(shaderId, ShaderParameterName.CompileStatus, out int сompileStatus);
@@ -78,8 +109,15 @@ void main()
                 throw new InvalidOperationException($"Shader compiling error: {errorString}");
             };
 
-            programId = Gl.CreateProgram();
-            Gl.AttachShader(programId, shaderId);
+            return shaderId;
+        }
+
+        private uint BuildProgram(string shaderSource)
+        {
+            uint compiledShader = CompileShader(shaderSource);
+
+            uint programId = Gl.CreateProgram();
+            Gl.AttachShader(programId, compiledShader);
             Gl.LinkProgram(programId);
 
             Gl.GetProgram(programId, ProgramProperty.LinkStatus, out int linkStatus);
@@ -93,39 +131,49 @@ void main()
                 throw new InvalidOperationException($"Program linking error: {errorString}");
             };
 
-            Gl.DeleteShader(shaderId);
+            Gl.DeleteShader(compiledShader);
+            return programId;
         }
 
         public void BindTexture()
         {
-            textureOut.Bind();
+            fancyLighting.Bind();
         }
 
         public void Run()
         {
             Gl.BindImageTexture(
-                0, textureIn.glId, 0,
+                0, flatLighting.glId, 0,
                 false, 0,
-                BufferAccess.ReadOnly,
+                BufferAccess.ReadWrite,
                 InternalFormat.Rgba8
             );
 
             Gl.BindImageTexture(
-                1, textureOut.glId, 0,
+                1, fancyLighting.glId, 0,
                 false, 0,
                 BufferAccess.WriteOnly,
                 InternalFormat.Rgba8
             );
 
-            Gl.UseProgram(programId);
-            Gl.DispatchCompute(TEXTURE_WIDTH, TEXTURE_HEIGHT, 1);
+            Gl.UseProgram(lightingProgramId);
+            for (int i = 0; i < 16; i++)
+            {
+                Gl.MemoryBarrier(MemoryBarrierMask.ShaderImageAccessBarrierBit);
+                Gl.DispatchCompute(REGION_WIDTH, REGION_HEIGHT, 1);
+            }
+
+            Gl.UseProgram(convertingProgramId);
+            Gl.MemoryBarrier(MemoryBarrierMask.ShaderImageAccessBarrierBit);
+            Gl.DispatchCompute(REGION_WIDTH, REGION_HEIGHT, 1);
         }
 
         public void Dispose()
         {
-            textureIn.Dispose();
-            textureOut.Dispose();
-            Gl.DeleteProgram(programId);
+            flatLighting.Dispose();
+            fancyLighting.Dispose();
+            Gl.DeleteProgram(lightingProgramId);
+            Gl.DeleteProgram(convertingProgramId);
         }
     }
 }
