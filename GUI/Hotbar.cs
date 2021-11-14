@@ -1,10 +1,12 @@
-﻿using OpenGL;
+﻿using System;
+using OpenGL;
+
 using Mycraft.Blocks;
 using Mycraft.Utils;
 
 namespace Mycraft.GUI
 {
-    public class Hotbar
+    public class Hotbar : IDisposable
     {
         public const int CAPACITY = 10;
 

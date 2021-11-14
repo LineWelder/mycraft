@@ -54,7 +54,7 @@ namespace Mycraft.Utils
 
             var disposableResources =
                 from property in typeof(Resources).GetProperties()
-                where property.PropertyType.IsSubclassOf(typeof(IDisposable))
+                where typeof(IDisposable).IsAssignableFrom(property.PropertyType)
                 select (IDisposable)property.GetValue(null);
 
             foreach (IDisposable resource in disposableResources)

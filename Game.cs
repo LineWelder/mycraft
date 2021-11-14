@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 using OpenGL;
 
@@ -91,7 +93,7 @@ namespace Mycraft
             origin = new Origin();
             chunkBorders = new ChunkBorders();
 
-            world = new GameWorld(new FlatWorldGenerator());
+            world = new GameWorld(new SimpleWorldGenerator(1337));
             world.GenerateSpawnArea();
 
             playerMovement = new SmoothChangingVertex2f(new Vertex2f(), MOVEMENT_ACCELERATION);
@@ -380,12 +382,13 @@ namespace Mycraft
 
         public void Dispose()
         {
-            world.Dispose();
-            origin.Dispose();
-            chunkBorders.Dispose();
-            player.Dispose();
-            cross.Dispose();
-            hotbar.Dispose();
+            var disposableGameObjects =
+                from field in typeof(Game).GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+                where typeof(IDisposable).IsAssignableFrom(field.FieldType)
+                select field.GetValue(this);
+
+            foreach (IDisposable gameObject in disposableGameObjects)
+                gameObject.Dispose();
         }
     }
 }
