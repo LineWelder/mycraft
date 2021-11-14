@@ -9,31 +9,39 @@ namespace Mycraft.Graphics
     {
         public readonly uint glId;
 
-        protected float[] Data
+        protected unsafe float[] Data
         {
             set
             {
-                Debug.Assert(value.Length % vertexSize == 0, "Invalid vertices data");
-                verticesCount = value.Length / vertexSize;
-
-                Gl.BindVertexArray(glId);
-                Gl.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-                Gl.BufferData(BufferTarget.ArrayBuffer, (uint)(sizeof(float) * value.Length), value, BufferUsage.StaticDraw);
-
-                int offset = 0;
-                for (uint i = 0; i < vertexFormat.Length; i++)
+                fixed (float* ptr = value)
                 {
-                    Debug.Assert(vertexFormat[i] > 0, "Variable size must be greater than zero");
-
-                    Gl.VertexAttribPointer(
-                        i, vertexFormat[i],
-                        VertexAttribType.Float, false,
-                        sizeof(float) * vertexSize,
-                        IntPtr.Zero + sizeof(float) * offset
-                    );
-                    Gl.EnableVertexAttribArray(i);
-                    offset += vertexFormat[i];
+                    LoadData(new IntPtr(ptr), value.Length);
                 }
+            }
+        }
+
+        protected void LoadData(IntPtr pointer, int length)
+        {
+            Debug.Assert(length % vertexSize == 0, "Invalid vertices data");
+            verticesCount = length;
+
+            Gl.BindVertexArray(glId);
+            Gl.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+            Gl.BufferData(BufferTarget.ArrayBuffer, (uint)(sizeof(float) * length), pointer, BufferUsage.StaticDraw);
+
+            int offset = 0;
+            for (uint i = 0; i < vertexFormat.Length; i++)
+            {
+                Debug.Assert(vertexFormat[i] > 0, "Variable size must be greater than zero");
+
+                Gl.VertexAttribPointer(
+                    i, vertexFormat[i],
+                    VertexAttribType.Float, false,
+                    sizeof(float) * vertexSize,
+                    IntPtr.Zero + sizeof(float) * offset
+                );
+                Gl.EnableVertexAttribArray(i);
+                offset += vertexFormat[i];
             }
         }
 
