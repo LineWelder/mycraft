@@ -114,9 +114,7 @@ namespace Mycraft.World
                 transparentMesh.quads = context.transparentQuads.ToArray();
 
                 needsSolidVertexRefresh = true;
-
                 needsTransparentGeometrySort = true;
-                await EnsureTransparentGeometrySortedAsync();
 
                 await lightUpdating;
             });
