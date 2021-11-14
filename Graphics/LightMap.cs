@@ -14,9 +14,13 @@ namespace Mycraft.Graphics
         private readonly uint dataMapId;
         private readonly uint lightMapId;
 
+        private bool needsUpdate;
+        private Vertex2f[,,] data;
+
         public LightMap(Chunk chunk)
         {
             this.chunk = chunk;
+            needsUpdate = false;
 
             dataMapId = Gl.GenTexture();
             Gl.BindTexture(TextureTarget.Texture3d, dataMapId);
@@ -42,65 +46,67 @@ namespace Mycraft.Graphics
             );
         }
 
-        public void Update()
+        public void BuildDataMap()
         {
-            // Building the data map
+            data = new Vertex2f[Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3];
 
-            unsafe
+            int startChunkX = chunk.xOffset / Chunk.SIZE - 1;
+            int startChunkZ = chunk.zOffset / Chunk.SIZE - 1;
+
+            for (int chunkX = 0; chunkX < 3; chunkX++)
             {
-                Vertex2f[,,] data = new Vertex2f[Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3];
-
-                int startChunkX = chunk.xOffset / Chunk.SIZE - 1;
-                int startChunkZ = chunk.zOffset / Chunk.SIZE - 1;
-
-                for (int chunkX = 0; chunkX < 3; chunkX++)
+                for (int chunkZ = 0; chunkZ < 3; chunkZ++)
                 {
-                    for (int chunkZ = 0; chunkZ < 3; chunkZ++)
+                    Chunk currentChunk = chunk.world.GetChunk(
+                        startChunkX + chunkX,
+                        startChunkZ + chunkZ
+                    );
+
+                    if (currentChunk == null)
+                        continue;
+
+                    for (int x = 0; x < Chunk.SIZE; x++)
                     {
-                        Chunk currentChunk = chunk.world.GetChunk(
-                            startChunkX + chunkX,
-                            startChunkZ + chunkZ
-                        );
-
-                        if (currentChunk == null)
-                            continue;
-
-                        for (int x = 0; x < Chunk.SIZE; x++)
+                        for (int z = 0; z < Chunk.SIZE; z++)
                         {
-                            for (int z = 0; z < Chunk.SIZE; z++)
+                            bool drawSunLight = true;
+                            for (int y = Chunk.HEIGHT - 1; y >= 0; y--)
                             {
-                                bool drawSunLight = true;
-                                for (int y = Chunk.HEIGHT - 1; y >= 0; y--)
-                                {
-                                    Block block = currentChunk.blocks[x, y, z];
-                                    bool blockTransparent = block.IsTransparent;
-                                    if (!blockTransparent)
-                                        drawSunLight = false;
+                                Block block = currentChunk.blocks[x, y, z];
+                                bool blockTransparent = block.IsTransparent;
+                                if (!blockTransparent)
+                                    drawSunLight = false;
 
-                                    data[z + chunkZ * Chunk.SIZE, y, x + chunkX * Chunk.SIZE] = new Vertex2f(
-                                        blockTransparent ? 1f : 0f,
-                                        drawSunLight || block is TorchBlock ? 1f : 0f
-                                    );
-                                }
+                                data[z + chunkZ * Chunk.SIZE, y, x + chunkX * Chunk.SIZE] = new Vertex2f(
+                                    blockTransparent ? 1f : 0f,
+                                    drawSunLight || block is TorchBlock ? 1f : 0f
+                                );
                             }
                         }
                     }
                 }
-
-                fixed (void* dataPtr = data)
-                {
-                    Gl.BindTexture(TextureTarget.Texture3d, dataMapId);
-                    Gl.TexSubImage3D(
-                        TextureTarget.Texture3d, 0,
-                        0, 0, 0,
-                        Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3,
-                        PixelFormat.Rg, PixelType.Float,
-                        new IntPtr(dataPtr)
-                    );
-                }
             }
 
-            // Calling the compute shader
+            needsUpdate = true;
+        }
+
+        public unsafe bool UpdateIfNeeded()
+        {
+            if (!needsUpdate)
+                return false;
+            needsUpdate = false;
+
+            fixed (void* dataPtr = data)
+            {
+                Gl.BindTexture(TextureTarget.Texture3d, dataMapId);
+                Gl.TexSubImage3D(
+                    TextureTarget.Texture3d, 0,
+                    0, 0, 0,
+                    Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3,
+                    PixelFormat.Rg, PixelType.Float,
+                    new IntPtr(dataPtr)
+                );
+            }
 
             Gl.BindImageTexture(
                 0, dataMapId, 0,
@@ -117,6 +123,7 @@ namespace Mycraft.Graphics
             );
 
             Resources.LightComputeShader.Run();
+            return true;
         }
 
         public void Bind()

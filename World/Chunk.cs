@@ -105,15 +105,13 @@ namespace Mycraft.World
             return array;
         }
 
-        public bool EnsureLightRecalculated()
+        public Task UpdateLightAsync()
         {
             if (!needsLightRecalculation)
-                return false;
+                return Task.CompletedTask;
 
             needsLightRecalculation = false;
-            lightMap.Update();
-
-            return true;
+            return Task.Run(lightMap.BuildDataMap);
         }
 
         public Task UpdateMeshAsync()
@@ -198,6 +196,9 @@ namespace Mycraft.World
 
                 refreshed = true;
             }
+
+            if (lightMap.UpdateIfNeeded())
+                refreshed = true;
 
             return refreshed;
         }

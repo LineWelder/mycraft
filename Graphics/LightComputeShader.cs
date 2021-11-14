@@ -143,12 +143,11 @@ void main()
             Gl.UseProgram(lightingProgramId);
             for (int i = 0; i < 16; i++)
             {
-                Gl.MemoryBarrier(MemoryBarrierMask.ShaderImageAccessBarrierBit);
                 Gl.DispatchCompute(Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3);
+                Gl.MemoryBarrier(MemoryBarrierMask.ShaderImageAccessBarrierBit);
             }
 
             Gl.UseProgram(convertingProgramId);
-            Gl.MemoryBarrier(MemoryBarrierMask.ShaderImageAccessBarrierBit);
             Gl.DispatchCompute(Chunk.SIZE + 1, Chunk.HEIGHT + 1, Chunk.SIZE + 1);
         }
 
