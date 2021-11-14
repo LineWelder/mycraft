@@ -48,7 +48,7 @@ namespace Mycraft.Graphics
 
             unsafe
             {
-                float[,,,] data = new float[Chunk.SIZE, Chunk.HEIGHT, Chunk.SIZE, 2];
+                Vertex2f[,,] data = new Vertex2f[Chunk.SIZE, Chunk.HEIGHT, Chunk.SIZE];
                 for (int x = 0; x < Chunk.SIZE; x++)
                 {
                     for (int z = 0; z < Chunk.SIZE; z++)
@@ -61,13 +61,15 @@ namespace Mycraft.Graphics
                             if (!blockTransparent)
                                 drawSunLight = false;
 
-                            data[z, y, x, 0] = blockTransparent ? 0f : 1f;
-                            data[z, y, x, 1] = drawSunLight || block is TorchBlock ? 1f : 0f;
+                            data[z, y, x] = new Vertex2f(
+                                blockTransparent ? 0f : 1f,
+                                drawSunLight || block is TorchBlock ? 1f : 0f
+                            );
                         }
                     }
                 }
 
-                fixed (float* dataPtr = data)
+                fixed (void* dataPtr = data)
                 {
                     Gl.BindTexture(TextureTarget.Texture3d, dataMapId);
                     Gl.TexSubImage3D(
