@@ -23,7 +23,7 @@ namespace Mycraft.Graphics
             Gl.TexStorage3D(
                 TextureTarget.Texture3d, 1,
                 InternalFormat.Rg8,
-                Chunk.SIZE, Chunk.HEIGHT, Chunk.SIZE
+                Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3
             );
 
             lightMapId = Gl.GenTexture();
@@ -48,23 +48,38 @@ namespace Mycraft.Graphics
 
             unsafe
             {
-                Vertex2f[,,] data = new Vertex2f[Chunk.SIZE, Chunk.HEIGHT, Chunk.SIZE];
-                for (int x = 0; x < Chunk.SIZE; x++)
-                {
-                    for (int z = 0; z < Chunk.SIZE; z++)
-                    {
-                        bool drawSunLight = true;
-                        for (int y = Chunk.HEIGHT - 1; y >= 0; y--)
-                        {
-                            Block block = chunk.blocks[x, y, z];
-                            bool blockTransparent = block.IsTransparent;
-                            if (!blockTransparent)
-                                drawSunLight = false;
+                Vertex2f[,,] data = new Vertex2f[Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3];
 
-                            data[z, y, x] = new Vertex2f(
-                                blockTransparent ? 0f : 1f,
-                                drawSunLight || block is TorchBlock ? 1f : 0f
-                            );
+                int startChunkX = chunk.xOffset / Chunk.SIZE - 1;
+                int startChunkZ = chunk.zOffset / Chunk.SIZE - 1;
+
+                for (int chunkX = 0; chunkX < 3; chunkX++)
+                {
+                    for (int chunkZ = 0; chunkZ < 3; chunkZ++)
+                    {
+                        Chunk currentChunk = chunk.world.GetChunk(
+                            startChunkX + chunkX,
+                            startChunkZ + chunkZ
+                        );
+
+                        for (int x = 0; x < Chunk.SIZE; x++)
+                        {
+                            for (int z = 0; z < Chunk.SIZE; z++)
+                            {
+                                bool drawSunLight = true;
+                                for (int y = Chunk.HEIGHT - 1; y >= 0; y--)
+                                {
+                                    Block block = currentChunk.blocks[x, y, z];
+                                    bool blockTransparent = block.IsTransparent;
+                                    if (!blockTransparent)
+                                        drawSunLight = false;
+
+                                    data[z + chunkZ * Chunk.SIZE, y, x + chunkX * Chunk.SIZE] = new Vertex2f(
+                                        blockTransparent ? 0f : 1f,
+                                        drawSunLight || block is TorchBlock ? 1f : 0f
+                                    );
+                                }
+                            }
                         }
                     }
                 }
@@ -75,7 +90,7 @@ namespace Mycraft.Graphics
                     Gl.TexSubImage3D(
                         TextureTarget.Texture3d, 0,
                         0, 0, 0,
-                        Chunk.SIZE, Chunk.HEIGHT, Chunk.SIZE,
+                        Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3,
                         PixelFormat.Rg, PixelType.Float,
                         new IntPtr(dataPtr)
                     );

@@ -54,8 +54,8 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(rg8, binding = 0) uniform image3D dataMap;
 layout(r8, binding = 1) uniform image3D lightMap;
 
-#define REGION_SIZE 16
-#define REGION_HEIGHT 256
+#define CHUNK_SIZE 16
+#define CHUNK_HEIGHT 256
 
 void main()
 {
@@ -70,13 +70,11 @@ void main()
         {
             for (int dz = -1; dz <= 0; dz++)
             {
-                ivec3 probeCoords = pixelCoords + ivec3(dx, dy, dz);
+                ivec3 probeCoords = pixelCoords + ivec3(dx, dy, dz) + ivec3(CHUNK_SIZE, 0, CHUNK_SIZE);
                 vec4 info = imageLoad(dataMap, probeCoords);
 
                 accumulator += (1.0 - info.r) * info.g;
-                probesCount += step(0, probeCoords.x) * step(probeCoords.x, REGION_SIZE - 1)
-                             * step(0, probeCoords.y) * step(probeCoords.y, REGION_HEIGHT - 1)
-                             * step(0, probeCoords.z) * step(probeCoords.z, REGION_SIZE - 1)
+                probesCount += step(0, probeCoords.y) * step(probeCoords.y, CHUNK_HEIGHT - 1)
                              * (1.0 - info.r);
             }
         }
@@ -146,7 +144,7 @@ void main()
             for (int i = 0; i < 16; i++)
             {
                 Gl.MemoryBarrier(MemoryBarrierMask.ShaderImageAccessBarrierBit);
-                Gl.DispatchCompute(Chunk.SIZE, Chunk.HEIGHT, Chunk.SIZE);
+                Gl.DispatchCompute(Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3);
             }
 
             Gl.UseProgram(convertingProgramId);
