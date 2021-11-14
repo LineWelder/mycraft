@@ -18,6 +18,8 @@ namespace Mycraft.Utils
         public static OverlayShader OverlayShader { get; private set; }
         public static SkyShader SkyShader { get; private set; }
 
+        public static LightComputeShader LightComputeShader { get; private set; }
+
         public static TextureArray BlocksTexture { get; private set; }
         public static Texture CrossTexture { get; private set; }
         public static Texture HotbarTexture { get; private set; }
@@ -35,6 +37,8 @@ namespace Mycraft.Utils
             ParticleShader  = new ParticleShader();
             OverlayShader   = new OverlayShader();
             SkyShader       = new SkyShader();
+
+            LightComputeShader = new LightComputeShader();
 
             BlocksTexture         = new TextureArray(@"resources\textures\blocks.png", 4, 4);
             CrossTexture          = new Texture(@"resources\textures\cross.png");

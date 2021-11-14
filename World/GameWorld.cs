@@ -90,19 +90,6 @@ namespace Mycraft.World
             return chunk.groundLevel[blockX, blockZ];
         }
 
-        public float GetLightLevel(int x, int y, int z)
-        {
-            var (chunkX, blockX) = ToChunkCoord(x);
-            var (chunkZ, blockZ) = ToChunkCoord(z);
-
-            if (!chunks.TryGetValue((chunkX, chunkZ), out Chunk chunk)
-             || !chunk.isLoaded
-             || chunk.flatLightMapData is null)
-                return 0f;
-
-            return chunk.flatLightMapData[blockX + 1, y, blockZ + 1];
-        }
-
         public Chunk GetChunk(int x, int z)
         {
             if (chunks.TryGetValue((x, z), out Chunk chunk)
@@ -215,7 +202,7 @@ namespace Mycraft.World
 
             ThrottleUpdates(chunk => !chunk.UpdateMeshAsync().IsCompleted, 3);
             ThrottleUpdates(chunk => !chunk.EnsureTransparentGeometrySortedAsync().IsCompleted, 3);
-            ThrottleUpdates(chunk => !chunk.EnsureLightRecalculatedAsync().IsCompleted, 3);
+            ThrottleUpdates(chunk => !chunk.EnsureLightRecalculated(), 3);
             ThrottleUpdates(chunk => chunk.RefreshVertexData(), 3);
         }
 

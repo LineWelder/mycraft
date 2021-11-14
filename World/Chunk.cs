@@ -36,9 +36,6 @@ namespace Mycraft.World
         private readonly WorldGeometry solidMesh, doubleSidedMesh, waterMesh;
 
         public bool needsLightRecalculation;
-        public bool lightDataNeedsRefresh;
-        public float[,,] flatLightMapData;
-        private float[,,] lightMapData;
         private readonly LightMap lightMap;
 
         public Chunk(GameWorld world, int x, int z)
@@ -55,9 +52,7 @@ namespace Mycraft.World
             doubleSidedMesh = new WorldGeometry();
             waterMesh = new WorldGeometry();
 
-            lightMap = new LightMap(SIZE + 1, HEIGHT + 1, SIZE + 1);
-            flatLightMapData = new float[SIZE, HEIGHT, SIZE];
-            lightMapData = new float[SIZE + 1, HEIGHT + 1, SIZE + 1];
+            lightMap = new LightMap(this);
         }
 
         public void Draw()
@@ -110,217 +105,15 @@ namespace Mycraft.World
             return array;
         }
 
-        private void RecalculateLight(bool updateNeighbourds)
-        {
-            // Caching the neighbouring chunks
-
-            Chunk frontChunk = world.GetChunk(xOffset / SIZE, zOffset / SIZE + 1);
-            Chunk backChunk = world.GetChunk(xOffset / SIZE, zOffset / SIZE - 1);
-            Chunk rightChunk = world.GetChunk(xOffset / SIZE + 1, zOffset / SIZE);
-            Chunk leftChunk = world.GetChunk(xOffset / SIZE - 1, zOffset / SIZE);
-            Chunk frontRightChunk = world.GetChunk(xOffset / SIZE + 1, zOffset / SIZE + 1);
-            Chunk backRightChunk = world.GetChunk(xOffset / SIZE + 1, zOffset / SIZE - 1);
-            Chunk frontLeftChunk = world.GetChunk(xOffset / SIZE - 1, zOffset / SIZE + 1);
-            Chunk backLeftChunk = world.GetChunk(xOffset / SIZE - 1, zOffset / SIZE - 1);
-
-            // Reset the light map
-
-            for (int x = 0; x < SIZE; x++)
-                for (int y = 0; y < HEIGHT; y++)
-                    for (int z = 0; z < SIZE; z++)
-                        flatLightMapData[x, y, z] = 1f;
-
-            // Apply the shades
-
-            void MakeShade(int x, int y, int z)
-            {
-                for (int y_ = y - 1; y_ >= 0; y_--)
-                    if (!(blocks[x, y_, z] is TorchBlock))
-                        flatLightMapData[x, y_, z] = 0f;
-            }
-
-            for (int y = HEIGHT - 1; y > 0; y--)
-                for (int x = 0; x < SIZE; x++)
-                    for (int z = 0; z < SIZE; z++)
-                        if (!blocks[x, y, z].IsTransparent)
-                            MakeShade(x, y, z);
-
-            // Blend the shades
-
-            Chunk GetChunkFromCoords(int x, int z, out int newX, out int newZ)
-            {
-                if (x >= SIZE)
-                {
-                    newX = x - SIZE;
-
-                    if (z >= SIZE)
-                    {
-                        newZ = z - SIZE;
-                        return frontRightChunk;
-                    }
-                    else if (z < 0)
-                    {
-                        newZ = z + SIZE;
-                        return backRightChunk;
-                    }
-                    else
-                    {
-                        newZ = z;
-                        return rightChunk;
-                    }
-                }
-                else if (x < 0)
-                {
-                    newX = x + SIZE;
-
-                    if (z >= SIZE)
-                    {
-                        newZ = z - SIZE;
-                        return frontLeftChunk;
-                    }
-                    else if (z < 0)
-                    {
-                        newZ = z + SIZE;
-                        return backLeftChunk;
-                    }
-                    else
-                    {
-                        newZ = z;
-                        return leftChunk;
-                    }
-                }
-                else
-                {
-                    newX = x;
-
-                    if (z >= SIZE)
-                    {
-                        newZ = z - SIZE;
-                        return frontChunk;
-                    }
-                    else if (z < 0)
-                    {
-                        newZ = z + SIZE;
-                        return backChunk;
-                    }
-                    else
-                    {
-                        newZ = z;
-                        return this;
-                    }
-                }
-            }
-
-            bool ProbeLight(int x, int y, int z, out float level)
-            {
-                if (y >= HEIGHT)
-                {
-                    level = 1f;
-                    return false;
-                }
-                else if (y < 0)
-                {
-                    level = 0f;
-                    return false;
-                }
-
-                Chunk chunk = GetChunkFromCoords(x, z, out int newX, out int newZ);
-                if (chunk is null || !chunk.blocks[newX, y, newZ].IsTransparent)
-                {
-                    level = 0f;
-                    return false;
-                }
-
-                level = chunk.flatLightMapData[newX, y, newZ];
-                return true;
-            }
-
-            bool IsNeighbouring(int x, int y, int z)
-                => x == 0 && y == 0 && z != 0
-                || x == 0 && y != 0 && z == 0
-                || x != 0 && y == 0 && z == 0;
-
-            void BlendShades(int x, int y, int z)
-            {
-                for (int dx = -1; dx <= 1; dx++)
-                    for (int dy = -1; dy <= 1; dy++)
-                        for (int dz = -1; dz <= 1; dz++)
-                            if (IsNeighbouring(dx, dy, dz))
-                            {
-                                if (ProbeLight(x + dx, y + dy, z + dz, out float level))
-                                {
-                                    float blendValue = level - 1f / 16f;
-                                    if (flatLightMapData[x, y, z] < blendValue)
-                                        flatLightMapData[x, y, z] = blendValue;
-                                }
-                            }
-            }
-
-            for (int i = 0; i < 16; i++)
-            {
-                for (int y = HEIGHT - 1; y > 0; y--)
-                    for (int x = 0; x < SIZE; x++)
-                        for (int z = 0; z < SIZE; z++)
-                            BlendShades(x, y, z);
-            }
-
-            // Use the flat light map to generate the actual LightMap data
-
-            for (int x = 0; x <= SIZE; x++)
-                for (int y = 0; y <= HEIGHT; y++)
-                    for (int z = 0; z <= SIZE; z++)
-                    {
-                        float lightAccum = 0f;
-                        int probesCount = 0;
-                        for (int x_ = -1; x_ <= 0; x_++)
-                            for (int y_ = -1; y_ <= 0; y_++)
-                                for (int z_ = -1; z_ <= 0; z_++)
-                                    if (ProbeLight(x + x_, y + y_, z + z_, out float level))
-                                    {
-                                        lightAccum += level;
-                                        probesCount++;
-                                    }
-
-                        lightMapData[z, y, x] = lightAccum / probesCount;
-                    }
-
-            if (updateNeighbourds)
-            {
-                if (!(frontChunk is null))
-                    frontChunk.RecalculateLight(false);
-
-                if (!(backChunk is null))
-                    backChunk.RecalculateLight(false);
-
-                if (!(rightChunk is null))
-                    rightChunk.RecalculateLight(false);
-
-                if (!(leftChunk is null))
-                    leftChunk.RecalculateLight(false);
-
-                if (!(frontRightChunk is null))
-                    frontRightChunk.RecalculateLight(false);
-
-                if (!(backRightChunk is null))
-                    backRightChunk.RecalculateLight(false);
-
-                if (!(frontLeftChunk is null))
-                    frontLeftChunk.RecalculateLight(false);
-
-                if (!(backLeftChunk is null))
-                    backLeftChunk.RecalculateLight(false);
-            }
-
-            lightDataNeedsRefresh = true;
-        }
-
-        public Task EnsureLightRecalculatedAsync()
+        public bool EnsureLightRecalculated()
         {
             if (!needsLightRecalculation)
-                return Task.CompletedTask;
+                return false;
 
             needsLightRecalculation = false;
-            return Task.Run(() => RecalculateLight(true));
+            lightMap.Update();
+
+            return true;
         }
 
         public Task UpdateMeshAsync()
@@ -381,14 +174,6 @@ namespace Mycraft.World
         public bool RefreshVertexData()
         {
             bool refreshed = false;
-
-            if (lightDataNeedsRefresh)
-            {
-                lightMap.Data = lightMapData;
-                lightDataNeedsRefresh = false;
-
-                refreshed = true;
-            }
 
             if (!(solidVertices is null))
             {

@@ -46,9 +46,6 @@ namespace Mycraft
 
         private float time = 0.3f;
 
-        private GUIRectangle imageShowcase;
-        private LightComputeShader computeShader;
-
         public void Init()
         {
             // Configure the graphics
@@ -94,7 +91,7 @@ namespace Mycraft
             origin = new Origin();
             chunkBorders = new ChunkBorders();
 
-            world = new GameWorld(new SimpleWorldGenerator(1337));
+            world = new GameWorld(new FlatWorldGenerator());
             world.GenerateSpawnArea();
 
             playerMovement = new SmoothChangingVertex2f(new Vertex2f(), MOVEMENT_ACCELERATION);
@@ -103,11 +100,6 @@ namespace Mycraft
             world.Update();
 
             particles = new ParticleSystem(world, .2f, .5d);
-
-            imageShowcase = new GUIRectangle(new Vertex2i(), new Vertex2i());
-            computeShader = new LightComputeShader();
-            computeShader.BuildDataMap(world.GetChunk(0, 0), 0, 16);
-            computeShader.Run();
         }
 
         public void MoveHotbarSelection(int delta)
@@ -210,14 +202,6 @@ namespace Mycraft
                     height - 21 * pixelSize
                 ),
                 pixelSize
-            );
-
-            imageShowcase.Resize(
-                new Vertex2i(
-                    width / 2 - 16 * pixelSize,
-                    height / 2 - 16 * pixelSize
-                ),
-                new Vertex2i(32 * pixelSize, 32 * pixelSize)
             );
         }
 
@@ -388,10 +372,8 @@ namespace Mycraft
             Gl.UseProgram(Resources.GUIShader.glId);
             Gl.Disable(EnableCap.Blend);
 
-            // Resources.CrossTexture.Bind();
-            // cross.Draw();
-            computeShader.BindTexture();
-            imageShowcase.Draw();
+            Resources.CrossTexture.Bind();
+            cross.Draw();
 
             hotbar.Draw();
         }
@@ -404,9 +386,6 @@ namespace Mycraft
             player.Dispose();
             cross.Dispose();
             hotbar.Dispose();
-            
-            imageShowcase.Dispose();
-            computeShader.Dispose();
         }
     }
 }
