@@ -69,17 +69,17 @@ namespace Mycraft.Graphics
                     {
                         for (int z = 0; z < Chunk.SIZE; z++)
                         {
-                            bool drawSunLight = true;
+                            float drawSunLight = 1f;
                             for (int y = Chunk.HEIGHT - 1; y >= 0; y--)
                             {
                                 Block block = currentChunk.blocks[x, y, z];
                                 bool blockTransparent = block.IsTransparent;
                                 if (!blockTransparent)
-                                    drawSunLight = false;
+                                    drawSunLight = 0f;
 
                                 data[z + chunkZ * Chunk.SIZE, y, x + chunkX * Chunk.SIZE] = new Vertex2f(
                                     blockTransparent ? 1f : 0f,
-                                    drawSunLight || block is TorchBlock ? 1f : 0f
+                                    Math.Max(drawSunLight, block.LightLevel)
                                 );
                             }
                         }

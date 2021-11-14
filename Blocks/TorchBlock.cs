@@ -9,17 +9,17 @@ namespace Mycraft.Blocks
     {
         public override bool IsTransparent => true;
         public override bool HasCollider => false;
-        public override bool IsVisible => true;
+        public override float LightLevel => 0.5f;
 
         public TorchBlock(int textureId)
             : base(textureId) { }
 
-        public override void EmitMesh(List<Quad> mesh, Chunk chunk, int x, int y, int z)
+        public override void EmitMesh(MeshBuildingContext context, int x, int y, int z)
         {
             const float offset = 7f / 16f;
 
             // Left
-            mesh.Add(QuadGenerator.Left(
+            context.AddSolidQuad(QuadGenerator.Left(
                 new Vertex3f(x + offset, y, z + 1f),
                 new Vertex2f(1f, 1f),
                 GetTexture(BlockSide.Left),
@@ -27,7 +27,7 @@ namespace Mycraft.Blocks
             ));
 
             // Right
-            mesh.Add(QuadGenerator.Right(
+            context.AddSolidQuad(QuadGenerator.Right(
                 new Vertex3f(x + 1f - offset, y, z + 1f),
                 new Vertex2f(1f, 1f),
                 GetTexture(BlockSide.Right),
@@ -35,7 +35,7 @@ namespace Mycraft.Blocks
             ));
 
             // Back
-            mesh.Add(QuadGenerator.Back(
+            context.AddSolidQuad(QuadGenerator.Back(
                 new Vertex3f(x + 1f, y, z + offset),
                 new Vertex2f(1f, 1f),
                 GetTexture(BlockSide.Back),
@@ -43,7 +43,7 @@ namespace Mycraft.Blocks
             ));
 
             // Front
-            mesh.Add(QuadGenerator.Front(
+            context.AddSolidQuad(QuadGenerator.Front(
                 new Vertex3f(x, y, z + 1f - offset),
                 new Vertex2f(1f, 1f),
                 GetTexture(BlockSide.Front),
@@ -51,7 +51,7 @@ namespace Mycraft.Blocks
             ));
 
             // Top
-            mesh.Add(QuadGenerator.Top(
+            context.AddSolidQuad(QuadGenerator.Top(
                 new Vertex3f(x + 1f - offset, y + 1f - offset, z + 1f - offset),
                 new Vertex2f(1f - 2f * offset),
                 8,

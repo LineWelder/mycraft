@@ -8,14 +8,13 @@ namespace Mycraft.Blocks
     {
         public override bool IsTransparent => true;
         public override bool HasCollider => false;
-        public override bool IsVisible => true;
 
         public PlantBlock(int textureId)
             : base(textureId) { }
 
-        public override void EmitMesh(List<Quad> mesh, Chunk chunk, int x, int y, int z)
+        public override void EmitMesh(MeshBuildingContext context, int x, int y, int z)
         {
-            mesh.Add(
+            context.AddDoubleSidedQuad(
                 new Quad(
                     new Vertex3f(x + 1f, y,      z + 1f),
                     new Vertex3f(x + 1f, y + 1f, z + 1f),
@@ -26,7 +25,7 @@ namespace Mycraft.Blocks
                 )
             );
 
-            mesh.Add(
+            context.AddDoubleSidedQuad(
                 new Quad(
                     new Vertex3f(x,      y,      z + 1f),
                     new Vertex3f(x,      y + 1f, z + 1f),

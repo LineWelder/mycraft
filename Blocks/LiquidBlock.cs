@@ -8,21 +8,20 @@ namespace Mycraft.Blocks
     {
         public override bool IsTransparent => true;
         public override bool HasCollider => false;
-        public override bool IsVisible => true;
         public override bool IsSelectable => false;
 
         public LiquidBlock(int textureId)
             : base(textureId) { }
 
-        public override void EmitMesh(List<Quad> mesh, Chunk chunk, int x, int y, int z)
+        public override void EmitMesh(MeshBuildingContext context, int x, int y, int z)
         {
-            Block topNeighbour = GetChunkBlock(chunk, x, y + 1, z);
+            Block topNeighbour = GetChunkBlock(context.chunk, x, y + 1, z);
             float height = topNeighbour is LiquidBlock ? 1f : 15f / 16f;
 
             // Top
             if (!(topNeighbour is LiquidBlock))
             {
-                mesh.Add(QuadGenerator.Top(
+                context.AddTransparentQuad(QuadGenerator.Top(
                     new Vertex3f(x + 1f, y + height, z + 1f),
                     new Vertex2f(1f, 1f),
                     GetTexture(BlockSide.Top),
@@ -31,8 +30,8 @@ namespace Mycraft.Blocks
             }
 
             // Bottom
-            if (HasFace(GetChunkBlock(chunk, x, y - 1, z)))
-                mesh.Add(QuadGenerator.Bottom(
+            if ( HasFace(GetChunkBlock(context.chunk, x, y - 1, z)) )
+                context.AddTransparentQuad(QuadGenerator.Bottom(
                     new Vertex3f(x + 1f, y, z + 1f),
                     new Vertex2f(1f, 1f),
                     GetTexture(BlockSide.Bottom),
@@ -40,8 +39,8 @@ namespace Mycraft.Blocks
                 ));
 
             // Left
-            if (HasFace(GetChunkBlock(chunk, x - 1, y, z)))
-                mesh.Add(QuadGenerator.Left(
+            if ( HasFace(GetChunkBlock(context.chunk, x - 1, y, z)) )
+                context.AddTransparentQuad(QuadGenerator.Left(
                     new Vertex3f(x, y, z + 1f),
                     new Vertex2f(1f, height),
                     GetTexture(BlockSide.Left),
@@ -49,8 +48,8 @@ namespace Mycraft.Blocks
                 ));
 
             // Right
-            if (HasFace(GetChunkBlock(chunk, x + 1, y, z)))
-                mesh.Add(QuadGenerator.Right(
+            if ( HasFace(GetChunkBlock(context.chunk, x + 1, y, z)) )
+                context.AddTransparentQuad(QuadGenerator.Right(
                     new Vertex3f(x + 1f, y, z + 1f),
                     new Vertex2f(1f, height),
                     GetTexture(BlockSide.Right),
@@ -58,8 +57,8 @@ namespace Mycraft.Blocks
                 ));
 
             // Back
-            if (HasFace(GetChunkBlock(chunk, x, y, z - 1)))
-                mesh.Add(QuadGenerator.Back(
+            if ( HasFace(GetChunkBlock(context.chunk, x, y, z - 1)) )
+                context.AddTransparentQuad(QuadGenerator.Back(
                     new Vertex3f(x + 1f, y, z),
                     new Vertex2f(1f, height),
                     GetTexture(BlockSide.Back),
@@ -67,8 +66,8 @@ namespace Mycraft.Blocks
                 ));
 
             // Front
-            if (HasFace(GetChunkBlock(chunk, x, y, z + 1)))
-                mesh.Add(QuadGenerator.Front(
+            if ( HasFace(GetChunkBlock(context.chunk, x, y, z + 1)) )
+                context.AddTransparentQuad(QuadGenerator.Front(
                      new Vertex3f(x, y, z + 1f),
                      new Vertex2f(1f, height),
                      GetTexture(BlockSide.Front),

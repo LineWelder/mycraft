@@ -131,6 +131,7 @@
     <Compile Include="World\Generation\IWorldGenerator.cs" />
     <Compile Include="World\Generation\FlatWorldGenerator.cs" />
     <Compile Include="World\Generation\SimpleWorldGenerator.cs" />
+    <Compile Include="World\MeshBuildingContext.cs" />
     <Compile Include="World\Quad.cs" />
     <Compile Include="World\QuadGenerator.cs" />
     <None Include="packages.config" />

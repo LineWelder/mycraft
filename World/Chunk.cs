@@ -31,7 +31,7 @@ namespace Mycraft.World
         public readonly GameWorld world;
         public readonly int xOffset, zOffset;
 
-        private readonly List<Quad> waterQuads;
+        private List<Quad> waterQuads;
         private float[] solidVertices, doubleSidedVertices, waterVertices;
         private readonly WorldGeometry solidMesh, doubleSidedMesh, waterMesh;
 
@@ -74,6 +74,40 @@ namespace Mycraft.World
             Gl.Disable(EnableCap.Blend);
         }
 
+        public Task UpdateLightAsync()
+        {
+            if (!needsLightRecalculation)
+                return Task.CompletedTask;
+
+            needsLightRecalculation = false;
+            return Task.Run(lightMap.BuildDataMap);
+        }
+
+        public Task UpdateMeshAsync()
+        {
+            if (!needsUpdate)
+                return Task.CompletedTask;
+
+            needsUpdate = false;
+            needsLightRecalculation = true;
+
+            return Task.Run(() =>
+            {
+                MeshBuildingContext context = new MeshBuildingContext(this);
+
+                for (int cx = 0; cx < SIZE; cx++)
+                    for (int cz = 0; cz < SIZE; cz++)
+                        for (int cy = 0; cy < HEIGHT; cy++)
+                            blocks[cx, cy, cz].EmitMesh(context, cx, cy, cz);
+
+                solidVertices       = ToFloatArray(context.solidQuads);
+                doubleSidedVertices = ToFloatArray(context.doubleSidedQuads);
+                waterQuads          = context.transparentQuads;
+
+                needsTransparentGeometrySort = true;
+            });
+        }
+
         private float[] ToFloatArray(List<Quad> quads)
         {
             const int VERTEX_SIZE = 7;
@@ -103,50 +137,6 @@ namespace Mycraft.World
             }
 
             return array;
-        }
-
-        public Task UpdateLightAsync()
-        {
-            if (!needsLightRecalculation)
-                return Task.CompletedTask;
-
-            needsLightRecalculation = false;
-            return Task.Run(lightMap.BuildDataMap);
-        }
-
-        public Task UpdateMeshAsync()
-        {
-            if (!needsUpdate)
-                return Task.CompletedTask;
-
-            needsUpdate = false;
-            needsLightRecalculation = true;
-
-            return Task.Run(() =>
-            {
-                List<Quad> solidQuads = new List<Quad>();
-                List<Quad> doubleSidedQuads = new List<Quad>();
-                waterQuads.Clear();
-
-                for (int cx = 0; cx < SIZE; cx++)
-                    for (int cz = 0; cz < SIZE; cz++)
-                        for (int cy = 0; cy < HEIGHT; cy++)
-                        {
-                            Block block = blocks[cx, cy, cz];
-
-                            if (block is LiquidBlock)
-                                block.EmitMesh(waterQuads, this, cx, cy, cz);
-                            else if (block is PlantBlock)
-                                block.EmitMesh(doubleSidedQuads, this, cx, cy, cz);
-                            else
-                                block.EmitMesh(solidQuads, this, cx, cy, cz);
-                        }
-
-                solidVertices = ToFloatArray(solidQuads);
-                doubleSidedVertices = ToFloatArray(doubleSidedQuads);
-
-                needsTransparentGeometrySort = true;
-            });
         }
 
         public Task EnsureTransparentGeometrySortedAsync()
