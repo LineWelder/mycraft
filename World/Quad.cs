@@ -6,14 +6,14 @@ namespace Mycraft.World
     {
         public Vertex3f position;
         public Vertex2f texture;
+        public float textureId;
         public float light;
     }
 
     public struct Quad
     {
         public Vertex a, b, c, d;
-        public int textureId;
-
+        
         public Vertex3f Center => (a.position + b.position + c.position + d.position) / 4f;
 
         public Quad(
@@ -22,12 +22,11 @@ namespace Mycraft.World
             int textureId, float light
         )
         {
-            this.textureId = textureId;
-
             a = new Vertex
             {
                 position = pa,
                 texture = new Vertex2f(1f, 1f),
+                textureId = textureId,
                 light = light
             };
 
@@ -35,6 +34,7 @@ namespace Mycraft.World
             {
                 position = pb,
                 texture = new Vertex2f(1f, 0f),
+                textureId = textureId,
                 light = light
             };
 
@@ -42,6 +42,7 @@ namespace Mycraft.World
             {
                 position = pc,
                 texture = new Vertex2f(0f, 0f),
+                textureId = textureId,
                 light = light
             };
 
@@ -49,6 +50,7 @@ namespace Mycraft.World
             {
                 position = pd,
                 texture = new Vertex2f(0f, 1f),
+                textureId = textureId,
                 light = light
             };
         }

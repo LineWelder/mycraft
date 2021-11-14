@@ -54,7 +54,6 @@ namespace Mycraft.Graphics
 
         private int verticesCount;
 
-        /// <param name="vertexFormat">The index is the variable location and the value is the variable size</param>
         public VertexArray(PrimitiveType primitiveType, ShaderProgram shader)
         {
             this.primitiveType = primitiveType;

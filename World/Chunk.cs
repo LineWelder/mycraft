@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using OpenGL;
 
@@ -13,10 +12,19 @@ namespace Mycraft.World
     {
         private class WorldGeometry : VertexArray
         {
-            public new float[] Data { set => base.Data = value; }
+            public Quad[] quads;
+            public bool needsUpdate;
 
             public WorldGeometry()
                 : base(PrimitiveType.Quads, Resources.GameWorldShader) { }
+
+            public unsafe void UpdateVertexData()
+            {
+                fixed (Quad* ptr = quads)
+                {
+                    LoadData(new IntPtr(ptr), quads.Length * sizeof(Quad) / sizeof(float));
+                }
+            }
         }
 
         public const int SIZE = 16;
@@ -24,16 +32,16 @@ namespace Mycraft.World
 
         public bool isLoaded;
         public bool needsUpdate;
-        public bool needsTransparentGeometrySort;
+        
         public readonly Block[,,] blocks;
         public readonly int[,] groundLevel;
 
         public readonly GameWorld world;
         public readonly int xOffset, zOffset;
 
-        private List<Quad> waterQuads;
-        private float[] solidVertices, doubleSidedVertices, waterVertices;
-        private readonly WorldGeometry solidMesh, doubleSidedMesh, waterMesh;
+        public bool needsTransparentGeometrySort;
+        private readonly WorldGeometry solidMesh, doubleSidedMesh, transparentMesh;
+        private bool needsSolidVertexRefresh, needsTransparentVertexRefresh;
 
         public bool needsLightRecalculation;
         private readonly LightMap lightMap;
@@ -47,10 +55,9 @@ namespace Mycraft.World
             xOffset = x * SIZE;
             zOffset = z * SIZE;
 
-            waterQuads = new List<Quad>();
             solidMesh = new WorldGeometry();
             doubleSidedMesh = new WorldGeometry();
-            waterMesh = new WorldGeometry();
+            transparentMesh = new WorldGeometry();
 
             lightMap = new LightMap(this);
         }
@@ -70,7 +77,7 @@ namespace Mycraft.World
             doubleSidedMesh.Draw();
 
             Gl.Enable(EnableCap.Blend);
-            waterMesh.Draw();
+            transparentMesh.Draw();
             Gl.Disable(EnableCap.Blend);
         }
 
@@ -89,10 +96,12 @@ namespace Mycraft.World
                 return Task.CompletedTask;
 
             needsUpdate = false;
-            needsLightRecalculation = true;
 
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
+                needsLightRecalculation = true;
+                Task lightUpdating = UpdateLightAsync();
+
                 MeshBuildingContext context = new MeshBuildingContext(this);
 
                 for (int cx = 0; cx < SIZE; cx++)
@@ -100,62 +109,35 @@ namespace Mycraft.World
                         for (int cy = 0; cy < HEIGHT; cy++)
                             blocks[cx, cy, cz].EmitMesh(context, cx, cy, cz);
 
-                solidVertices       = ToFloatArray(context.solidQuads);
-                doubleSidedVertices = ToFloatArray(context.doubleSidedQuads);
-                waterQuads          = context.transparentQuads;
+                solidMesh.quads       = context.solidQuads.ToArray();
+                doubleSidedMesh.quads = context.doubleSidedQuads.ToArray();
+                transparentMesh.quads = context.transparentQuads.ToArray();
+
+                needsSolidVertexRefresh = true;
 
                 needsTransparentGeometrySort = true;
+                await EnsureTransparentGeometrySortedAsync();
+
+                await lightUpdating;
             });
-        }
-
-        private float[] ToFloatArray(List<Quad> quads)
-        {
-            const int VERTEX_SIZE = 7;
-            const int QUAD_SIZE = VERTEX_SIZE * 4;
-
-            List<Quad> cachedQuads = new List<Quad>(quads);
-            float[] array = new float[cachedQuads.Count * QUAD_SIZE];
-
-            for (int i = 0; i < cachedQuads.Count; i++)
-            {
-                Quad quad = cachedQuads[i];
-                void SaveVertex(int index, Vertex vertex)
-                {
-                    array[index]     = vertex.position.x;
-                    array[index + 1] = vertex.position.y;
-                    array[index + 2] = vertex.position.z;
-                    array[index + 3] = vertex.texture.x;
-                    array[index + 4] = vertex.texture.y;
-                    array[index + 5] = quad.textureId;
-                    array[index + 6] = vertex.light;
-                }
-
-                SaveVertex(i * QUAD_SIZE,                   quad.a);
-                SaveVertex(i * QUAD_SIZE + VERTEX_SIZE,     quad.b);
-                SaveVertex(i * QUAD_SIZE + VERTEX_SIZE * 2, quad.c);
-                SaveVertex(i * QUAD_SIZE + VERTEX_SIZE * 3, quad.d);
-            }
-
-            return array;
         }
 
         public Task EnsureTransparentGeometrySortedAsync()
         {
-            if (!needsTransparentGeometrySort)
+            if (!needsTransparentGeometrySort || transparentMesh.quads is null)
                 return Task.CompletedTask;
 
             needsTransparentGeometrySort = false;
             return Task.Run(() =>
             {
-                List<Quad> cachedWaterQuads = new List<Quad>(waterQuads);
-
                 Vertex3f offset = new Vertex3f(xOffset, 0f, zOffset) - world.ObservingCamera.Position;
-                cachedWaterQuads.Sort(
+                Array.Sort(
+                    transparentMesh.quads,
                     (Quad a, Quad b) => (b.Center + offset).ModuleSquared()
                              .CompareTo((a.Center + offset).ModuleSquared())
                 );
 
-                waterVertices = ToFloatArray(cachedWaterQuads);
+                needsTransparentVertexRefresh = true;
             });
         }
 
@@ -163,26 +145,21 @@ namespace Mycraft.World
         {
             bool refreshed = false;
 
-            if (!(solidVertices is null))
+            if (needsSolidVertexRefresh)
             {
-                solidMesh.Data = solidVertices;
-                solidVertices = null;
-
-                refreshed = true;
+                 needsSolidVertexRefresh = false;
+                 
+                 solidMesh.UpdateVertexData();
+                 doubleSidedMesh.UpdateVertexData();
+                 transparentMesh.UpdateVertexData();
+                 
+                 refreshed = true;
             }
 
-            if (!(doubleSidedVertices is null))
+            if (needsTransparentVertexRefresh)
             {
-                doubleSidedMesh.Data = doubleSidedVertices;
-                doubleSidedVertices = null;
-
-                refreshed = true;
-            }
-
-            if (!(waterVertices is null))
-            {
-                waterMesh.Data = waterVertices;
-                waterVertices = null;
+                needsTransparentVertexRefresh = false;
+                transparentMesh.UpdateVertexData();
 
                 refreshed = true;
             }
@@ -197,7 +174,7 @@ namespace Mycraft.World
         {
             solidMesh.Dispose();
             doubleSidedMesh.Dispose();
-            waterMesh.Dispose();
+            transparentMesh.Dispose();
             lightMap.Dispose();
         }
     }
