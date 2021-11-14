@@ -45,6 +45,7 @@ namespace Mycraft.Utils
                 EndFrame();
             }
 
+            Console.WriteLine("===== Profiler frame =====");
             Console.WriteLine("Total frame time: " + frameStopwatch.ElapsedMilliseconds);
             foreach (var pair in fragments)
             {

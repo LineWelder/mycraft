@@ -139,9 +139,13 @@ namespace Mycraft.World
             });
         }
 
+        private readonly Profiler profiler = new Profiler();
+
         public bool RefreshVertexData()
         {
             bool refreshed = false;
+
+            profiler.NewFrame();
 
             if (needsSolidVertexRefresh)
             {
@@ -154,6 +158,8 @@ namespace Mycraft.World
                  refreshed = true;
             }
 
+            profiler.EndFragment("Solid vertex refresh");
+
             if (needsTransparentVertexRefresh)
             {
                 needsTransparentVertexRefresh = false;
@@ -162,8 +168,16 @@ namespace Mycraft.World
                 refreshed = true;
             }
 
+            profiler.EndFragment("Transparent vertex refresh");
+
             if (lightMap.UpdateIfNeeded())
                 refreshed = true;
+
+            profiler.EndFragment("Light map update");
+            profiler.EndFrame();
+
+            if (profiler.FrameTime > 2)
+                profiler.PrintInfo();
 
             return refreshed;
         }
