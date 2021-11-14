@@ -62,6 +62,9 @@ namespace Mycraft.Graphics
                             startChunkZ + chunkZ
                         );
 
+                        if (currentChunk == null)
+                            continue;
+
                         for (int x = 0; x < Chunk.SIZE; x++)
                         {
                             for (int z = 0; z < Chunk.SIZE; z++)
@@ -75,7 +78,7 @@ namespace Mycraft.Graphics
                                         drawSunLight = false;
 
                                     data[z + chunkZ * Chunk.SIZE, y, x + chunkX * Chunk.SIZE] = new Vertex2f(
-                                        blockTransparent ? 0f : 1f,
+                                        blockTransparent ? 1f : 0f,
                                         drawSunLight || block is TorchBlock ? 1f : 0f
                                     );
                                 }

@@ -21,7 +21,7 @@ layout(rg8, binding = 0) uniform image3D dataMap;
 float getLight(ivec3 coords)
 {
     vec4 pixel = imageLoad(dataMap, coords);
-    return (1.0 - pixel.r) * pixel.g;
+    return pixel.r * pixel.g;
 }
 
 void main()
@@ -39,7 +39,7 @@ void main()
     light = max(light, getLight(pixelCoords + ivec3( 0,  0, -1)) - LIGHT_DECREASE);
     light = max(0.0, light);
 
-    info.g = (1.0 - info.r) * light;
+    info.g = info.r * light;
 
     imageStore(
         dataMap, pixelCoords,
@@ -73,9 +73,9 @@ void main()
                 ivec3 probeCoords = pixelCoords + ivec3(dx, dy, dz) + ivec3(CHUNK_SIZE, 0, CHUNK_SIZE);
                 vec4 info = imageLoad(dataMap, probeCoords);
 
-                accumulator += (1.0 - info.r) * info.g;
+                accumulator += info.r * info.g;
                 probesCount += step(0, probeCoords.y) * step(probeCoords.y, CHUNK_HEIGHT - 1)
-                             * (1.0 - info.r);
+                             * info.r;
             }
         }
     }
