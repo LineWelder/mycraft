@@ -22,6 +22,9 @@ namespace Mycraft.Graphics
 
         protected void LoadData(IntPtr pointer, int length)
         {
+            int[] vertexFormat = shader.vertexFormat;
+            int vertexSize = shader.vertexFormat.Sum();
+
             Debug.Assert(length % vertexSize == 0, "Invalid vertices data");
             verticesCount = length;
 
@@ -46,8 +49,7 @@ namespace Mycraft.Graphics
         }
 
         private readonly PrimitiveType primitiveType;
-        private readonly int[] vertexFormat;
-        private readonly int vertexSize;
+        private readonly ShaderProgram shader;
         private readonly uint vbo;
 
         private int verticesCount;
@@ -56,8 +58,7 @@ namespace Mycraft.Graphics
         public VertexArray(PrimitiveType primitiveType, ShaderProgram shader)
         {
             this.primitiveType = primitiveType;
-            this.vertexFormat = shader.vertexFormat;
-            vertexSize = vertexFormat.Sum();
+            this.shader = shader;
 
             glId = Gl.GenVertexArray();
             Gl.BindVertexArray(glId);
