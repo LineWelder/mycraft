@@ -72,8 +72,8 @@ void main()
             {
                 ivec3 probeCoords = pixelCoords + ivec3(dx, dy, dz);
                 vec4 info = imageLoad(dataMap, probeCoords);
-                accumulator += info.g;
 
+                accumulator += (1.0 - info.r) * info.g;
                 probesCount += step(0, probeCoords.x) * step(probeCoords.x, REGION_SIZE - 1)
                              * step(0, probeCoords.y) * step(probeCoords.y, REGION_HEIGHT - 1)
                              * step(0, probeCoords.z) * step(probeCoords.z, REGION_SIZE - 1)

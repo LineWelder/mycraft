@@ -28,6 +28,13 @@ namespace Mycraft.Graphics
 
             lightMapId = Gl.GenTexture();
             Gl.BindTexture(TextureTarget.Texture3d, lightMapId);
+
+            Gl.TexParameteri(TextureTarget.Texture3d, TextureParameterName.TextureWrapS, TextureWrapMode.ClampToEdge);
+            Gl.TexParameteri(TextureTarget.Texture3d, TextureParameterName.TextureWrapT, TextureWrapMode.ClampToEdge);
+            Gl.TexParameteri(TextureTarget.Texture3d, TextureParameterName.TextureWrapR, TextureWrapMode.ClampToEdge);
+            Gl.TexParameteri(TextureTarget.Texture3d, TextureParameterName.TextureMinFilter, TextureMinFilter.Linear);
+            Gl.TexParameteri(TextureTarget.Texture3d, TextureParameterName.TextureMagFilter, TextureMagFilter.Linear);
+
             Gl.TexStorage3D(
                 TextureTarget.Texture3d, 1,
                 InternalFormat.R8,
