@@ -7,7 +7,7 @@ namespace Mycraft.Blocks
     {
         public override bool IsTransparent => true;
         public override bool HasCollider => false;
-        public override byte LightLevel => 16 * 7;
+        public override byte LightLevel => 10;
 
         public TorchBlock(int textureId)
             : base(textureId) { }

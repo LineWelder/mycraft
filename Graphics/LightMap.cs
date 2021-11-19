@@ -69,7 +69,7 @@ namespace Mycraft.Graphics
                     {
                         for (int z = 0; z < Chunk.SIZE; z++)
                         {
-                            byte sunLight = 255;
+                            byte sunLight = 15;
                             for (int y = Chunk.HEIGHT - 1; y >= 0; y--)
                             {
                                 Block block = currentChunk.blocks[x, y, z];

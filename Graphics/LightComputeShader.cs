@@ -29,12 +29,12 @@ void main()
     uvec4 info = imageLoad(dataMap, pixelCoords);
     int light = int(info.g);
 
-    light = max(light, getLight(pixelCoords + ivec3( 1,  0,  0)) - 16);
-    light = max(light, getLight(pixelCoords + ivec3(-1,  0,  0)) - 16);
-    light = max(light, getLight(pixelCoords + ivec3( 0,  1,  0)) - 16);
-    light = max(light, getLight(pixelCoords + ivec3( 0, -1,  0)) - 16);
-    light = max(light, getLight(pixelCoords + ivec3( 0,  0,  1)) - 16);
-    light = max(light, getLight(pixelCoords + ivec3( 0,  0, -1)) - 16);
+    light = max(light, getLight(pixelCoords + ivec3( 1,  0,  0)) - 1);
+    light = max(light, getLight(pixelCoords + ivec3(-1,  0,  0)) - 1);
+    light = max(light, getLight(pixelCoords + ivec3( 0,  1,  0)) - 1);
+    light = max(light, getLight(pixelCoords + ivec3( 0, -1,  0)) - 1);
+    light = max(light, getLight(pixelCoords + ivec3( 0,  0,  1)) - 1);
+    light = max(light, getLight(pixelCoords + ivec3( 0,  0, -1)) - 1);
     light = max(0, light);
 
     info.g = info.r * uint(light);
@@ -71,7 +71,7 @@ void main()
                 ivec3 probeCoords = pixelCoords + ivec3(dx, dy, dz) + ivec3(CHUNK_SIZE, 0, CHUNK_SIZE);
                 uvec4 info = imageLoad(dataMap, probeCoords);
                 float block = info.r;
-                float light = float(info.g) / 255.0;
+                float light = float(info.g) / 15.0;
 
                 accumulator += block * light;
                 probesCount += step(0, probeCoords.y) * step(probeCoords.y, CHUNK_HEIGHT - 1)
