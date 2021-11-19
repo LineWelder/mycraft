@@ -19,13 +19,14 @@ namespace Mycraft.World
         public Quad(
             Vertex3f pa, Vertex3f pb,
             Vertex3f pc, Vertex3f pd,
-            int textureId, float light
+            int textureId, Vertex4f textureCoords,
+            float light
         )
         {
             a = new Vertex
             {
                 position = pa,
-                texture = new Vertex2f(1f, 1f),
+                texture = new Vertex2f(textureCoords.z, textureCoords.w),
                 textureId = textureId,
                 light = light
             };
@@ -33,7 +34,7 @@ namespace Mycraft.World
             b = new Vertex
             {
                 position = pb,
-                texture = new Vertex2f(1f, 0f),
+                texture = new Vertex2f(textureCoords.z, textureCoords.y),
                 textureId = textureId,
                 light = light
             };
@@ -41,7 +42,7 @@ namespace Mycraft.World
             c = new Vertex
             {
                 position = pc,
-                texture = new Vertex2f(0f, 0f),
+                texture = new Vertex2f(textureCoords.x, textureCoords.y),
                 textureId = textureId,
                 light = light
             };
@@ -49,10 +50,16 @@ namespace Mycraft.World
             d = new Vertex
             {
                 position = pd,
-                texture = new Vertex2f(0f, 1f),
+                texture = new Vertex2f(textureCoords.x, textureCoords.w),
                 textureId = textureId,
                 light = light
             };
         }
+
+        public Quad(
+            Vertex3f pa, Vertex3f pb,
+            Vertex3f pc, Vertex3f pd,
+            int textureId, float light
+        ) : this(pa, pb, pc, pd, textureId, new Vertex4f(0f, 0f, 1f, 1f), light) { }
     }
 }

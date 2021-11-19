@@ -52,7 +52,8 @@ namespace Mycraft.Blocks
             context.AddSolidQuad(QuadGenerator.Top(
                 new Vertex3f(x + 1f - offset, y + 1f - offset, z + 1f - offset),
                 new Vertex2f(1f - 2f * offset),
-                8,
+                GetTexture(BlockSide.Top),
+                new Vertex4f(offset, offset, 1f - offset, 1f - offset),
                 1f
             ));
         }
