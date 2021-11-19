@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using OpenGL;
+﻿using OpenGL;
 using Mycraft.World;
 
 namespace Mycraft.Blocks
@@ -22,7 +21,7 @@ namespace Mycraft.Blocks
 
         public virtual bool IsSelectable => true;
 
-        public virtual float LightLevel => 0f;
+        public virtual byte LightLevel => 0;
 
         private readonly int textureId;
 

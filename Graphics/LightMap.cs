@@ -15,7 +15,7 @@ namespace Mycraft.Graphics
         private readonly uint lightMapId;
 
         private bool needsUpdate;
-        private Vertex2f[,,] data;
+        private Vertex2ub[,,] data;
 
         public LightMap(Chunk chunk)
         {
@@ -48,7 +48,7 @@ namespace Mycraft.Graphics
 
         public void BuildDataMap()
         {
-            data = new Vertex2f[Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3];
+            data = new Vertex2ub[Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3];
 
             int startChunkX = chunk.xOffset / Chunk.SIZE - 1;
             int startChunkZ = chunk.zOffset / Chunk.SIZE - 1;
@@ -69,17 +69,17 @@ namespace Mycraft.Graphics
                     {
                         for (int z = 0; z < Chunk.SIZE; z++)
                         {
-                            float drawSunLight = 1f;
+                            byte sunLight = 255;
                             for (int y = Chunk.HEIGHT - 1; y >= 0; y--)
                             {
                                 Block block = currentChunk.blocks[x, y, z];
                                 bool blockTransparent = block.IsTransparent;
                                 if (!blockTransparent)
-                                    drawSunLight = 0f;
+                                    sunLight = 0;
 
-                                data[z + chunkZ * Chunk.SIZE, y, x + chunkX * Chunk.SIZE] = new Vertex2f(
-                                    blockTransparent ? 1f : 0f,
-                                    Math.Max(drawSunLight, block.LightLevel)
+                                data[z + chunkZ * Chunk.SIZE, y, x + chunkX * Chunk.SIZE] = new Vertex2ub(
+                                    (byte)(blockTransparent ? 255 : 0),
+                                    (byte)Math.Max(sunLight, block.LightLevel)
                                 );
                             }
                         }
@@ -103,7 +103,7 @@ namespace Mycraft.Graphics
                     TextureTarget.Texture3d, 0,
                     0, 0, 0,
                     Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3,
-                    PixelFormat.Rg, PixelType.Float,
+                    PixelFormat.Rg, PixelType.UnsignedByte,
                     new IntPtr(dataPtr)
                 );
             }
