@@ -123,6 +123,7 @@ namespace Mycraft.Graphics
             );
 
             Resources.LightComputeShader.Run();
+            data = null;
             return true;
         }
 

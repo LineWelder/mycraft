@@ -11,7 +11,7 @@ namespace Mycraft.World
 {
     public class GameWorld : IDisposable
     {
-        public const int LOAD_DISTANCE = 4;
+        public const int LOAD_DISTANCE = 16;
         public const int UNLOAD_DISTANCE = LOAD_DISTANCE + 2;
 
         public Camera ObservingCamera { get; set; }
