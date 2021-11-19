@@ -15,7 +15,7 @@ namespace Mycraft.Graphics
         private readonly uint lightMapId;
 
         private bool needsUpdate;
-        private Vertex2ub[,,] data;
+        private byte[,,] data;
 
         public LightMap(Chunk chunk)
         {
@@ -26,7 +26,7 @@ namespace Mycraft.Graphics
             Gl.BindTexture(TextureTarget.Texture3d, dataMapId);
             Gl.TexStorage3D(
                 TextureTarget.Texture3d, 1,
-                InternalFormat.Rg8ui,
+                InternalFormat.R8ui,
                 Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3
             );
 
@@ -48,7 +48,7 @@ namespace Mycraft.Graphics
 
         public void BuildDataMap()
         {
-            data = new Vertex2ub[Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3];
+            data = new byte[Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3];
 
             int startChunkX = chunk.xOffset / Chunk.SIZE - 1;
             int startChunkZ = chunk.zOffset / Chunk.SIZE - 1;
@@ -77,9 +77,9 @@ namespace Mycraft.Graphics
                                 if (!blockTransparent)
                                     sunLight = 0;
 
-                                data[z + chunkZ * Chunk.SIZE, y, x + chunkX * Chunk.SIZE] = new Vertex2ub(
-                                    (byte)(blockTransparent ? 1 : 0),
-                                    Math.Max(sunLight, block.LightLevel)
+                                data[z + chunkZ * Chunk.SIZE, y, x + chunkX * Chunk.SIZE] = (byte)(
+                                    (blockTransparent ? 0x10 : 0x00)
+                                  | Math.Max(sunLight, block.LightLevel) & 0x0F
                                 );
                             }
                         }
@@ -103,7 +103,7 @@ namespace Mycraft.Graphics
                     TextureTarget.Texture3d, 0,
                     0, 0, 0,
                     Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3,
-                    PixelFormat.RgInteger, PixelType.UnsignedByte,
+                    PixelFormat.RedInteger, PixelType.UnsignedByte,
                     new IntPtr(dataPtr)
                 );
             }
@@ -112,7 +112,7 @@ namespace Mycraft.Graphics
                 0, dataMapId, 0,
                 false, 0,
                 BufferAccess.ReadWrite,
-                InternalFormat.Rg8ui
+                InternalFormat.R8ui
             );
 
             Gl.BindImageTexture(

@@ -2,8 +2,6 @@
 using System.Text;
 using OpenGL;
 
-using Mycraft.Blocks;
-using Mycraft.Graphics;
 using Mycraft.World;
 
 namespace Mycraft.Graphics
@@ -14,12 +12,15 @@ namespace Mycraft.Graphics
 @"#version 430
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-layout(rg8ui, binding = 0) uniform uimage3D dataMap;
+layout(r8ui, binding = 0) uniform uimage3D dataMap;
 
 int getLight(ivec3 coords)
 {
     uvec4 pixel = imageLoad(dataMap, coords);
-    return int(pixel.r * pixel.g);
+    uint block = (pixel.r & 0x10) >> 4;
+    uint light = pixel.r & 0x0F;
+
+    return int(block * light);
 }
 
 void main()
@@ -27,7 +28,7 @@ void main()
     ivec3 pixelCoords = ivec3(gl_GlobalInvocationID.xyz);
     
     uvec4 info = imageLoad(dataMap, pixelCoords);
-    int light = int(info.g);
+    int light = int(info.r & 0x0F);
 
     light = max(light, getLight(pixelCoords + ivec3( 1,  0,  0)) - 1);
     light = max(light, getLight(pixelCoords + ivec3(-1,  0,  0)) - 1);
@@ -37,7 +38,8 @@ void main()
     light = max(light, getLight(pixelCoords + ivec3( 0,  0, -1)) - 1);
     light = max(0, light);
 
-    info.g = info.r * uint(light);
+    info.r = info.r & 0xF0
+           | uint(light) & 0x0F;
 
     imageStore(
         dataMap, pixelCoords,
@@ -49,7 +51,7 @@ void main()
 @"#version 430
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-layout(rg8ui, binding = 0) uniform uimage3D dataMap;
+layout(r8ui, binding = 0) uniform uimage3D dataMap;
 layout(r8, binding = 1) uniform image3D lightMap;
 
 #define CHUNK_SIZE 16
@@ -70,8 +72,8 @@ void main()
             {
                 ivec3 probeCoords = pixelCoords + ivec3(dx, dy, dz) + ivec3(CHUNK_SIZE, 0, CHUNK_SIZE);
                 uvec4 info = imageLoad(dataMap, probeCoords);
-                float block = info.r;
-                float light = float(info.g) / 15.0;
+                float block = (info.r & 0xF0) >> 4;
+                float light = float(info.r & 0x0F) / 15.0;
 
                 accumulator += block * light;
                 probesCount += step(0, probeCoords.y) * step(probeCoords.y, CHUNK_HEIGHT - 1)
