@@ -14,32 +14,30 @@ namespace Mycraft.Graphics
 @"#version 430
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-layout(rg8, binding = 0) uniform image3D dataMap;
+layout(rg8ui, binding = 0) uniform uimage3D dataMap;
 
-#define LIGHT_DECREASE 1.0 / 16.0
-
-float getLight(ivec3 coords)
+int getLight(ivec3 coords)
 {
-    vec4 pixel = imageLoad(dataMap, coords);
-    return pixel.r * pixel.g;
+    uvec4 pixel = imageLoad(dataMap, coords);
+    return int(pixel.r * pixel.g);
 }
 
 void main()
 {
     ivec3 pixelCoords = ivec3(gl_GlobalInvocationID.xyz);
     
-    vec4 info = imageLoad(dataMap, pixelCoords);
-    float light = info.g;
+    uvec4 info = imageLoad(dataMap, pixelCoords);
+    int light = int(info.g);
 
-    light = max(light, getLight(pixelCoords + ivec3( 1,  0,  0)) - LIGHT_DECREASE);
-    light = max(light, getLight(pixelCoords + ivec3(-1,  0,  0)) - LIGHT_DECREASE);
-    light = max(light, getLight(pixelCoords + ivec3( 0,  1,  0)) - LIGHT_DECREASE);
-    light = max(light, getLight(pixelCoords + ivec3( 0, -1,  0)) - LIGHT_DECREASE);
-    light = max(light, getLight(pixelCoords + ivec3( 0,  0,  1)) - LIGHT_DECREASE);
-    light = max(light, getLight(pixelCoords + ivec3( 0,  0, -1)) - LIGHT_DECREASE);
-    light = max(0.0, light);
+    light = max(light, getLight(pixelCoords + ivec3( 1,  0,  0)) - 16);
+    light = max(light, getLight(pixelCoords + ivec3(-1,  0,  0)) - 16);
+    light = max(light, getLight(pixelCoords + ivec3( 0,  1,  0)) - 16);
+    light = max(light, getLight(pixelCoords + ivec3( 0, -1,  0)) - 16);
+    light = max(light, getLight(pixelCoords + ivec3( 0,  0,  1)) - 16);
+    light = max(light, getLight(pixelCoords + ivec3( 0,  0, -1)) - 16);
+    light = max(0, light);
 
-    info.g = info.r * light;
+    info.g = info.r * uint(light);
 
     imageStore(
         dataMap, pixelCoords,
@@ -51,7 +49,7 @@ void main()
 @"#version 430
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-layout(rg8, binding = 0) uniform image3D dataMap;
+layout(rg8ui, binding = 0) uniform uimage3D dataMap;
 layout(r8, binding = 1) uniform image3D lightMap;
 
 #define CHUNK_SIZE 16
@@ -71,11 +69,13 @@ void main()
             for (int dz = -1; dz <= 0; dz++)
             {
                 ivec3 probeCoords = pixelCoords + ivec3(dx, dy, dz) + ivec3(CHUNK_SIZE, 0, CHUNK_SIZE);
-                vec4 info = imageLoad(dataMap, probeCoords);
+                uvec4 info = imageLoad(dataMap, probeCoords);
+                float block = info.r;
+                float light = float(info.g) / 255.0;
 
-                accumulator += info.r * info.g;
+                accumulator += block * light;
                 probesCount += step(0, probeCoords.y) * step(probeCoords.y, CHUNK_HEIGHT - 1)
-                             * info.r;
+                             * block;
             }
         }
     }

@@ -26,7 +26,7 @@ namespace Mycraft.Graphics
             Gl.BindTexture(TextureTarget.Texture3d, dataMapId);
             Gl.TexStorage3D(
                 TextureTarget.Texture3d, 1,
-                InternalFormat.Rg8,
+                InternalFormat.Rg8ui,
                 Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3
             );
 
@@ -78,8 +78,8 @@ namespace Mycraft.Graphics
                                     sunLight = 0;
 
                                 data[z + chunkZ * Chunk.SIZE, y, x + chunkX * Chunk.SIZE] = new Vertex2ub(
-                                    (byte)(blockTransparent ? 255 : 0),
-                                    (byte)Math.Max(sunLight, block.LightLevel)
+                                    (byte)(blockTransparent ? 1 : 0),
+                                    Math.Max(sunLight, block.LightLevel)
                                 );
                             }
                         }
@@ -103,7 +103,7 @@ namespace Mycraft.Graphics
                     TextureTarget.Texture3d, 0,
                     0, 0, 0,
                     Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3,
-                    PixelFormat.Rg, PixelType.UnsignedByte,
+                    PixelFormat.RgInteger, PixelType.UnsignedByte,
                     new IntPtr(dataPtr)
                 );
             }
@@ -112,7 +112,7 @@ namespace Mycraft.Graphics
                 0, dataMapId, 0,
                 false, 0,
                 BufferAccess.ReadWrite,
-                InternalFormat.Rg8
+                InternalFormat.Rg8ui
             );
 
             Gl.BindImageTexture(

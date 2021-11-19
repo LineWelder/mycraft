@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using OpenGL;
-
+﻿using OpenGL;
 using Mycraft.World;
 
 namespace Mycraft.Blocks
