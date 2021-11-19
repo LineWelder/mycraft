@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using OpenGL;
 
 using Mycraft.Blocks;
@@ -13,7 +12,6 @@ namespace Mycraft.World
         private class WorldGeometry : VertexArray
         {
             public Quad[] quads;
-            public bool needsUpdate;
 
             public WorldGeometry()
                 : base(PrimitiveType.Quads, Resources.GameWorldShader) { }
@@ -41,7 +39,6 @@ namespace Mycraft.World
 
         public bool needsTransparentGeometrySort;
         private readonly WorldGeometry solidMesh, doubleSidedMesh, transparentMesh;
-        private bool needsSolidVertexRefresh, needsTransparentVertexRefresh;
 
         public bool needsLightRecalculation;
         private readonly LightMap lightMap;
@@ -81,105 +78,63 @@ namespace Mycraft.World
             Gl.Disable(EnableCap.Blend);
         }
 
-        public Task UpdateLightAsync()
+        public bool UpdateLight()
         {
             if (!needsLightRecalculation)
-                return Task.CompletedTask;
+                return false;
 
             needsLightRecalculation = false;
-            return Task.Run(lightMap.BuildDataMap);
+            lightMap.BuildDataMap();
+            lightMap.UpdateIfNeeded();
+
+            return true;
         }
 
-        public Task UpdateMeshAsync()
+        public bool UpdateMesh()
         {
             if (!needsUpdate)
-                return Task.CompletedTask;
+                return false;
 
             needsUpdate = false;
+            needsLightRecalculation = true;
+            UpdateLight();
 
-            return Task.Run(async () =>
-            {
-                needsLightRecalculation = true;
-                Task lightUpdating = UpdateLightAsync();
+            MeshBuildingContext context = new MeshBuildingContext(this);
 
-                MeshBuildingContext context = new MeshBuildingContext(this);
+            for (int cx = 0; cx < SIZE; cx++)
+                for (int cz = 0; cz < SIZE; cz++)
+                    for (int cy = 0; cy < HEIGHT; cy++)
+                        blocks[cx, cy, cz].EmitMesh(context, cx, cy, cz);
 
-                for (int cx = 0; cx < SIZE; cx++)
-                    for (int cz = 0; cz < SIZE; cz++)
-                        for (int cy = 0; cy < HEIGHT; cy++)
-                            blocks[cx, cy, cz].EmitMesh(context, cx, cy, cz);
+            solidMesh.quads       = context.solidQuads.ToArray();
+            doubleSidedMesh.quads = context.doubleSidedQuads.ToArray();
+            transparentMesh.quads = context.transparentQuads.ToArray();
 
-                solidMesh.quads       = context.solidQuads.ToArray();
-                doubleSidedMesh.quads = context.doubleSidedQuads.ToArray();
-                transparentMesh.quads = context.transparentQuads.ToArray();
+            needsTransparentGeometrySort = true;
+            EnsureTransparentGeometrySorted();
 
-                needsSolidVertexRefresh = true;
-                needsTransparentGeometrySort = true;
+            solidMesh.UpdateVertexData();
+            doubleSidedMesh.UpdateVertexData();
 
-                await lightUpdating;
-            });
+            return true;
         }
 
-        public Task EnsureTransparentGeometrySortedAsync()
+        public bool EnsureTransparentGeometrySorted()
         {
-            if (!needsTransparentGeometrySort || transparentMesh.quads is null)
-                return Task.CompletedTask;
+            if (!needsTransparentGeometrySort
+             || transparentMesh.quads is null)
+                return false;
 
             needsTransparentGeometrySort = false;
-            return Task.Run(() =>
-            {
-                Vertex3f offset = new Vertex3f(xOffset, 0f, zOffset) - world.ObservingCamera.Position;
-                Array.Sort(
-                    transparentMesh.quads,
-                    (Quad a, Quad b) => (b.Center + offset).ModuleSquared()
-                             .CompareTo((a.Center + offset).ModuleSquared())
-                );
+            Vertex3f offset = new Vertex3f(xOffset, 0f, zOffset) - world.ObservingCamera.Position;
+            Array.Sort(
+                transparentMesh.quads,
+                (Quad a, Quad b) => (b.Center + offset).ModuleSquared()
+                         .CompareTo((a.Center + offset).ModuleSquared())
+            );
 
-                needsTransparentVertexRefresh = true;
-            });
-        }
-
-        private readonly Profiler profiler = new Profiler();
-
-        public bool RefreshVertexData()
-        {
-            bool refreshed = false;
-
-            profiler.NewFrame();
-
-            if (needsSolidVertexRefresh)
-            {
-                 needsSolidVertexRefresh = false;
-                 
-                 solidMesh.UpdateVertexData();
-                 doubleSidedMesh.UpdateVertexData();
-                 transparentMesh.UpdateVertexData();
-                 
-                 refreshed = true;
-            }
-
-            profiler.EndFragment("Solid vertex refresh");
-
-            if (needsTransparentVertexRefresh)
-            {
-                needsTransparentVertexRefresh = false;
-                transparentMesh.UpdateVertexData();
-
-                refreshed = true;
-            }
-
-            profiler.EndFragment("Transparent vertex refresh");
-
-            if (lightMap.UpdateIfNeeded())
-                refreshed = true;
-
-            profiler.EndFragment("Light map update");
-            profiler.EndFrame();
-
-            if (profiler.FrameTime > 2)
-                profiler.PrintInfo();
-
-            return refreshed;
+            transparentMesh.UpdateVertexData();
+            return true;
         }
 
         public void Dispose()

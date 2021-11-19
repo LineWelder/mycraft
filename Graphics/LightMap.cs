@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using OpenGL;
 
 using Mycraft.Blocks;
@@ -48,7 +49,7 @@ namespace Mycraft.Graphics
 
         public void BuildDataMap()
         {
-            data = new byte[Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3];
+            byte[,,] data = new byte[Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3];
 
             int startChunkX = chunk.xOffset / Chunk.SIZE - 1;
             int startChunkZ = chunk.zOffset / Chunk.SIZE - 1;
@@ -69,7 +70,7 @@ namespace Mycraft.Graphics
                     {
                         for (int z = 0; z < Chunk.SIZE; z++)
                         {
-                            byte sunLight = 15;
+                            byte sunLight = 8;
                             for (int y = Chunk.HEIGHT - 1; y >= 0; y--)
                             {
                                 Block block = currentChunk.blocks[x, y, z];
@@ -87,6 +88,7 @@ namespace Mycraft.Graphics
                 }
             }
 
+            this.data = data;
             needsUpdate = true;
         }
 
