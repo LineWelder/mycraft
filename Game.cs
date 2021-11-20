@@ -62,7 +62,8 @@ namespace Mycraft
             Resources.GameWorldShader.LightMapScale = new Vertex3f(
                 Chunk.SIZE + 1, Chunk.HEIGHT, Chunk.SIZE + 1
             );
-            Resources.GameWorldShader.LightMap = 1;
+            Resources.GameWorldShader.SunLightMap = 1;
+            Resources.GameWorldShader.BlockLightMap = 2;
 
             // Create the GUI
 

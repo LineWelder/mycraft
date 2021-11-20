@@ -61,7 +61,6 @@ namespace Mycraft.World
 
         public void Draw()
         {
-            Gl.ActiveTexture(TextureUnit.Texture1);
             lightMap.Bind();
 
             Gl.ActiveTexture(TextureUnit.Texture0);

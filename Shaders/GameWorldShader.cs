@@ -44,7 +44,8 @@ uniform float fogDistance;
 uniform float fogDensity;
 
 uniform vec3 lightMapScale;
-uniform sampler3D lightMap;
+uniform sampler3D sunLightMap;
+uniform sampler3D blockLightMap;
 
 in vec3 _position;
 in float _distance;
@@ -54,7 +55,10 @@ in float _light;
 void main()
 {
     vec3 lightMapCoords = (_position + vec3(0.5, 0.5, 0.5)) / lightMapScale;
-    float lightMapSample = texture(lightMap, lightMapCoords).x;
+    float lightMapSample = max(
+        texture(sunLightMap, lightMapCoords).x,
+        texture(blockLightMap, lightMapCoords).x
+    );
 
     vec4 textureSample = texture(tex, _textureCoords);
     if (textureSample.a == 0.0) discard;
@@ -115,9 +119,14 @@ void main()
             set => Gl.Uniform3f(lightMapScaleLocation, 1, value);
         }
 
-        public int LightMap
+        public int SunLightMap
         {
-            set => Gl.Uniform1i(lightMapLocation, 1, value);
+            set => Gl.Uniform1i(sunLightMapLocation, 1, value);
+        }
+
+        public int BlockLightMap
+        {
+            set => Gl.Uniform1i(blockLightMapLocation, 1, value);
         }
 
         private readonly int chunkStartLocation;
@@ -130,7 +139,8 @@ void main()
         private readonly int fogDensityLocation;
 
         private readonly int lightMapScaleLocation;
-        private readonly int lightMapLocation;
+        private readonly int sunLightMapLocation;
+        private readonly int blockLightMapLocation;
 
         public GameWorldShader()
             : base(new int[] { 3, 3, 1 }, VERTEX_SOURCE, FRAGMENT_SOURCE)
@@ -146,7 +156,8 @@ void main()
             fogDensityLocation = FindVariable("fogDensity");
 
             lightMapScaleLocation = FindVariable("lightMapScale");
-            lightMapLocation = FindVariable("lightMap");
+            sunLightMapLocation = FindVariable("sunLightMap");
+            blockLightMapLocation = FindVariable("blockLightMap");
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using OpenGL;
 
 using Mycraft.Blocks;
@@ -12,27 +11,41 @@ namespace Mycraft.Graphics
     {
         private readonly Chunk chunk;
 
-        private readonly uint dataMapId;
-        private readonly uint lightMapId;
+        private readonly uint sunDataMapId, blockDataMapId;
+        private readonly uint sunLightMapId, blockLightMapId;
 
         private bool needsUpdate;
-        private byte[,,] data;
+        private byte[,,] sunData, blockData;
 
         public LightMap(Chunk chunk)
         {
             this.chunk = chunk;
             needsUpdate = false;
 
-            dataMapId = Gl.GenTexture();
-            Gl.BindTexture(TextureTarget.Texture3d, dataMapId);
+            sunDataMapId = CreateDataMap();
+            blockDataMapId = CreateDataMap();
+
+            sunLightMapId = CreateLightMap();
+            blockLightMapId = CreateLightMap();
+        }
+
+        private uint CreateDataMap()
+        {
+            uint glId = Gl.GenTexture();
+            Gl.BindTexture(TextureTarget.Texture3d, glId);
             Gl.TexStorage3D(
                 TextureTarget.Texture3d, 1,
                 InternalFormat.R8ui,
                 Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3
             );
 
-            lightMapId = Gl.GenTexture();
-            Gl.BindTexture(TextureTarget.Texture3d, lightMapId);
+            return glId;
+        }
+
+        private uint CreateLightMap()
+        {
+            uint glId = Gl.GenTexture();
+            Gl.BindTexture(TextureTarget.Texture3d, glId);
 
             Gl.TexParameteri(TextureTarget.Texture3d, TextureParameterName.TextureWrapS, TextureWrapMode.ClampToEdge);
             Gl.TexParameteri(TextureTarget.Texture3d, TextureParameterName.TextureWrapT, TextureWrapMode.ClampToEdge);
@@ -45,11 +58,14 @@ namespace Mycraft.Graphics
                 InternalFormat.R8,
                 Chunk.SIZE + 1, Chunk.HEIGHT + 1, Chunk.SIZE + 1
             );
+
+            return glId;
         }
 
         public void BuildDataMap()
         {
-            byte[,,] data = new byte[Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3];
+            byte[,,] sunData = new byte[Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3];
+            byte[,,] blockData = new byte[Chunk.SIZE * 3, Chunk.HEIGHT, Chunk.SIZE * 3];
 
             int startChunkX = chunk.xOffset / Chunk.SIZE - 1;
             int startChunkZ = chunk.zOffset / Chunk.SIZE - 1;
@@ -70,7 +86,7 @@ namespace Mycraft.Graphics
                     {
                         for (int z = 0; z < Chunk.SIZE; z++)
                         {
-                            byte sunLight = 8;
+                            byte sunLight = 15;
                             for (int y = Chunk.HEIGHT - 1; y >= 0; y--)
                             {
                                 Block block = currentChunk.blocks[x, y, z];
@@ -78,9 +94,14 @@ namespace Mycraft.Graphics
                                 if (!blockTransparent)
                                     sunLight = 0;
 
-                                data[z + chunkZ * Chunk.SIZE, y, x + chunkX * Chunk.SIZE] = (byte)(
+                                sunData[z + chunkZ * Chunk.SIZE, y, x + chunkX * Chunk.SIZE] = (byte)(
                                     (blockTransparent ? 0x10 : 0x00)
-                                  | Math.Max(sunLight, block.LightLevel) & 0x0F
+                                  | sunLight & 0x0F
+                                );
+
+                                blockData[z + chunkZ * Chunk.SIZE, y, x + chunkX * Chunk.SIZE] = (byte)(
+                                    (blockTransparent ? 0x10 : 0x00)
+                                  | block.LightLevel & 0x0F
                                 );
                             }
                         }
@@ -88,7 +109,8 @@ namespace Mycraft.Graphics
                 }
             }
 
-            this.data = data;
+            this.sunData = sunData;
+            this.blockData = blockData;
             needsUpdate = true;
         }
 
@@ -98,6 +120,15 @@ namespace Mycraft.Graphics
                 return false;
             needsUpdate = false;
 
+            UpdateMap(sunData, sunDataMapId, sunLightMapId);
+            UpdateMap(blockData, blockDataMapId, blockLightMapId);
+            sunData = null;
+            blockData = null;
+            return true;
+        }
+
+        private unsafe void UpdateMap(byte[,,] data, uint dataMapId, uint lightMapId)
+        {
             fixed (void* dataPtr = data)
             {
                 Gl.BindTexture(TextureTarget.Texture3d, dataMapId);
@@ -125,16 +156,23 @@ namespace Mycraft.Graphics
             );
 
             Resources.LightComputeShader.Run();
-            data = null;
-            return true;
         }
 
         public void Bind()
         {
-            Gl.BindTexture(TextureTarget.Texture3d, lightMapId);
+            Gl.ActiveTexture(TextureUnit.Texture1);
+            Gl.BindTexture(TextureTarget.Texture3d, sunLightMapId);
+
+            Gl.ActiveTexture(TextureUnit.Texture2);
+            Gl.BindTexture(TextureTarget.Texture3d, blockLightMapId);
+
             Gl.MemoryBarrier(MemoryBarrierMask.ShaderImageAccessBarrierBit);
         }
 
-        public void Dispose() => Gl.DeleteTextures(dataMapId, lightMapId);
+        public void Dispose()
+            => Gl.DeleteTextures(
+                sunDataMapId, blockDataMapId,
+                sunLightMapId, blockLightMapId
+            );
     }
 }
