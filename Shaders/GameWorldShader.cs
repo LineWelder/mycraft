@@ -10,7 +10,7 @@ namespace Mycraft.Shaders
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 textureCoords;
-layout(location = 2) in float light;
+layout(location = 2) in float directionalLight;
 
 uniform vec3 chunkStart;
 uniform mat4 view;
@@ -19,13 +19,13 @@ uniform mat4 projection;
 out vec3 _position;
 out float _distance;
 out vec3 _textureCoords;
-out float _light;
+out float _directionalLight;
 
 void main()
 {
     _position = position;
     _textureCoords = textureCoords;
-    _light = light;
+    _directionalLight = directionalLight;
 
     vec4 viewPosition = view * vec4(chunkStart + position, 1.0);
     _distance = length(viewPosition);
@@ -43,6 +43,7 @@ uniform vec3 fogColor;
 uniform float fogDistance;
 uniform float fogDensity;
 
+uniform float sunLight;
 uniform vec3 lightMapScale;
 uniform sampler3D sunLightMap;
 uniform sampler3D blockLightMap;
@@ -50,19 +51,19 @@ uniform sampler3D blockLightMap;
 in vec3 _position;
 in float _distance;
 in vec3 _textureCoords;
-in float _light;
+in float _directionalLight;
 
 void main()
 {
     vec3 lightMapCoords = (_position + vec3(0.5, 0.5, 0.5)) / lightMapScale;
     float lightMapSample = max(
-        texture(sunLightMap, lightMapCoords).x,
+        texture(sunLightMap, lightMapCoords).x * sunLight,
         texture(blockLightMap, lightMapCoords).x
     );
 
     vec4 textureSample = texture(tex, _textureCoords);
     if (textureSample.a == 0.0) discard;
-    vec3 color = textureSample.rgb * _light * lightMapSample;
+    vec3 color = textureSample.rgb * _directionalLight * lightMapSample;
 
     gl_FragColor = vec4(
         mix(
@@ -119,6 +120,11 @@ void main()
             set => Gl.Uniform3f(lightMapScaleLocation, 1, value);
         }
 
+        public float SunLight
+        {
+            set => Gl.Uniform1f(sunLightLocation, 1, value);
+        }
+
         public int SunLightMap
         {
             set => Gl.Uniform1i(sunLightMapLocation, 1, value);
@@ -138,6 +144,7 @@ void main()
         private readonly int fogDistanceLocation;
         private readonly int fogDensityLocation;
 
+        private readonly int sunLightLocation;
         private readonly int lightMapScaleLocation;
         private readonly int sunLightMapLocation;
         private readonly int blockLightMapLocation;
@@ -155,6 +162,7 @@ void main()
             fogDistanceLocation = FindVariable("fogDistance");
             fogDensityLocation = FindVariable("fogDensity");
 
+            sunLightLocation = FindVariable("sunLight");
             lightMapScaleLocation = FindVariable("lightMapScale");
             sunLightMapLocation = FindVariable("sunLightMap");
             blockLightMapLocation = FindVariable("blockLightMap");

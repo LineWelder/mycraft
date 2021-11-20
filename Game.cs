@@ -262,6 +262,14 @@ namespace Mycraft
             Gl.UseProgram(Resources.SkyShader.glId);
             Resources.SkyShader.Time = time;
 
+            double simmetricalTime = time;
+            if (simmetricalTime > .5d)
+            {
+                simmetricalTime = 1d - simmetricalTime;
+            }
+
+            double dayness = 1d / (1d + Math.Exp(-40d * (simmetricalTime - .25d)));
+
             Vertex3f skyColor, fogColor;
             if (player.camera.Position.y < 0)
             {
@@ -270,23 +278,15 @@ namespace Mycraft
             }
             else
             {
-                double time_ = time;
-                if (time_ > .5d)
-                {
-                    time_ = 1d - time_;
-                }
-
-                double mix = 1d / ( 1d + Math.Exp(-40d * (time_ - .25d)) );
-
-                Vertex3f nightSkyColor = new Vertex3f(0.00f, 0.00f, 0.09f);
+                Vertex3f nightSkyColor = new Vertex3f(0.00f, 0.00f, 0.08f);
                 Vertex3f daySkyColor   = new Vertex3f(0.43f, 0.77f, 0.98f);
-                skyColor = nightSkyColor + (daySkyColor - nightSkyColor) * mix;
+                skyColor = nightSkyColor + (daySkyColor - nightSkyColor) * dayness;
 
-                Vertex3f nightFogColor = new Vertex3f(0.00f, 0.01f, 0.17f);
+                Vertex3f nightFogColor = new Vertex3f(0.00f, 0.00f, 0.09f);
                 Vertex3f dayFogColor   = new Vertex3f(0.53f, 0.81f, 0.98f);
-                fogColor = nightFogColor + (dayFogColor - nightFogColor) * mix;
+                fogColor = nightFogColor + (dayFogColor - nightFogColor) * dayness;
 
-                double sunset = 1d / (1d + Math.Pow(40d * (time_ - .25d), 4d));
+                double sunset = 1d / (1d + Math.Pow(40d * (simmetricalTime - .25d), 4d));
 
                 Vertex3f sunsetColor = new Vertex3f(1.00f, 0.60f, 0.40f);
                 fogColor += (sunsetColor - fogColor) * sunset;
@@ -298,6 +298,7 @@ namespace Mycraft
             
             Gl.UseProgram(Resources.GameWorldShader.glId);
             Resources.GameWorldShader.FogColor = fogColor;
+            Resources.GameWorldShader.SunLight = (float)(dayness * .75d + .25d);
 
             blockIn = world.GetBlock(
                 (int)Math.Floor(player.camera.Position.x),
